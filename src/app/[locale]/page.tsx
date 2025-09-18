@@ -29,11 +29,11 @@ export default async function LocaleHome({
 
   if (parsedFilters.search) {
     where.OR = [
-      { baseName: { contains: parsedFilters.search, mode: "insensitive" } },
+      { baseName: { contains: parsedFilters.search } },
       {
         translations: {
           some: {
-            name: { contains: parsedFilters.search, mode: "insensitive" },
+            name: { contains: parsedFilters.search },
           },
         },
       },

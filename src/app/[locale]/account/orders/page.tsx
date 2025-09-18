@@ -8,7 +8,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ locale:
   const { locale: paramLocale } = await params;
   const locale = isLocale(paramLocale) ? paramLocale : defaultLocale;
   const dictionary = await getDictionary(locale as Locale);
-  const auth = getAuthenticatedUser();
+  const auth = await getAuthenticatedUser();
   if (!auth) {
     redirect(`/${locale}/auth/login`);
   }

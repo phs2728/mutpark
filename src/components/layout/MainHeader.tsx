@@ -3,7 +3,7 @@ import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
 export async function MainHeader({ locale }: { locale: string }) {
-  const authUser = getAuthenticatedUser();
+  const authUser = await getAuthenticatedUser();
   let user: { name: string; role: string } | null = null;
 
   if (authUser) {

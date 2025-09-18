@@ -6,10 +6,11 @@ import { ProductDetail } from "@/components/products/ProductDetail";
 export default async function ProductDetailPage({
   params,
 }: {
-  params: { locale: string; slug: string };
+  params: Promise<{ locale: string; slug: string }>;
 }) {
+  const { locale, slug } = await params;
   const product = await prisma.product.findUnique({
-    where: { slug: params.slug },
+    where: { slug },
     include: {
       translations: true,
     },
@@ -30,12 +31,12 @@ export default async function ProductDetailPage({
     },
   });
 
-  const localizedProduct = getLocalizedProduct(product, params.locale);
-  const localizedRelated = relatedProducts.map((related) => getLocalizedProduct(related, params.locale));
+  const localizedProduct = getLocalizedProduct(product, locale);
+  const localizedRelated = relatedProducts.map((related) => getLocalizedProduct(related, locale));
 
   return (
     <ProductDetail
-      locale={params.locale}
+      locale={locale}
       product={localizedProduct}
       related={localizedRelated.map((item) => ({
         id: item.id,

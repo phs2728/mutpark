@@ -6,7 +6,7 @@ import { getLocalizedProduct } from "@/lib/i18n-utils";
 
 export default async function CheckoutPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const auth = getAuthenticatedUser();
+  const auth = await getAuthenticatedUser();
   if (!auth) {
     redirect(`/${locale}/auth/login`);
   }

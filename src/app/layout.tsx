@@ -22,14 +22,15 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mutpark.app"),
 };
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
   params,
 }: {
   children: React.ReactNode;
-  params: { locale?: string };
+  params: Promise<{ locale?: string }>;
 }) {
-  const locale = params?.locale ?? "ko";
+  const resolvedParams = await params;
+  const locale = resolvedParams?.locale ?? "ko";
 
   return (
     <html lang={locale} suppressHydrationWarning>

@@ -5,7 +5,7 @@ import { prisma } from "@/lib/prisma";
 
 export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale } = await params;
-  const auth = getAuthenticatedUser();
+  const auth = await getAuthenticatedUser();
   if (!auth) {
     redirect(`/${locale}/auth/login`);
   }

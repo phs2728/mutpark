@@ -14,11 +14,11 @@ export async function GET(request: NextRequest) {
 
     if (filters.search) {
       where.OR = [
-        { baseName: { contains: filters.search, mode: "insensitive" } },
+        { baseName: { contains: filters.search } },
         {
           translations: {
             some: {
-              name: { contains: filters.search, mode: "insensitive" },
+              name: { contains: filters.search },
             },
           },
         },
