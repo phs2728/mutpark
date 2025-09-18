@@ -11,7 +11,10 @@
     "prisma:studio": "prisma studio",
     "db:push": "prisma db push",
     "db:migrate": "prisma migrate deploy",
-    "db:seed": "node prisma/seed.mjs"
+    "db:seed": "node prisma/seed.mjs",
+    "docker:dev": "docker-compose -f docker-compose.dev.yml up --build",
+    "docker:down": "docker-compose -f docker-compose.dev.yml down",
+    "dev:setup": "prisma generate && prisma db push && npm run dev"
   },
   "dependencies": {
     "next": "15.5.3",
