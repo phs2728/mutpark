@@ -1,0 +1,477 @@
+{
+  "designSystemName": "Chilkabmall-Style-Guide",
+  "lastUpdated": "2025-09-18",
+  "theme": {
+    "mode": "light",
+    "modes": {
+      "light": {
+        "colors": {
+          "primary": {
+            "default": "#2f8355",
+            "hover": "#256a44",
+            "active": "#1f5932",
+            "text": "#ffffff"
+          },
+          "secondary": {
+            "default": "#f5f5f5",
+            "hover": "#eeeeee",
+            "text": "#555555"
+          },
+          "tertiary": { "backgroundDark": "#f0f0f0" },
+          "text": {
+            "primary": "#333333",
+            "secondary": "#777777",
+            "disabled": "#aaaaaa",
+            "link": "#4a4a4a",
+            "highContrast": "#1a1a1a"
+          },
+          "background": {
+            "default": "#ffffff",
+            "subtle": "#fafafa",
+            "dark": "#1f2a44",
+            "card": "#ffffff"
+          },
+          "border": {
+            "default": "#e5e5e5",
+            "strong": "#cccccc",
+            "highlight": "#4caf50"
+          },
+          "accent": {
+            "sale": "#e53935",
+            "coupon": "#ff9800",
+            "freeShipping": "#4caf50",
+            "pastelBlue": "#b3e5fc",
+            "pastelBeige": "#f5e8d3"
+          }
+        }
+      },
+      "dark": {
+        "colors": {
+          "primary": {
+            "default": "#66bb6a",
+            "hover": "#81c784",
+            "active": "#4caf50",
+            "text": "#ffffff"
+          },
+          "secondary": {
+            "default": "#2a2a2a",
+            "hover": "#3a3a3a",
+            "text": "#e0e0e0"
+          },
+          "tertiary": { "backgroundDark": "#1e1e1e" },
+          "text": {
+            "primary": "#e0e0e0",
+            "secondary": "#b0b0b0",
+            "disabled": "#777777",
+            "link": "#90caf9",
+            "highContrast": "#ffffff"
+          },
+          "background": {
+            "default": "#121212",
+            "subtle": "#1d1d1d",
+            "dark": "#000000",
+            "card": "#1f1f1f"
+          },
+          "border": {
+            "default": "#333333",
+            "strong": "#555555",
+            "highlight": "#81c784"
+          },
+          "accent": {
+            "sale": "#ef5350",
+            "coupon": "#ffb74d",
+            "freeShipping": "#81c784",
+            "pastelBlue": "#4fc3f7",
+            "pastelBeige": "#8d6e63"
+          }
+        }
+      }
+    },
+    "typography": {
+      "fontFamily": "'Noto Sans KR', sans-serif",
+      "headings": {
+        "h1": { "fontSize": "2.5rem", "fontWeight": "700", "lineHeight": "1.2" },
+        "h2": { "fontSize": "2rem", "fontWeight": "700", "lineHeight": "1.3" },
+        "h3": { "fontSize": "1.5rem", "fontWeight": "500", "lineHeight": "1.4" },
+        "h4": { "fontSize": "1.25rem", "fontWeight": "500", "lineHeight": "1.4" }
+      },
+      "body": {
+        "default": { "fontSize": "1rem", "fontWeight": "400", "lineHeight": "1.6" },
+        "small": { "fontSize": "0.9rem", "fontWeight": "400", "lineHeight": "1.5" },
+        "emphasized": { "fontSize": "1rem", "fontWeight": "600", "lineHeight": "1.6" },
+        "caption": { "fontSize": "0.75rem", "fontWeight": "400", "lineHeight": "1.5" },
+        "label": { "fontSize": "0.875rem", "fontWeight": "500", "lineHeight": "1.5" }
+      }
+    },
+    "spacing": {
+      "xxs": "0.125rem",
+      "xs": "0.25rem",
+      "sm": "0.5rem",
+      "md": "1rem",
+      "lg": "1.5rem",
+      "xl": "2.5rem",
+      "xxl": "4rem"
+    },
+    "borderRadius": {
+      "sm": "4px",
+      "md": "8px",
+      "lg": "12px",
+      "xl": "16px",
+      "full": "9999px"
+    },
+    "shadows": {
+      "sm": "0 1px 2px 0 rgba(0, 0, 0, 0.05)",
+      "md": "0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)",
+      "lg": "0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05)",
+      "hover": "0 8px 20px rgba(0,0,0,0.12)"
+    },
+    "transitions": {
+      "default": "all 0.2s ease-in-out",
+      "hover": "transform 0.2s ease, box-shadow 0.2s ease",
+      "short": "all 0.15s ease-in-out"
+    },
+    "breakpoints": {
+      "sm": "480px",
+      "md": "768px",
+      "lg": "1024px",
+      "xl": "1280px"
+    },
+    "layout": {
+      "container": {
+        "maxWidth": "1200px",
+        "paddingHorizontal": "{theme.spacing.lg}"
+      },
+      "grid": {
+        "gutter": "{theme.spacing.md}",
+        "columns": {
+          "sm": 2,
+          "md": 3,
+          "lg": 4
+        }
+      }
+    },
+    "components": {
+      "button": {
+        "primary": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.primary.text}",
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "borderRadius": "{theme.borderRadius.md}",
+          "transition": "{theme.transitions.default}",
+          "hover": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.hover}",
+            "boxShadow": "{theme.shadows.sm}"
+          },
+          "active": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.active}"
+          },
+          "disabled": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.border.default}",
+            "textColor": "{theme.modes.{theme.mode}.colors.text.highContrast}"
+          }
+        },
+        "secondary": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "border": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "borderRadius": "{theme.borderRadius.md}",
+          "transition": "{theme.transitions.default}",
+          "hover": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.hover}",
+            "boxShadow": "{theme.shadows.sm}"
+          },
+          "disabled": {
+            "textColor": "{theme.modes.{theme.mode}.colors.text.highContrast}",
+            "borderColor": "{theme.modes.{theme.mode}.colors.border.strong}"
+          }
+        },
+        "icon": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "padding": "{theme.spacing.sm}",
+          "borderRadius": "{theme.borderRadius.full}",
+          "display": "flex",
+          "alignItems": "center",
+          "justifyContent": "center",
+          "gap": "{theme.spacing.xs}",
+          "transition": "{theme.transitions.default}",
+          "hover": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.hover}",
+            "boxShadow": "{theme.shadows.sm}"
+          }
+        }
+      },
+      "productCard": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.card}",
+          "borderRadius": "{theme.borderRadius.lg}",
+          "boxShadow": "{theme.shadows.md}",
+          "padding": "{theme.spacing.md}",
+          "transition": "{theme.transitions.hover}",
+          "hover": {
+            "transform": "scale(1.03)",
+            "boxShadow": "{theme.shadows.lg}"
+          }
+        },
+        "image": {
+          "aspectRatio": "1 / 1",
+          "borderRadius": "{theme.borderRadius.md}",
+          "transition": "{theme.transitions.hover}",
+          "hover": {
+            "transform": "scale(1.05)"
+          }
+        },
+        "title": {
+          "fontSize": "{theme.typography.body.default.fontSize}",
+          "fontWeight": "500",
+          "color": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "marginTop": "{theme.spacing.sm}"
+        },
+        "price": {
+          "salePrice": {
+            "fontSize": "1.25rem",
+            "fontWeight": "700",
+            "color": "{theme.modes.{theme.mode}.colors.accent.sale}"
+          },
+          "originalPrice": {
+            "fontSize": "{theme.typography.body.small.fontSize}",
+            "color": "{theme.modes.{theme.mode}.colors.text.disabled}",
+            "textDecoration": "line-through",
+            "marginLeft": "{theme.spacing.xs}"
+          }
+        },
+        "badge": {
+          "saleBadge": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.accent.sale}",
+            "textColor": "{theme.modes.{theme.mode}.colors.primary.text}",
+            "fontSize": "{theme.typography.body.caption.fontSize}",
+            "fontWeight": "600",
+            "padding": "{theme.spacing.xs} {theme.spacing.sm}",
+            "borderRadius": "{theme.borderRadius.sm}",
+            "position": "absolute",
+            "top": "{theme.spacing.sm}",
+            "right": "{theme.spacing.sm}"
+          },
+          "soldOut": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.text.disabled}",
+            "textColor": "{theme.modes.{theme.mode}.colors.background.default}",
+            "fontSize": "{theme.typography.body.caption.fontSize}",
+            "fontWeight": "500",
+            "padding": "{theme.spacing.xs} {theme.spacing.sm}",
+            "borderRadius": "{theme.borderRadius.sm}",
+            "position": "absolute",
+            "top": "{theme.spacing.sm}",
+            "right": "{theme.spacing.sm}"
+          }
+        }
+      },
+      "banner": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.accent.pastelBeige}",
+          "padding": "{theme.spacing.xl}",
+          "borderRadius": "{theme.borderRadius.lg}",
+          "boxShadow": "{theme.shadows.md}",
+          "textAlign": "center",
+          "marginTop": "{theme.spacing.lg}",
+          "marginBottom": "{theme.spacing.lg}"
+        },
+        "title": {
+          "fontSize": "{theme.typography.headings.h2.fontSize}",
+          "fontWeight": "{theme.typography.headings.h2.fontWeight}",
+          "color": "{theme.modes.{theme.mode}.colors.text.primary}"
+        },
+        "description": {
+          "fontSize": "{theme.typography.body.default.fontSize}",
+          "color": "{theme.modes.{theme.mode}.colors.text.secondary}",
+          "marginTop": "{theme.spacing.sm}"
+        },
+        "ctaButton": {
+          "primary": {
+            "marginTop": "{theme.spacing.md}"
+          }
+        }
+      },
+      "videoThumbnail": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "borderRadius": "{theme.borderRadius.lg}",
+          "boxShadow": "{theme.shadows.md}",
+          "aspectRatio": "16 / 9",
+          "position": "relative",
+          "overflow": "hidden",
+          "transition": "{theme.transitions.hover}",
+          "hover": {
+            "transform": "scale(1.02)"
+          }
+        },
+        "playButton": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.primary.text}",
+          "borderRadius": "{theme.borderRadius.full}",
+          "padding": "{theme.spacing.md}",
+          "position": "absolute",
+          "top": "50%",
+          "left": "50%",
+          "transform": "translate(-50%, -50%)",
+          "transition": "{theme.transitions.default}",
+          "hover": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.hover}",
+            "boxShadow": "{theme.shadows.sm}"
+          }
+        }
+      },
+      "nav": {
+        "container": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "padding": "{theme.spacing.sm} 0",
+          "boxShadow": "0 1px 2px rgba(0,0,0,0.05)"
+        },
+        "menuItem": {
+          "fontSize": "{theme.typography.body.default.fontSize}",
+          "fontWeight": "500",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "transition": "{theme.transitions.short}",
+          "hover": {
+            "textColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.background.subtle}"
+          },
+          "active": {
+            "textColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+            "borderBottom": "2px solid {theme.modes.{theme.mode}.colors.primary.default}"
+          },
+          "focus": {
+            "outline": "2px solid {theme.modes.{theme.mode}.colors.primary.default}",
+            "outlineOffset": "2px"
+          }
+        },
+        "dropdown": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "hoverBackground": "{theme.modes.{theme.mode}.colors.secondary.hover}",
+          "hoverTextColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "border": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+          "borderRadius": "{theme.borderRadius.sm}",
+          "boxShadow": "{theme.shadows.sm}"
+        }
+      },
+      "header": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "padding": "{theme.spacing.md} {theme.spacing.lg}",
+          "boxShadow": "0 2px 4px rgba(0,0,0,0.05)",
+          "sticky": true
+        },
+        "logo": {
+          "height": "40px",
+          "marginRight": "{theme.spacing.lg}"
+        },
+        "searchBar": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.default}",
+          "borderRadius": "{theme.borderRadius.md}",
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "inputColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "placeholderColor": "#999999"
+        },
+        "iconMenu": {
+          "iconColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "hoverColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "gap": "{theme.spacing.md}"
+        }
+      },
+      "categoryMenu": {
+        "container": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.default}",
+          "padding": "{theme.spacing.sm} {theme.spacing.lg}",
+          "borderBottom": "1px solid {theme.modes.{theme.mode}.colors.border.default}"
+        },
+        "item": {
+          "fontSize": "{theme.typography.body.default.fontSize}",
+          "fontWeight": "500",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "transition": "{theme.transitions.short}",
+          "hover": {
+            "textColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.hover}"
+          },
+          "active": {
+            "textColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+            "borderBottom": "2px solid {theme.modes.{theme.mode}.colors.primary.default}"
+          },
+          "focus": {
+            "outline": "2px solid {theme.modes.{theme.mode}.colors.primary.default}",
+            "outlineOffset": "2px"
+          }
+        },
+        "dropdown": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.text.primary}",
+          "hoverBackground": "{theme.modes.{theme.mode}.colors.secondary.hover}",
+          "hoverTextColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "borderRadius": "{theme.borderRadius.sm}",
+          "boxShadow": "{theme.shadows.sm}"
+        }
+      },
+      "productDetail": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.default}",
+          "padding": "{theme.spacing.lg}",
+          "gridColumns": "2",
+          "gap": "{theme.spacing.lg}"
+        },
+        "imageGallery": {
+          "mainImageBorderRadius": "{theme.borderRadius.lg}",
+          "thumbnailGap": "{theme.spacing.sm}",
+          "thumbnailBorder": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+          "thumbnailActiveBorder": "2px solid {theme.modes.{theme.mode}.colors.primary.default}"
+        },
+        "infoSection": {
+          "titleFont": "{theme.typography.headings.h2}",
+          "priceFont": "{theme.typography.headings.h3}",
+          "descriptionColor": "{theme.modes.{theme.mode}.colors.text.secondary}"
+        },
+        "addToCartButton": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "textColor": "{theme.modes.{theme.mode}.colors.primary.text}",
+          "hover": {
+            "backgroundColor": "{theme.modes.{theme.mode}.colors.primary.hover}"
+          }
+        },
+        "reviewSection": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.background.subtle}",
+          "starColor": "#ffa500",
+          "borderRadius": "{theme.borderRadius.md}"
+        }
+      },
+      "footer": {
+        "layout": {
+          "backgroundColor": "{theme.modes.{theme.mode}.colors.secondary.default}",
+          "padding": "{theme.spacing.lg}",
+          "borderTop": "1px solid {theme.modes.{theme.mode}.colors.border.default}"
+        },
+        "link": {
+          "textColor": "{theme.modes.{theme.mode}.colors.text.secondary}",
+          "hoverColor": "{theme.modes.{theme.mode}.colors.primary.default}"
+        },
+        "socialIcon": {
+          "color": "{theme.modes.{theme.mode}.colors.text.secondary}",
+          "hoverColor": "{theme.modes.{theme.mode}.colors.primary.default}"
+        },
+        "supportSection": {
+          "title": {
+            "fontSize": "{theme.typography.body.label.fontSize}",
+            "fontWeight": "{theme.typography.body.label.fontWeight}",
+            "color": "{theme.modes.{theme.mode}.colors.text.primary}"
+          },
+          "contact": {
+            "fontSize": "{theme.typography.body.small.fontSize}",
+            "color": "{theme.modes.{theme.mode}.colors.text.secondary}",
+            "hoverColor": "{theme.modes.{theme.mode}.colors.primary.default}"
+          }
+        }
+      }
+    }
+  }
+}

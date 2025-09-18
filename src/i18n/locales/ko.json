@@ -1,0 +1,138 @@
+{
+  "navigation": {
+    "home": "홈",
+    "products": "상품",
+    "recipes": "레시피",
+    "community": "커뮤니티",
+    "cart": "장바구니",
+    "account": "마이페이지",
+    "login": "로그인",
+    "logout": "로그아웃",
+    "language": "언어",
+    "admin": "관리자"
+  },
+  "hero": {
+    "title": "터키에서 만나는 정통 한국 식재료",
+    "subtitle": "MutPark에서 할랄 인증된 한국 식품과 레시피를 한 번에 만나보세요.",
+    "ctaShop": "지금 쇼핑하기",
+    "ctaRecipes": "레시피 보기"
+  },
+  "products": {
+    "featured": "추천 상품",
+    "filters": {
+      "search": "상품 검색",
+      "category": "카테고리",
+      "halal": "할랄 인증",
+      "spicy": "매운맛",
+      "apply": "필터 적용",
+      "reset": "초기화"
+    },
+    "price": "가격",
+    "stock": "재고",
+    "halal": "할랄 인증",
+    "spiceLevel": "매운맛",
+    "addToCart": "장바구니 담기",
+    "viewDetails": "상세 보기",
+    "empty": "등록된 상품이 없습니다."
+  },
+  "community": {
+    "placeholder": "커뮤니티 기능이 곧 오픈됩니다. 레시피 공유와 리뷰 작성을 기대해주세요!"
+  },
+  "recipes": {
+    "placeholder": "터키에 맞춘 한식 레시피 콘텐츠가 준비 중입니다."
+  },
+  "productDetail": {
+    "ingredients": "성분",
+    "nutrition": "영양 정보",
+    "recipes": "레시피",
+    "actions": {
+      "addToCart": "장바구니 담기",
+      "checkout": "바로 구매"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "로그인",
+      "email": "이메일",
+      "password": "비밀번호",
+      "submit": "로그인",
+      "withGoogle": "Google로 로그인",
+      "withKakao": "Kakao로 로그인",
+      "registerLink": "회원가입"
+    },
+    "register": {
+      "title": "회원가입",
+      "name": "이름",
+      "phone": "연락처",
+      "confirmPassword": "비밀번호 확인",
+      "passwordMismatch": "비밀번호가 일치하지 않습니다.",
+      "submit": "가입하기",
+      "loginLink": "이미 계정이 있으신가요?"
+    }
+  },
+  "cart": {
+    "title": "장바구니",
+    "empty": "장바구니가 비어 있습니다.",
+    "subtotal": "소계",
+    "checkout": "결제하기",
+    "continue": "계속 쇼핑하기",
+    "quantity": "수량",
+    "remove": "삭제"
+  },
+  "checkout": {
+    "title": "주문/결제",
+    "address": "배송지",
+    "selectAddress": "배송지를 선택하세요",
+    "addAddress": "새 배송지 추가",
+    "payment": "결제",
+    "placeOrder": "주문하기",
+    "notes": "배송 요청사항",
+    "success": "주문이 접수되었습니다."
+  },
+  "account": {
+    "title": "마이페이지",
+    "profile": "프로필",
+    "orders": "주문 내역",
+    "addresses": "배송지 관리",
+    "logout": "로그아웃",
+    "update": "정보 수정",
+    "viewAll": "전체 보기",
+    "addressForm": {
+      "title": "새 배송지",
+      "name": "이름",
+      "phone": "전화번호",
+      "city": "도시",
+      "district": "구/군",
+      "street": "상세 주소",
+      "setDefault": "기본 배송지로 설정",
+      "submit": "추가",
+      "defaultBadge": "기본",
+      "setAsDefault": "기본 설정",
+      "delete": "삭제"
+    },
+    "orderStatus": {
+      "PENDING": "주문 접수",
+      "AWAITING_PAYMENT": "결제 대기",
+      "PAID": "결제 완료",
+      "PROCESSING": "준비 중",
+      "SHIPPED": "배송 중",
+      "DELIVERED": "배송 완료",
+      "CANCELLED": "취소됨"
+    }
+  },
+  "notifications": {
+    "addedToCart": "장바구니에 담겼습니다.",
+    "cartUpdated": "장바구니가 업데이트되었습니다.",
+    "loginRequired": "로그인이 필요합니다.",
+    "error": "문제가 발생했습니다. 다시 시도해주세요."
+  },
+  "footer": {
+    "tagline": "MutPark - 터키에서 즐기는 한국의 맛",
+    "customerCenter": "고객센터",
+    "email": "이메일",
+    "phone": "전화",
+    "hours": "상담 가능 시간",
+    "policy": "이용약관",
+    "privacy": "개인정보처리방침"
+  }
+}

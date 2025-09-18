@@ -1,0 +1,198 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "mysql"
+  url      = env("DATABASE_URL")
+}
+
+enum UserRole {
+  CUSTOMER
+  ADMIN
+}
+
+enum SocialProvider {
+  GOOGLE
+  KAKAO
+}
+
+enum OrderStatus {
+  PENDING
+  AWAITING_PAYMENT
+  PAID
+  PROCESSING
+  SHIPPED
+  DELIVERED
+  CANCELLED
+}
+
+enum PaymentStatus {
+  PENDING
+  REQUIRES_ACTION
+  SUCCEEDED
+  FAILED
+  REFUNDED
+}
+
+model User {
+  id            Int              @id @default(autoincrement())
+  email         String           @unique
+  passwordHash  String
+  name          String
+  phone         String?
+  role          UserRole         @default(CUSTOMER)
+  locale        String           @default("ko")
+  currency      String           @default("TRY")
+  createdAt     DateTime         @default(now())
+  updatedAt     DateTime         @updatedAt
+  socialAccounts SocialAccount[]
+  cartItems     CartItem[]
+  orders        Order[]
+  addresses     Address[]
+  refreshTokens RefreshToken[]
+}
+
+model SocialAccount {
+  id               Int             @id @default(autoincrement())
+  provider         SocialProvider
+  providerUserId   String
+  userId           Int
+  createdAt        DateTime        @default(now())
+  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([provider, providerUserId])
+}
+
+model Product {
+  id              Int                  @id @default(autoincrement())
+  sku             String               @unique
+  slug            String               @unique
+  baseName        String
+  baseDescription String?
+  price           Decimal              @db.Decimal(10, 2)
+  currency        String               @default("TRY")
+  stock           Int                  @default(0)
+  halalCertified  Boolean              @default(false)
+  spiceLevel      Int?
+  weightGrams     Int?
+  imageUrl        String?
+  brand           String?
+  category        String?
+  expiryDate      DateTime?
+  metadata        Json?
+  createdAt       DateTime             @default(now())
+  updatedAt       DateTime             @updatedAt
+  translations    ProductTranslation[]
+  cartItems       CartItem[]
+  orderItems      OrderItem[]
+}
+
+model ProductTranslation {
+  id          Int      @id @default(autoincrement())
+  language    String
+  name        String
+  description String?
+  productId   Int
+  product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([productId, language])
+}
+
+model CartItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  quantity  Int      @default(1)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id])
+
+  @@unique([userId, productId])
+}
+
+model Address {
+  id            Int      @id @default(autoincrement())
+  userId        Int
+  label         String?
+  recipientName String
+  phone         String
+  country       String   @default("TR")
+  city          String
+  district      String
+  street        String
+  postalCode    String?
+  addressLine2  String?
+  isDefault     Boolean  @default(false)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+  user          User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  orders        Order[]
+}
+
+model Order {
+  id              Int           @id @default(autoincrement())
+  orderNumber     String        @unique @default(uuid())
+  userId          Int
+  addressId       Int
+  status          OrderStatus   @default(PENDING)
+  subtotalAmount  Decimal       @db.Decimal(10, 2)
+  shippingFee     Decimal       @db.Decimal(10, 2) @default(0)
+  totalAmount     Decimal       @db.Decimal(10, 2)
+  currency        String        @default("TRY")
+  notes           String?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  user            User          @relation(fields: [userId], references: [id])
+  address         Address       @relation(fields: [addressId], references: [id])
+  items           OrderItem[]
+  payment         Payment?
+}
+
+model OrderItem {
+  id           Int      @id @default(autoincrement())
+  orderId      Int
+  productId    Int
+  quantity     Int
+  unitPrice    Decimal @db.Decimal(10, 2)
+  currency     String  @default("TRY")
+  productName  String
+  productImage String?
+  metaSnapshot Json?
+  order        Order   @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  product      Product @relation(fields: [productId], references: [id])
+}
+
+model Payment {
+  id              Int           @id @default(autoincrement())
+  orderId         Int           @unique
+  provider        String        @default("iyzico")
+  status          PaymentStatus @default(PENDING)
+  amount          Decimal       @db.Decimal(10, 2)
+  currency        String        @default("TRY")
+  transactionId   String?
+  rawResponse     Json?
+  createdAt       DateTime      @default(now())
+  updatedAt       DateTime      @updatedAt
+  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+}
+
+model RefreshToken {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  token     String   @unique
+  expiresAt DateTime
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model WebhookEvent {
+  id          Int      @id @default(autoincrement())
+  provider    String
+  eventType   String
+  payload     Json
+  status      String   @default("received")
+  createdAt   DateTime @default(now())
+  processedAt DateTime?
+}

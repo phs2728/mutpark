@@ -1,0 +1,138 @@
+{
+  "navigation": {
+    "home": "Ana Sayfa",
+    "products": "Ürünler",
+    "recipes": "Tarifler",
+    "community": "Topluluk",
+    "cart": "Sepet",
+    "account": "Hesabım",
+    "login": "Giriş Yap",
+    "logout": "Çıkış Yap",
+    "language": "Dil",
+    "admin": "Yönetici"
+  },
+  "hero": {
+    "title": "Türkiye'de otantik Kore lezzeti",
+    "subtitle": "MutPark ile helal sertifikalı Kore ürünleri ve tariflerine kolayca ulaşın.",
+    "ctaShop": "Alışverişe Başla",
+    "ctaRecipes": "Tarifleri Gör"
+  },
+  "products": {
+    "featured": "Öne Çıkan Ürünler",
+    "filters": {
+      "search": "Ürün ara",
+      "category": "Kategori",
+      "halal": "Helal sertifikalı",
+      "spicy": "Acı tat",
+      "apply": "Filtrele",
+      "reset": "Sıfırla"
+    },
+    "price": "Fiyat",
+    "stock": "Stok",
+    "halal": "Helal",
+    "spiceLevel": "Acılık",
+    "addToCart": "Sepete Ekle",
+    "viewDetails": "Detayları Gör",
+    "empty": "Henüz ürün eklenmedi."
+  },
+  "community": {
+    "placeholder": "Topluluk özelliklerimiz yakında açılıyor. Tarif paylaşımı ve yorumlar için bizi takip edin!"
+  },
+  "recipes": {
+    "placeholder": "Türkiye'ye uyarlanmış Kore tarifleri yakında burada olacak."
+  },
+  "productDetail": {
+    "ingredients": "İçindekiler",
+    "nutrition": "Besin Değerleri",
+    "recipes": "Tarifler",
+    "actions": {
+      "addToCart": "Sepete Ekle",
+      "checkout": "Hemen Satın Al"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Giriş Yap",
+      "email": "E-posta",
+      "password": "Şifre",
+      "submit": "Giriş",
+      "withGoogle": "Google ile giriş yap",
+      "withKakao": "Kakao ile giriş yap",
+      "registerLink": "Kayıt ol"
+    },
+    "register": {
+      "title": "Üye Ol",
+      "name": "İsim",
+      "phone": "Telefon",
+      "confirmPassword": "Şifreyi doğrula",
+      "passwordMismatch": "Şifreler eşleşmiyor.",
+      "submit": "Kaydol",
+      "loginLink": "Zaten hesabınız var mı?"
+    }
+  },
+  "cart": {
+    "title": "Alışveriş Sepeti",
+    "empty": "Sepetiniz boş.",
+    "subtotal": "Ara toplam",
+    "checkout": "Ödeme Yap",
+    "continue": "Alışverişe Devam",
+    "quantity": "Adet",
+    "remove": "Kaldır"
+  },
+  "checkout": {
+    "title": "Sipariş ve Ödeme",
+    "address": "Teslimat adresi",
+    "selectAddress": "Lütfen bir adres seçin",
+    "addAddress": "Yeni adres ekle",
+    "payment": "Ödeme",
+    "placeOrder": "Siparişi Tamamla",
+    "notes": "Teslimat notu",
+    "success": "Siparişiniz alındı."
+  },
+  "account": {
+    "title": "Hesabım",
+    "profile": "Profil",
+    "orders": "Siparişler",
+    "addresses": "Adresler",
+    "logout": "Çıkış Yap",
+    "update": "Güncelle",
+    "viewAll": "Tümünü Gör",
+    "addressForm": {
+      "title": "Yeni adres",
+      "name": "İsim",
+      "phone": "Telefon",
+      "city": "Şehir",
+      "district": "İlçe",
+      "street": "Adres",
+      "setDefault": "Varsayılan adres yap",
+      "submit": "Ekle",
+      "defaultBadge": "Varsayılan",
+      "setAsDefault": "Varsayılan yap",
+      "delete": "Sil"
+    },
+    "orderStatus": {
+      "PENDING": "Sipariş alındı",
+      "AWAITING_PAYMENT": "Ödeme bekliyor",
+      "PAID": "Ödeme tamamlandı",
+      "PROCESSING": "Hazırlanıyor",
+      "SHIPPED": "Kargoya verildi",
+      "DELIVERED": "Teslim edildi",
+      "CANCELLED": "İptal edildi"
+    }
+  },
+  "notifications": {
+    "addedToCart": "Ürün sepete eklendi.",
+    "cartUpdated": "Sepet güncellendi.",
+    "loginRequired": "Lütfen giriş yapın.",
+    "error": "Bir hata oluştu. Tekrar deneyin."
+  },
+  "footer": {
+    "tagline": "MutPark - Türkiye'de Kore lezzetleri",
+    "customerCenter": "Müşteri Hizmetleri",
+    "email": "E-posta",
+    "phone": "Telefon",
+    "hours": "Çalışma saatleri",
+    "policy": "Kullanım Şartları",
+    "privacy": "Gizlilik Politikası"
+  }
+}
