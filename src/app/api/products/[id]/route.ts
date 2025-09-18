@@ -6,7 +6,7 @@ import { requireAuth } from "@/lib/auth-guard";
 import { updateProductSchema } from "@/lib/validators";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function parseProductId(id: string) {
@@ -19,7 +19,8 @@ function parseProductId(id: string) {
 
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
-    const productId = parseProductId(context.params.id);
+    const { id } = await context.params;
+    const productId = parseProductId(id);
     const product = await prisma.product.findUnique({
       where: { id: productId },
       include: {
@@ -44,7 +45,8 @@ export async function GET(_request: NextRequest, context: RouteContext) {
 export async function PUT(request: NextRequest, context: RouteContext) {
   try {
     requireAuth(request, { adminOnly: true });
-    const productId = parseProductId(context.params.id);
+    const { id } = await context.params;
+    const productId = parseProductId(id);
 
     const body = await request.json();
     const data = updateProductSchema.parse(body);
@@ -133,7 +135,8 @@ export async function PUT(request: NextRequest, context: RouteContext) {
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     requireAuth(request, { adminOnly: true });
-    const productId = parseProductId(context.params.id);
+    const { id } = await context.params;
+    const productId = parseProductId(id);
 
     await prisma.product.delete({ where: { id: productId } });
 

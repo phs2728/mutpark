@@ -116,14 +116,15 @@ async function findOrCreateUser({
   });
 }
 
-export async function POST(request: NextRequest, context: { params: { provider: string } }) {
+export async function POST(request: NextRequest, context: { params: Promise<{ provider: string }> }) {
   try {
     const { token } = (await request.json()) as SocialLoginPayload;
     if (!token) {
       return errorResponse("Token is required", 400);
     }
 
-    const providerParam = context.params.provider.toLowerCase();
+    const { provider: providerParamValue } = await context.params;
+    const providerParam = providerParamValue.toLowerCase();
 
     let email: string;
     let name: string;

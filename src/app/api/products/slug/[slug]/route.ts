@@ -3,13 +3,14 @@ import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api";
 
 interface RouteContext {
-  params: { slug: string };
+  params: Promise<{ slug: string }>;
 }
 
 export async function GET(_request: NextRequest, context: RouteContext) {
   try {
+    const { slug } = await context.params;
     const product = await prisma.product.findUnique({
-      where: { slug: context.params.slug },
+      where: { slug },
       include: {
         translations: true,
       },

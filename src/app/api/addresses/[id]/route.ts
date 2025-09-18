@@ -5,7 +5,7 @@ import { requireAuth } from "@/lib/auth-guard";
 import { upsertAddressSchema } from "@/lib/validators";
 
 interface RouteContext {
-  params: { id: string };
+  params: Promise<{ id: string }>;
 }
 
 function parseId(id: string) {
@@ -19,7 +19,8 @@ function parseId(id: string) {
 export async function PATCH(request: NextRequest, context: RouteContext) {
   try {
     const user = requireAuth(request);
-    const addressId = parseId(context.params.id);
+    const { id } = await context.params;
+    const addressId = parseId(id);
 
     const body = await request.json();
     const data = upsertAddressSchema.parse(body);
@@ -80,7 +81,8 @@ export async function PATCH(request: NextRequest, context: RouteContext) {
 export async function DELETE(request: NextRequest, context: RouteContext) {
   try {
     const user = requireAuth(request);
-    const addressId = parseId(context.params.id);
+    const { id } = await context.params;
+    const addressId = parseId(id);
 
     const address = await prisma.address.findUnique({ where: { id: addressId } });
     if (!address || address.userId !== user.userId) {
