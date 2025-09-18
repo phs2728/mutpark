@@ -3,6 +3,12 @@ import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
+import type { Order, OrderItem, Payment } from "@prisma/client";
+
+type OrderWithDetails = Order & {
+  items: OrderItem[];
+  payment: Payment | null;
+};
 
 export default async function OrdersPage({ params }: { params: Promise<{ locale: string }> }) {
   const { locale: paramLocale } = await params;
@@ -26,7 +32,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ locale:
     <div className="space-y-4">
       <h1 className="text-2xl font-semibold text-slate-900 dark:text-white">{dictionary.account.orders}</h1>
       <div className="space-y-4">
-        {orders.map((order) => (
+        {orders.map((order: OrderWithDetails) => (
           <div
             key={order.id}
             className="space-y-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900"
@@ -58,7 +64,7 @@ export default async function OrdersPage({ params }: { params: Promise<{ locale:
               </div>
             </div>
             <div className="space-y-2 rounded-2xl bg-slate-50 p-4 text-sm dark:bg-slate-800">
-              {order.items.map((item) => (
+              {order.items.map((item: OrderItem) => (
                 <div key={item.id} className="flex items-center justify-between text-slate-600 dark:text-slate-300">
                   <span>
                     {item.productName} × {item.quantity}
