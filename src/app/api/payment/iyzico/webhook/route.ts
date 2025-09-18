@@ -7,7 +7,7 @@ interface IyzicoWebhookPayload {
   status: "success" | "failure";
   orderNumber: string;
   rawPayload?: unknown;
-  [key: string]: any;
+  [key: string]: string | number | boolean | unknown;
 }
 
 export async function POST(request: NextRequest) {
