@@ -14,7 +14,11 @@ interface Address {
   isDefault: boolean;
 }
 
-export function AddressManager({ locale, initialAddresses }: { locale: string; initialAddresses: Address[] }) {
+interface AddressManagerProps {
+  initialAddresses: Address[];
+}
+
+export function AddressManager({ initialAddresses }: AddressManagerProps) {
   const { t } = useI18n();
   const [addresses, setAddresses] = useState(initialAddresses);
   const [form, setForm] = useState({

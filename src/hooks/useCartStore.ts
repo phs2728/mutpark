@@ -32,15 +32,44 @@ interface CartState {
   clear: () => void;
 }
 
-async function handleResponse(response: Response) {
-  if (!response.ok) {
-    const errorBody = await response.json().catch(() => null);
-    throw new Error(errorBody?.message ?? "Request failed");
-  }
-  return response.json();
+interface RawCartItemTranslation {
+  name?: string | null;
 }
 
-function parseCartItems(rawItems: any[]): CartItem[] {
+interface RawCartItemProduct {
+  id: number;
+  slug: string;
+  baseName: string;
+  translations?: RawCartItemTranslation[] | null;
+  imageUrl?: string | null;
+  price: number | string;
+  currency: string;
+  halalCertified: boolean;
+  spiceLevel?: number | null;
+}
+
+interface RawCartItem {
+  id: number;
+  productId: number;
+  quantity: number;
+  product: RawCartItemProduct;
+}
+
+interface CartApiResponse {
+  data: {
+    items?: RawCartItem[];
+  };
+}
+
+async function handleResponse<T>(response: Response): Promise<T> {
+  if (!response.ok) {
+    const errorBody = (await response.json().catch(() => null)) as { message?: string } | null;
+    throw new Error(errorBody?.message ?? "Request failed");
+  }
+  return (await response.json()) as T;
+}
+
+function parseCartItems(rawItems: RawCartItem[]): CartItem[] {
   return rawItems.map((item) => ({
     id: item.id,
     productId: item.productId,
@@ -66,7 +95,7 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ loading: true, error: undefined });
     try {
       const response = await fetch("/api/cart", { credentials: "include" });
-      const json = await handleResponse(response);
+      const json = await handleResponse<CartApiResponse>(response);
       const items = parseCartItems(json.data.items ?? []);
       const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
       set({ items, subtotal, loading: false });

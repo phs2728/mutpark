@@ -14,5 +14,5 @@ export default async function AddressesPage({ params }: { params: { locale: stri
     orderBy: { isDefault: "desc" },
   });
 
-  return <AddressManager locale={params.locale} initialAddresses={addresses} />;
+  return <AddressManager initialAddresses={addresses} />;
 }
