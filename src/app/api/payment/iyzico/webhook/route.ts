@@ -3,7 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 
-interface IyzicoWebhookPayload extends Record<string, Prisma.JsonValue> {
+interface IyzicoWebhookPayload extends Record<string, Prisma.JsonValue | undefined> {
   transactionId: string;
   status: "success" | "failure";
   orderNumber: string;
