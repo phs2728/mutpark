@@ -1,18 +1,36 @@
 import { NextRequest } from "next/server";
+import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { successResponse, errorResponse } from "@/lib/api";
 
-interface IyzicoWebhookPayload {
+interface IyzicoWebhookPayload extends Record<string, Prisma.JsonValue> {
   transactionId: string;
   status: "success" | "failure";
   orderNumber: string;
-  rawPayload?: unknown;
-  [key: string]: string | number | boolean | unknown;
+  rawPayload?: Prisma.JsonValue;
+}
+
+function isIyzicoWebhookPayload(value: unknown): value is IyzicoWebhookPayload {
+  if (!value || typeof value !== "object") {
+    return false;
+  }
+
+  const data = value as Record<string, unknown>;
+  return (
+    typeof data.transactionId === "string" &&
+    typeof data.orderNumber === "string" &&
+    (data.status === "success" || data.status === "failure")
+  );
 }
 
 export async function POST(request: NextRequest) {
   try {
-    const payload = (await request.json()) as IyzicoWebhookPayload;
+    const rawPayload = await request.json();
+    if (!isIyzicoWebhookPayload(rawPayload)) {
+      return errorResponse("Invalid webhook payload", 400);
+    }
+
+    const payload = rawPayload;
 
     if (!payload.transactionId || !payload.orderNumber) {
       return errorResponse("Invalid webhook payload", 400);
