@@ -2,8 +2,9 @@ import { LoginForm } from "@/components/auth/LoginForm";
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 
-export default async function LoginPage({ params }: { params: { locale: string } }) {
-  const locale = isLocale(params.locale) ? params.locale : defaultLocale;
+export default async function LoginPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: localeParam } = await params;
+  const locale = isLocale(localeParam) ? localeParam : defaultLocale;
   const dictionary = await getDictionary(locale as Locale);
 
   return (

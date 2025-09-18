@@ -3,10 +3,11 @@ import { AddressManager } from "@/components/account/AddressManager";
 import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-export default async function AddressesPage({ params }: { params: { locale: string } }) {
+export default async function AddressesPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const auth = getAuthenticatedUser();
   if (!auth) {
-    redirect(`/${params.locale}/auth/login`);
+    redirect(`/${locale}/auth/login`);
   }
 
   const addresses = await prisma.address.findMany({

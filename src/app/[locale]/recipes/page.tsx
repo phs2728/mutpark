@@ -1,8 +1,9 @@
 import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
 import { getDictionary } from "@/i18n/get-dictionary";
 
-export default async function RecipesPlaceholder({ params }: { params: { locale: string } }) {
-  const locale = isLocale(params.locale) ? params.locale : defaultLocale;
+export default async function RecipesPlaceholder({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale: paramLocale } = await params;
+  const locale = isLocale(paramLocale) ? paramLocale : defaultLocale;
   const dictionary = await getDictionary(locale as Locale);
 
   return (

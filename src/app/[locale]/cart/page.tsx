@@ -1,5 +1,6 @@
 import { CartClient } from "@/components/cart/CartClient";
 
-export default function CartPage({ params }: { params: { locale: string } }) {
-  return <CartClient locale={params.locale} />;
+export default async function CartPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
+  return <CartClient locale={locale} />;
 }

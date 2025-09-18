@@ -4,10 +4,11 @@ import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 import { getLocalizedProduct } from "@/lib/i18n-utils";
 
-export default async function CheckoutPage({ params }: { params: { locale: string } }) {
+export default async function CheckoutPage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const auth = getAuthenticatedUser();
   if (!auth) {
-    redirect(`/${params.locale}/auth/login`);
+    redirect(`/${locale}/auth/login`);
   }
 
   const [addresses, cartItems] = await Promise.all([
@@ -26,12 +27,12 @@ export default async function CheckoutPage({ params }: { params: { locale: strin
   ]);
 
   if (cartItems.length === 0) {
-    redirect(`/${params.locale}/cart`);
+    redirect(`/${locale}/cart`);
   }
 
   return (
     <CheckoutClient
-      locale={params.locale}
+      locale={locale}
       addresses={addresses.map((address) => ({
         id: address.id,
         recipientName: address.recipientName,
@@ -42,7 +43,7 @@ export default async function CheckoutPage({ params }: { params: { locale: strin
         isDefault: address.isDefault,
       }))}
       items={cartItems.map((item) => {
-        const product = getLocalizedProduct(item.product!, params.locale);
+        const product = getLocalizedProduct(item.product!, locale);
         return {
           id: item.id,
           name: product.name,

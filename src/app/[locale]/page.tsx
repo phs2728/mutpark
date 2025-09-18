@@ -11,17 +11,18 @@ export default async function LocaleHome({
   params,
   searchParams,
 }: {
-  params: { locale: string };
-  searchParams: Record<string, string | string[] | undefined>;
+  params: Promise<{ locale: string }>;
+  searchParams: Promise<Record<string, string | string[] | undefined>>;
 }) {
-  const locale = params.locale;
+  const { locale } = await params;
+  const searchParamsResolved = await searchParams;
   const parsedFilters = productFilterSchema.parse({
-    search: searchParams.search,
-    category: searchParams.category,
-    halal: searchParams.halal,
-    spicy: searchParams.spicy,
-    page: searchParams.page,
-    pageSize: searchParams.pageSize,
+    search: searchParamsResolved.search,
+    category: searchParamsResolved.category,
+    halal: searchParamsResolved.halal,
+    spicy: searchParamsResolved.spicy,
+    page: searchParamsResolved.page,
+    pageSize: searchParamsResolved.pageSize,
   });
 
   const where: Prisma.ProductWhereInput = {};
@@ -80,7 +81,7 @@ export default async function LocaleHome({
             pageSize={parsedFilters.pageSize}
             totalItems={total}
             locale={locale}
-            searchParams={searchParams}
+            searchParams={searchParamsResolved}
           />
         </div>
       </div>

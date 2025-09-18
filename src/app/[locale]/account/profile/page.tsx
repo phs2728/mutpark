@@ -3,10 +3,11 @@ import { ProfileForm } from "@/components/account/ProfileForm";
 import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
-export default async function ProfilePage({ params }: { params: { locale: string } }) {
+export default async function ProfilePage({ params }: { params: Promise<{ locale: string }> }) {
+  const { locale } = await params;
   const auth = getAuthenticatedUser();
   if (!auth) {
-    redirect(`/${params.locale}/auth/login`);
+    redirect(`/${locale}/auth/login`);
   }
 
   const user = await prisma.user.findUnique({
@@ -20,7 +21,7 @@ export default async function ProfilePage({ params }: { params: { locale: string
   });
 
   if (!user) {
-    redirect(`/${params.locale}/auth/login`);
+    redirect(`/${locale}/auth/login`);
   }
 
   return <ProfileForm initialProfile={user} />;
