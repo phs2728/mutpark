@@ -33,6 +33,10 @@
     "stock": "Stock",
     "halal": "Halal",
     "spiceLevel": "Spice level",
+    "expiresSoon": "Expiring soon",
+    "expired": "Not for sale",
+    "lowStock": "Low stock",
+    "expiryDate": "Expiry date",
     "addToCart": "Add to Cart",
     "viewDetails": "View Details",
     "empty": "No products have been added yet."
@@ -44,9 +48,13 @@
     "placeholder": "Localized Korean recipes for Türkiye are coming soon."
   },
   "productDetail": {
+    "details": "Details",
     "ingredients": "Ingredients",
     "nutrition": "Nutrition Facts",
     "recipes": "Recipes",
+    "brand": "Brand",
+    "category": "Category",
+    "empty": "No information available.",
     "actions": {
       "addToCart": "Add to Cart",
       "checkout": "Buy Now"
@@ -87,6 +95,24 @@
     "selectAddress": "Select a delivery address",
     "addAddress": "Add new address",
     "payment": "Payment",
+    "paymentOptions": {
+      "title": "Payment method",
+      "iyzico": {
+        "title": "Card Payment (IyziPay)",
+        "description": "Pay securely with your credit or debit card.",
+        "badge": "Recommended"
+      },
+      "papara": {
+        "title": "Papara balance",
+        "description": "Pay instantly with your Papara account.",
+        "note": "We will send instructions after the order is placed."
+      },
+      "installment": {
+        "title": "Installments",
+        "description": "Spread the cost over 3, 6, 9 or 12 months.",
+        "months": "months"
+      }
+    },
     "placeOrder": "Place Order",
     "notes": "Delivery notes",
     "success": "Your order has been received."

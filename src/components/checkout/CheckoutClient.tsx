@@ -39,8 +39,34 @@ export function CheckoutClient({
   const [notes, setNotes] = useState("");
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
+  const [paymentMethod, setPaymentMethod] = useState<"iyzico" | "papara" | "installment">("iyzico");
+  const [installmentPlan, setInstallmentPlan] = useState(3);
 
   const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+
+  const paymentOptions: Array<{
+    id: "iyzico" | "papara" | "installment";
+    title: string;
+    description: string;
+    badge?: string;
+  }> = [
+    {
+      id: "iyzico",
+      title: t("checkout.paymentOptions.iyzico.title"),
+      description: t("checkout.paymentOptions.iyzico.description"),
+      badge: t("checkout.paymentOptions.iyzico.badge"),
+    },
+    {
+      id: "papara",
+      title: t("checkout.paymentOptions.papara.title"),
+      description: t("checkout.paymentOptions.papara.description"),
+    },
+    {
+      id: "installment",
+      title: t("checkout.paymentOptions.installment.title"),
+      description: t("checkout.paymentOptions.installment.description"),
+    },
+  ];
 
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
@@ -55,7 +81,12 @@ export function CheckoutClient({
       const response = await fetch("/api/orders", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ addressId: selectedAddress, notes }),
+        body: JSON.stringify({
+          addressId: selectedAddress,
+          notes,
+          paymentMethod,
+          installmentPlan: paymentMethod === "installment" ? installmentPlan : undefined,
+        }),
       });
       const json = await response.json();
       if (!response.ok) {
@@ -63,14 +94,24 @@ export function CheckoutClient({
       }
       const orderId = json.data?.id ?? json.data?.order?.id ?? json.data?.orderId;
       if (orderId) {
-        const checkoutResponse = await fetch("/api/payment/iyzico/checkout", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ orderId }),
-        });
-        const checkoutJson = await checkoutResponse.json();
-        if (checkoutResponse.ok && checkoutJson.data?.redirectUrl) {
-          window.location.href = checkoutJson.data.redirectUrl;
+        if (paymentMethod === "iyzico") {
+          const checkoutResponse = await fetch("/api/payment/iyzico/checkout", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ orderId }),
+          });
+          const checkoutJson = await checkoutResponse.json();
+          if (checkoutResponse.ok && checkoutJson.data?.redirectUrl) {
+            window.location.href = checkoutJson.data.redirectUrl;
+            return;
+          }
+        } else if (paymentMethod === "papara") {
+          router.push(`/${locale}/account/orders?payment=papara&order=${orderId}`);
+          return;
+        } else if (paymentMethod === "installment") {
+          router.push(
+            `/${locale}/account/orders?payment=installment&plan=${installmentPlan}&order=${orderId}`,
+          );
           return;
         }
       }
@@ -165,6 +206,64 @@ export function CheckoutClient({
               </span>
             </div>
           ))}
+        </div>
+        <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
+          <p className="text-sm font-semibold text-slate-900 dark:text-white">
+            {t("checkout.paymentOptions.title")}
+          </p>
+          <div className="flex flex-col gap-3">
+            {paymentOptions.map((option) => (
+              <label
+                key={option.id}
+                className={`flex cursor-pointer flex-col gap-1 rounded-2xl border px-4 py-3 text-sm transition ${
+                  paymentMethod === option.id
+                    ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20"
+                    : "border-slate-200 hover:border-emerald-300 dark:border-slate-700"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="payment-method"
+                      checked={paymentMethod === option.id}
+                      onChange={() => setPaymentMethod(option.id)}
+                    />
+                    <span className="font-semibold text-slate-900 dark:text-white">{option.title}</span>
+                  </div>
+                  {option.badge ? (
+                    <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
+                      {option.badge}
+                    </span>
+                  ) : null}
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-300">{option.description}</p>
+                {option.id === "installment" && paymentMethod === "installment" ? (
+                  <div className="flex flex-wrap gap-2 pt-2">
+                    {[3, 6, 9, 12].map((plan) => (
+                      <button
+                        key={plan}
+                        type="button"
+                        onClick={() => setInstallmentPlan(plan)}
+                        className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
+                          installmentPlan === plan
+                            ? "border-emerald-500 bg-emerald-50 text-emerald-600 dark:border-emerald-400 dark:bg-emerald-900/30"
+                            : "border-slate-200 text-slate-500 hover:border-emerald-300 dark:border-slate-700 dark:text-slate-300"
+                        }`}
+                      >
+                        {plan} {t("checkout.paymentOptions.installment.months")}
+                      </button>
+                    ))}
+                  </div>
+                ) : null}
+                {option.id === "papara" && paymentMethod === "papara" ? (
+                  <p className="text-xs italic text-slate-500 dark:text-slate-400">
+                    {t("checkout.paymentOptions.papara.note")}
+                  </p>
+                ) : null}
+              </label>
+            ))}
+          </div>
         </div>
         <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
           <span>{t("cart.subtotal")}</span>

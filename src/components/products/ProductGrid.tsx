@@ -13,6 +13,13 @@ interface ProductGridProps {
     halalCertified: boolean;
     spiceLevel?: number | null;
     stock: number;
+    expiryDate?: string | null;
+    isExpired?: boolean;
+    expiresSoon?: boolean;
+    isLowStock?: boolean;
+    priceOriginal?: number | null;
+    discountPercentage?: number;
+    discountReason?: string | null;
   }>;
 }
 

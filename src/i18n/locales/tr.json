@@ -33,6 +33,10 @@
     "stock": "Stok",
     "halal": "Helal",
     "spiceLevel": "Acılık",
+    "expiresSoon": "Son kullanma tarihi yaklaşıyor",
+    "expired": "Satışta değil",
+    "lowStock": "Stok azaldı",
+    "expiryDate": "Son kullanma tarihi",
     "addToCart": "Sepete Ekle",
     "viewDetails": "Detayları Gör",
     "empty": "Henüz ürün eklenmedi."
@@ -44,9 +48,13 @@
     "placeholder": "Türkiye'ye uyarlanmış Kore tarifleri yakında burada olacak."
   },
   "productDetail": {
+    "details": "Detaylar",
     "ingredients": "İçindekiler",
     "nutrition": "Besin Değerleri",
     "recipes": "Tarifler",
+    "brand": "Marka",
+    "category": "Kategori",
+    "empty": "Bilgi bulunmuyor.",
     "actions": {
       "addToCart": "Sepete Ekle",
       "checkout": "Hemen Satın Al"
@@ -87,6 +95,24 @@
     "selectAddress": "Lütfen bir adres seçin",
     "addAddress": "Yeni adres ekle",
     "payment": "Ödeme",
+    "paymentOptions": {
+      "title": "Ödeme yöntemi",
+      "iyzico": {
+        "title": "Kart ile Ödeme (IyziPay)",
+        "description": "Kredi veya banka kartınızla güvenle ödeyin.",
+        "badge": "Önerilen"
+      },
+      "papara": {
+        "title": "Papara bakiyesi",
+        "description": "Papara hesabınızla hızlı ödeme",
+        "note": "Sipariş sonrası Papara talimatı gönderilecektir."
+      },
+      "installment": {
+        "title": "Taksitli ödeme",
+        "description": "3, 6, 9 veya 12 ay taksit seçeneği",
+        "months": "ay"
+      }
+    },
     "placeOrder": "Siparişi Tamamla",
     "notes": "Teslimat notu",
     "success": "Siparişiniz alındı."

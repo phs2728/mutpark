@@ -18,6 +18,13 @@ interface ProductCardProps {
     halalCertified: boolean;
     spiceLevel?: number | null;
     stock: number;
+    expiryDate?: string | null;
+    isExpired?: boolean;
+    expiresSoon?: boolean;
+    isLowStock?: boolean;
+    priceOriginal?: number | null;
+    discountPercentage?: number;
+    discountReason?: string | null;
   };
 }
 
@@ -45,11 +52,22 @@ export function ProductCard({ locale, product }: ProductCardProps) {
             {product.name}
           </div>
         )}
-        {product.halalCertified && (
-          <span className="absolute left-3 top-3 rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
-            {t("products.halal")}
-          </span>
-        )}
+        <div className="absolute left-3 top-3 flex flex-col gap-2">
+          {product.halalCertified ? (
+            <span className="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
+              {t("products.halal")}
+            </span>
+          ) : null}
+          {product.isExpired ? (
+            <span className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
+              {t("products.expired")}
+            </span>
+          ) : product.expiresSoon ? (
+            <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
+              {t("products.expiresSoon")}
+            </span>
+          ) : null}
+        </div>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
@@ -59,7 +77,7 @@ export function ProductCard({ locale, product }: ProductCardProps) {
           </p>
         </div>
         <div className="mt-auto flex items-center justify-between">
-          <div>
+          <div className="flex flex-col">
             <p className="text-lg font-semibold text-slate-900 dark:text-white">
               {product.price.toLocaleString(undefined, {
                 style: "currency",
@@ -67,6 +85,30 @@ export function ProductCard({ locale, product }: ProductCardProps) {
                 minimumFractionDigits: 0,
               })}
             </p>
+            {product.priceOriginal && product.priceOriginal > product.price ? (
+              <p className="text-xs text-slate-400 line-through">
+                {product.priceOriginal.toLocaleString(undefined, {
+                  style: "currency",
+                  currency: product.currency,
+                  minimumFractionDigits: 0,
+                })}
+              </p>
+            ) : null}
+            {product.isExpired ? (
+              <p className="text-xs font-semibold text-red-600 dark:text-red-400">
+                {t("products.expired")}
+              </p>
+            ) : null}
+            {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
+              <p className="text-xs font-semibold text-emerald-600">
+                {t("products.expiresSoon")} (-{product.discountPercentage}%)
+              </p>
+            ) : null}
+            {product.isLowStock && !product.isExpired ? (
+              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+                {t("products.lowStock")}
+              </p>
+            ) : null}
             {product.spiceLevel ? (
               <p className="text-xs text-orange-500">
                 {t("products.spiceLevel")}: {"🌶️".repeat(product.spiceLevel)}
@@ -82,8 +124,9 @@ export function ProductCard({ locale, product }: ProductCardProps) {
             </Link>
             <button
               type="button"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300"
+              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300"
               onClick={handleAddToCart}
+              disabled={product.isExpired}
             >
               {t("products.addToCart")}
             </button>

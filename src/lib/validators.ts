@@ -50,6 +50,8 @@ export const upsertCartSchema = z.object({
 export const createOrderSchema = z.object({
   addressId: z.number().int(),
   notes: z.string().optional(),
+  paymentMethod: z.enum(["iyzico", "papara", "installment"]).optional(),
+  installmentPlan: z.number().int().positive().optional(),
 });
 
 export const upsertAddressSchema = z.object({

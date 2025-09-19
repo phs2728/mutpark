@@ -33,6 +33,10 @@
     "stock": "재고",
     "halal": "할랄 인증",
     "spiceLevel": "매운맛",
+    "expiresSoon": "유통기한 임박",
+    "expired": "판매 종료",
+    "lowStock": "재고 부족",
+    "expiryDate": "유통기한",
     "addToCart": "장바구니 담기",
     "viewDetails": "상세 보기",
     "empty": "등록된 상품이 없습니다."
@@ -44,9 +48,13 @@
     "placeholder": "터키에 맞춘 한식 레시피 콘텐츠가 준비 중입니다."
   },
   "productDetail": {
+    "details": "상세 정보",
     "ingredients": "성분",
     "nutrition": "영양 정보",
     "recipes": "레시피",
+    "brand": "브랜드",
+    "category": "카테고리",
+    "empty": "등록된 정보가 없습니다.",
     "actions": {
       "addToCart": "장바구니 담기",
       "checkout": "바로 구매"
@@ -87,6 +95,24 @@
     "selectAddress": "배송지를 선택하세요",
     "addAddress": "새 배송지 추가",
     "payment": "결제",
+    "paymentOptions": {
+      "title": "결제 방법",
+      "iyzico": {
+        "title": "카드 결제 (IyziPay)",
+        "description": "신용/체크카드로 안전하게 결제하세요.",
+        "badge": "추천"
+      },
+      "papara": {
+        "title": "Papara 잔액 결제",
+        "description": "Papara 계정으로 즉시 결제",
+        "note": "주문 후 안내 메시지가 발송됩니다."
+      },
+      "installment": {
+        "title": "무이자 할부",
+        "description": "3·6·9·12개월 할부로 부담 없이 결제",
+        "months": "개월"
+      }
+    },
     "placeOrder": "주문하기",
     "notes": "배송 요청사항",
     "success": "주문이 접수되었습니다."

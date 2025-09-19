@@ -33,6 +33,10 @@
     "stock": "المخزون",
     "halal": "حلال",
     "spiceLevel": "درجة الحدة",
+    "expiresSoon": "تنتهي قريبًا",
+    "expired": "غير متاح للبيع",
+    "lowStock": "المخزون منخفض",
+    "expiryDate": "تاريخ الانتهاء",
     "addToCart": "أضف إلى السلة",
     "viewDetails": "عرض التفاصيل",
     "empty": "لم يتم إضافة منتجات بعد."
@@ -44,9 +48,13 @@
     "placeholder": "وصفات كورية مخصصة لتركيا ستتوفر قريبًا."
   },
   "productDetail": {
+    "details": "التفاصيل",
     "ingredients": "المكونات",
     "nutrition": "القيمة الغذائية",
     "recipes": "الوصفات",
+    "brand": "العلامة التجارية",
+    "category": "الفئة",
+    "empty": "لا توجد معلومات.",
     "actions": {
       "addToCart": "أضف إلى السلة",
       "checkout": "اشترِ الآن"
@@ -87,6 +95,24 @@
     "selectAddress": "اختر عنوان التسليم",
     "addAddress": "إضافة عنوان جديد",
     "payment": "الدفع",
+    "paymentOptions": {
+      "title": "طريقة الدفع",
+      "iyzico": {
+        "title": "الدفع بالبطاقة (IyziPay)",
+        "description": "ادفع بأمان باستخدام بطاقة الائتمان أو الصراف الآلي.",
+        "badge": "موصى به"
+      },
+      "papara": {
+        "title": "رصيد Papara",
+        "description": "ادفع فوراً عبر حساب Papara الخاص بك.",
+        "note": "سنرسل تعليمات الدفع بعد إتمام الطلب."
+      },
+      "installment": {
+        "title": "الدفع بالتقسيط",
+        "description": "قسّم المبلغ على 3 أو 6 أو 9 أو 12 شهراً.",
+        "months": "شهر"
+      }
+    },
     "placeOrder": "تأكيد الطلب",
     "notes": "ملاحظات التسليم",
     "success": "تم استلام طلبك."

@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/providers/I18nProvider";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { useMemo, useState, type ReactNode } from "react";
 
 interface ProductDetailProps {
   locale: string;
@@ -20,6 +21,14 @@ interface ProductDetailProps {
     stock: number;
     brand?: string | null;
     category?: string | null;
+    expiryDate?: string | null;
+    isExpired?: boolean;
+    expiresSoon?: boolean;
+    isLowStock?: boolean;
+    priceOriginal?: number | null;
+    discountPercentage?: number;
+    discountReason?: string | null;
+    metadata?: Record<string, unknown> | null;
   };
   related: Array<{
     id: number;
@@ -30,8 +39,113 @@ interface ProductDetailProps {
   }>;
 }
 
+type DetailTab = "details" | "ingredients" | "nutrition" | "recipes";
+
+function renderContent(value: unknown, emptyFallback: string): ReactNode {
+  if (value === null || value === undefined) {
+    return <p className="text-sm text-slate-500 dark:text-slate-300">{emptyFallback}</p>;
+  }
+
+  if (typeof value === "string") {
+    return <p className="whitespace-pre-wrap text-sm text-slate-600 dark:text-slate-300">{value}</p>;
+  }
+
+  if (Array.isArray(value)) {
+    if (value.length === 0) {
+      return <p className="text-sm text-slate-500 dark:text-slate-300">{emptyFallback}</p>;
+    }
+    if (value.every((item) => typeof item === "string")) {
+      return (
+        <ul className="list-disc space-y-1 pl-5 text-sm text-slate-600 dark:text-slate-300">
+          {value.map((item, index) => (
+            <li key={index}>{item}</li>
+          ))}
+        </ul>
+      );
+    }
+    return (
+      <div className="space-y-3">
+        {value.map((item, index) => (
+          <div
+            key={index}
+            className="rounded-2xl border border-slate-200 p-4 text-sm text-slate-600 dark:border-slate-700 dark:text-slate-300"
+          >
+            {renderContent(item, emptyFallback)}
+          </div>
+        ))}
+      </div>
+    );
+  }
+
+  if (typeof value === "object") {
+    const entries = Object.entries(value as Record<string, unknown>);
+    if (entries.length === 0) {
+      return <p className="text-sm text-slate-500 dark:text-slate-300">{emptyFallback}</p>;
+    }
+    return (
+      <dl className="grid gap-2 text-sm text-slate-600 dark:text-slate-300">
+        {entries.map(([key, val]) => (
+          <div key={key} className="grid grid-cols-[120px_1fr] gap-3">
+            <dt className="font-semibold capitalize text-slate-500 dark:text-slate-400">{key}</dt>
+            <dd>{renderContent(val, emptyFallback)}</dd>
+          </div>
+        ))}
+      </dl>
+    );
+  }
+
+  return <p className="text-sm text-slate-600 dark:text-slate-300">{String(value)}</p>;
+}
+
 export function ProductDetail({ locale, product, related }: ProductDetailProps) {
   const { t } = useI18n();
+  const [activeTab, setActiveTab] = useState<DetailTab>("details");
+
+  const metadata = useMemo(() => (product.metadata ?? {}) as Record<string, unknown>, [product.metadata]);
+  const detailsContent = useMemo(
+    () => (
+      <div className="space-y-4 text-sm text-slate-600 dark:text-slate-300">
+        <p>{product.description}</p>
+        <div className="grid gap-2 sm:grid-cols-2">
+          {product.brand ? (
+            <div>
+              <p className="text-xs uppercase text-slate-400">{t("productDetail.brand")}</p>
+              <p className="font-medium text-slate-700 dark:text-slate-200">{product.brand}</p>
+            </div>
+          ) : null}
+          {product.category ? (
+            <div>
+              <p className="text-xs uppercase text-slate-400">{t("productDetail.category")}</p>
+              <p className="font-medium text-slate-700 dark:text-slate-200">{product.category}</p>
+            </div>
+          ) : null}
+        </div>
+      </div>
+    ),
+    [product.description, product.brand, product.category, t],
+  );
+
+  const emptyFallback = t("productDetail.empty");
+  const ingredientsContent = renderContent(metadata["ingredients"], emptyFallback);
+  const nutritionContent = renderContent(metadata["nutrition"], emptyFallback);
+  const recipesContent = renderContent(metadata["recipes"], emptyFallback);
+
+  const tabContent: Record<DetailTab, React.ReactNode> = {
+    details: detailsContent,
+    ingredients: ingredientsContent,
+    nutrition: nutritionContent,
+    recipes: recipesContent,
+  };
+
+  const tabs = useMemo(
+    () => [
+      { id: "details" as const, label: t("productDetail.details") },
+      { id: "ingredients" as const, label: t("productDetail.ingredients") },
+      { id: "nutrition" as const, label: t("productDetail.nutrition") },
+      { id: "recipes" as const, label: t("productDetail.recipes") },
+    ],
+    [t],
+  );
 
   return (
     <div className="space-y-12">
@@ -51,16 +165,27 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                 {product.name}
               </div>
             )}
-            {product.halalCertified && (
-              <span className="absolute left-4 top-4 rounded-full bg-emerald-500 px-3 py-1 text-sm font-semibold text-white">
-                {t("products.halal")}
-              </span>
-            )}
+            <div className="absolute left-4 top-4 flex flex-col gap-2">
+              {product.halalCertified ? (
+                <span className="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-sm font-semibold text-white">
+                  {t("products.halal")}
+                </span>
+              ) : null}
+              {product.isExpired ? (
+                <span className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white">
+                  {t("products.expired")}
+                </span>
+              ) : product.expiresSoon ? (
+                <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-sm font-semibold text-white">
+                  {t("products.expiresSoon")}
+                </span>
+              ) : null}
+            </div>
           </div>
           <div className="space-y-4 p-6">
             <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">{product.name}</h1>
             <p className="text-lg text-slate-600 dark:text-slate-300">{product.description}</p>
-            <div className="flex items-center gap-4">
+            <div className="flex flex-wrap items-center gap-4">
               <span className="text-2xl font-bold text-emerald-600">
                 {product.price.toLocaleString(undefined, {
                   style: "currency",
@@ -68,6 +193,15 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                   minimumFractionDigits: 0,
                 })}
               </span>
+              {product.priceOriginal && product.priceOriginal > product.price ? (
+                <span className="text-lg font-semibold text-slate-400 line-through">
+                  {product.priceOriginal.toLocaleString(undefined, {
+                    style: "currency",
+                    currency: product.currency,
+                    minimumFractionDigits: 0,
+                  })}
+                </span>
+              ) : null}
               {product.spiceLevel ? (
                 <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-600">
                   {t("products.spiceLevel")}: {"🌶️".repeat(product.spiceLevel)}
@@ -76,9 +210,33 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
               <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-300">
                 {t("products.stock")}: {product.stock}
               </span>
+              {product.isLowStock && !product.isExpired ? (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
+                  {t("products.lowStock")}
+                </span>
+              ) : null}
+              {product.isExpired ? (
+                <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-600 dark:bg-red-500/20 dark:text-red-300">
+                  {t("products.expired")}
+                </span>
+              ) : null}
             </div>
+            {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
+              <p className="text-sm font-medium text-emerald-600">
+                {t("products.expiresSoon")} (-{product.discountPercentage}%)
+              </p>
+            ) : null}
+            {product.expiryDate ? (
+              <p className="text-sm text-slate-500 dark:text-slate-300">
+                {t("products.expiryDate", "Expiry date")}: {new Date(product.expiryDate).toLocaleDateString(locale)}
+              </p>
+            ) : null}
             <div className="flex flex-wrap gap-3">
-              <AddToCartButton productId={product.id} className="px-8 py-3 text-base">
+              <AddToCartButton
+                productId={product.id}
+                className="px-8 py-3 text-base"
+                disabled={product.isExpired}
+              >
                 {t("productDetail.actions.addToCart")}
               </AddToCartButton>
               <Link
@@ -88,6 +246,11 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                 {t("productDetail.actions.checkout")}
               </Link>
             </div>
+            {product.isExpired ? (
+              <p className="text-sm font-semibold text-red-600 dark:text-red-400">
+                {t("products.expired")}
+              </p>
+            ) : null}
           </div>
         </div>
         <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
@@ -112,6 +275,27 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
           </div>
         </aside>
       </div>
+      <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+        <div className="flex flex-wrap gap-2">
+          {tabs.map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setActiveTab(tab.id)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold transition-colors ${
+                activeTab === tab.id
+                  ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
+                  : "bg-slate-100 text-slate-600 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        <div className="mt-6 border-t border-slate-100 pt-6 dark:border-slate-800">
+          {tabContent[activeTab]}
+        </div>
+      </section>
     </div>
   );
 }

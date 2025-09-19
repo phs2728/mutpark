@@ -3,6 +3,7 @@ import { Prisma } from "@prisma/client";
 import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api";
 import { productFilterSchema, createProductSchema } from "@/lib/validators";
+import { computeProductPricing } from "@/lib/product-pricing";
 import { requireAuth } from "@/lib/auth-guard";
 
 export async function GET(request: NextRequest) {
@@ -60,8 +61,25 @@ export async function GET(request: NextRequest) {
 
     const totalPages = Math.ceil(total / filters.pageSize) || 1;
 
+    const enrichedItems = items.map((item) => {
+      const pricing = computeProductPricing(item);
+
+      return {
+        ...item,
+        price: pricing.price,
+        originalPrice: pricing.priceOriginal,
+        discountPercentage: pricing.discountPercentage,
+        discountReason: pricing.discountReason,
+        expiryDate: pricing.expiryDate,
+        isExpired: pricing.isExpired,
+        expiresSoon: pricing.expiresSoon,
+        isLowStock: pricing.isLowStock,
+        stock: item.stock,
+      };
+    });
+
     return successResponse({
-      items,
+      items: enrichedItems,
       pagination: {
         page: filters.page,
         pageSize: filters.pageSize,
