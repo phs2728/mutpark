@@ -25,7 +25,6 @@ async function verifyGoogleToken(idToken: string) {
   return {
     email: data.email,
     name: data.name ?? data.email.split("@")[0],
-    locale: data.locale ?? "ko",
   };
 }
 
@@ -152,7 +151,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       email = profile.email;
       name = profile.name;
       providerUserId = profile.email;
-      localePref = profile.locale;
+      localePref = undefined;
     } else if (providerParam === "kakao") {
       provider = SocialProvider.KAKAO;
       const profile = await verifyKakaoToken(token);
