@@ -6,7 +6,8 @@ import { requireAuth } from "@/lib/auth-guard";
 import { createOrderSchema } from "@/lib/validators";
 
 const SHIPPING_THRESHOLD = 500;
-const SHIPPING_FEE = 29.9;
+const SHIPPING_FEE_STANDARD = 29.9;
+const SHIPPING_FEE_EXPRESS = 49.9;
 
 export async function GET(request: NextRequest) {
   try {
@@ -72,7 +73,13 @@ export async function POST(request: NextRequest) {
       return errorResponse(`재고가 부족한 상품이 있습니다: ${outOfStock.join(", ")}`, 400);
     }
 
-    const shippingFee = subtotal.gte(SHIPPING_THRESHOLD) ? new Prisma.Decimal(0) : new Prisma.Decimal(SHIPPING_FEE);
+    const freeShipping = subtotal.gte(SHIPPING_THRESHOLD);
+    const shippingFeeValue = freeShipping
+      ? 0
+      : data.shippingMethod === "express"
+      ? SHIPPING_FEE_EXPRESS
+      : SHIPPING_FEE_STANDARD;
+    const shippingFee = new Prisma.Decimal(shippingFeeValue);
     const total = subtotal.add(shippingFee);
 
     const paymentMethod = data.paymentMethod ?? "iyzico";
@@ -88,6 +95,7 @@ export async function POST(request: NextRequest) {
           subtotalAmount: subtotal,
           shippingFee,
           totalAmount: total,
+          shippingMethod: data.shippingMethod,
           notes: data.notes,
         },
       });

@@ -6,6 +6,7 @@ import { useI18n } from "@/providers/I18nProvider";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { isCurrency } from "@/lib/currency";
+import { resolveImageUrl } from "@/lib/imagekit";
 
 interface ProductCardProps {
   locale: string;
@@ -41,6 +42,7 @@ export function ProductCard({ locale, product }: ProductCardProps) {
     product.priceOriginal && isCurrency(baseCurrency)
       ? convert(product.priceOriginal, baseCurrency)
       : product.priceOriginal ?? null;
+  const imageSrc = resolveImageUrl(product.imageUrl, { width: 400, quality: 80 });
 
   const handleAddToCart = () => {
     void addItem(product.id, 1);
@@ -49,9 +51,9 @@ export function ProductCard({ locale, product }: ProductCardProps) {
   return (
     <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
       <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800">
-        {product.imageUrl ? (
+        {imageSrc ? (
           <Image
-            src={product.imageUrl}
+            src={imageSrc}
             alt={product.name}
             fill
             sizes="(min-width: 768px) 33vw, 100vw"

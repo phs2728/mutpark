@@ -120,9 +120,28 @@
         "months": "개월"
       }
     },
+    "shipping": {
+      "title": "배송 방법",
+      "label": "배송비",
+      "free": "무료",
+      "freeThreshold": "₺{amount} 이상 주문 시 무료 배송",
+      "options": {
+        "standard": {
+          "title": "일반 배송",
+          "description": "영업일 기준 2-3일 소요",
+          "estimate": "2-3일"
+        },
+        "express": {
+          "title": "익스프레스 배송",
+          "description": "익일 도착 (도심 지역 기준)",
+          "estimate": "1일"
+        }
+      }
+    },
     "placeOrder": "주문하기",
     "notes": "배송 요청사항",
-    "success": "주문이 접수되었습니다."
+    "success": "주문이 접수되었습니다.",
+    "total": "결제 금액"
   },
   "account": {
     "title": "마이페이지",

@@ -120,9 +120,28 @@
         "months": "شهر"
       }
     },
+    "shipping": {
+      "title": "طريقة الشحن",
+      "label": "رسوم الشحن",
+      "free": "مجاني",
+      "freeThreshold": "شحن مجاني للطلبات التي تتجاوز ₺{amount}",
+      "options": {
+        "standard": {
+          "title": "شحن عادي",
+          "description": "يصل خلال 2-3 أيام عمل",
+          "estimate": "2-3 أيام"
+        },
+        "express": {
+          "title": "شحن سريع",
+          "description": "تسليم في اليوم التالي (في المدن الكبرى)",
+          "estimate": "يوم واحد"
+        }
+      }
+    },
     "placeOrder": "تأكيد الطلب",
     "notes": "ملاحظات التسليم",
-    "success": "تم استلام طلبك."
+    "success": "تم استلام طلبك.",
+    "total": "الإجمالي"
   },
   "account": {
     "title": "حسابي",

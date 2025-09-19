@@ -4,7 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
-import { isCurrency } from "@/lib/currency";
+import { isCurrency, type CurrencyCode } from "@/lib/currency";
 
 interface CheckoutAddress {
   id: number;
@@ -43,6 +43,7 @@ export function CheckoutClient({
   const [error, setError] = useState<string | undefined>();
   const [paymentMethod, setPaymentMethod] = useState<"iyzico" | "papara" | "installment">("iyzico");
   const [installmentPlan, setInstallmentPlan] = useState(3);
+  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
   const { currency: displayCurrency, convert } = useCurrency();
 
@@ -51,6 +52,20 @@ export function CheckoutClient({
     const converted = convert(item.price * item.quantity, baseCurrency);
     return acc + converted;
   }, 0);
+
+  const subtotalRaw = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const SHIPPING_THRESHOLD = 500;
+  const SHIPPING_FEE_STANDARD = 29.9;
+  const SHIPPING_FEE_EXPRESS = 49.9;
+  const baseCurrency: CurrencyCode = "TRY";
+  const freeShipping = subtotalRaw >= SHIPPING_THRESHOLD;
+  const shippingFeeValue = freeShipping
+    ? 0
+    : shippingMethod === "express"
+    ? SHIPPING_FEE_EXPRESS
+    : SHIPPING_FEE_STANDARD;
+  const shippingFeeDisplay = convert(shippingFeeValue, baseCurrency);
+  const totalDisplay = subtotalDisplay + shippingFeeDisplay;
 
   const paymentOptions: Array<{
     id: "iyzico" | "papara" | "installment";
@@ -76,6 +91,29 @@ export function CheckoutClient({
     },
   ];
 
+  const shippingOptions: Array<{
+    id: "standard" | "express";
+    title: string;
+    description: string;
+    estimate: string;
+    fee: number;
+  }> = [
+    {
+      id: "standard",
+      title: t("checkout.shipping.options.standard.title"),
+      description: t("checkout.shipping.options.standard.description"),
+      estimate: t("checkout.shipping.options.standard.estimate"),
+      fee: SHIPPING_FEE_STANDARD,
+    },
+    {
+      id: "express",
+      title: t("checkout.shipping.options.express.title"),
+      description: t("checkout.shipping.options.express.description"),
+      estimate: t("checkout.shipping.options.express.estimate"),
+      fee: SHIPPING_FEE_EXPRESS,
+    },
+  ];
+
   const handleSubmit = async (event: FormEvent) => {
     event.preventDefault();
     if (!selectedAddress) {
@@ -94,6 +132,7 @@ export function CheckoutClient({
           notes,
           paymentMethod,
           installmentPlan: paymentMethod === "installment" ? installmentPlan : undefined,
+          shippingMethod,
         }),
       });
       const json = await response.json();
@@ -196,6 +235,47 @@ export function CheckoutClient({
             className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
           />
         </section>
+        <section className="space-y-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.shipping.title")}</h2>
+          <p className="text-xs text-slate-500 dark:text-slate-300">
+            {t("checkout.shipping.freeThreshold", { amount: SHIPPING_THRESHOLD })}
+          </p>
+          <div className="flex flex-col gap-3">
+            {shippingOptions.map((option) => (
+              <label
+                key={option.id}
+                className={`flex cursor-pointer flex-col gap-1 rounded-2xl border px-4 py-3 text-sm transition ${
+                  shippingMethod === option.id
+                    ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20"
+                    : "border-slate-200 hover:border-emerald-300 dark:border-slate-700"
+                }`}
+              >
+                <div className="flex items-center justify-between gap-2">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="radio"
+                      name="shipping-method"
+                      checked={shippingMethod === option.id}
+                      onChange={() => setShippingMethod(option.id)}
+                    />
+                    <span className="font-semibold text-slate-900 dark:text-white">{option.title}</span>
+                  </div>
+                  <span className="text-xs text-slate-500 dark:text-slate-300">{option.estimate}</span>
+                </div>
+                <p className="text-xs text-slate-500 dark:text-slate-300">{option.description}</p>
+                {!freeShipping ? (
+                  <p className="text-xs font-semibold text-emerald-600">
+                    {convert(option.fee, baseCurrency).toLocaleString(activeLocale, {
+                      style: "currency",
+                      currency: displayCurrency,
+                      minimumFractionDigits: 0,
+                    })}
+                  </p>
+                ) : null}
+              </label>
+            ))}
+          </div>
+        </section>
       </div>
       <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
         <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.payment")}</h2>
@@ -281,6 +361,28 @@ export function CheckoutClient({
           <span>{t("cart.subtotal")}</span>
           <span>
             {subtotalDisplay.toLocaleString(activeLocale, {
+              style: "currency",
+              currency: displayCurrency,
+              minimumFractionDigits: 0,
+            })}
+          </span>
+        </div>
+        <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
+          <span>{t("checkout.shipping.label")}</span>
+          <span className="font-semibold text-slate-900 dark:text-white">
+            {shippingFeeValue === 0
+              ? t("checkout.shipping.free")
+              : shippingFeeDisplay.toLocaleString(activeLocale, {
+                  style: "currency",
+                  currency: displayCurrency,
+                  minimumFractionDigits: 0,
+                })}
+          </span>
+        </div>
+        <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
+          <span>{t("checkout.total")}</span>
+          <span>
+            {totalDisplay.toLocaleString(activeLocale, {
               style: "currency",
               currency: displayCurrency,
               minimumFractionDigits: 0,

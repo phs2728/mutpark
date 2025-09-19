@@ -120,9 +120,28 @@
         "months": "ay"
       }
     },
+    "shipping": {
+      "title": "Teslimat",
+      "label": "Kargo",
+      "free": "Ücretsiz",
+      "freeThreshold": "₺{amount} ve üzeri siparişlerde ücretsiz kargo",
+      "options": {
+        "standard": {
+          "title": "Standart kargo",
+          "description": "2-3 iş günü içinde teslim",
+          "estimate": "2-3 gün"
+        },
+        "express": {
+          "title": "Hızlı teslimat",
+          "description": "Büyük şehirlerde ertesi gün teslim",
+          "estimate": "1 gün"
+        }
+      }
+    },
     "placeOrder": "Siparişi Tamamla",
     "notes": "Teslimat notu",
-    "success": "Siparişiniz alındı."
+    "success": "Siparişiniz alındı.",
+    "total": "Toplam"
   },
   "account": {
     "title": "Hesabım",

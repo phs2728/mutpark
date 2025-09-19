@@ -120,9 +120,28 @@
         "months": "months"
       }
     },
+    "shipping": {
+      "title": "Shipping",
+      "label": "Shipping",
+      "free": "Free",
+      "freeThreshold": "Free shipping on orders over ₺{amount}",
+      "options": {
+        "standard": {
+          "title": "Standard shipping",
+          "description": "Delivered in 2-3 business days",
+          "estimate": "2-3 days"
+        },
+        "express": {
+          "title": "Express shipping",
+          "description": "Next-day delivery in major cities",
+          "estimate": "1 day"
+        }
+      }
+    },
     "placeOrder": "Place Order",
     "notes": "Delivery notes",
-    "success": "Your order has been received."
+    "success": "Your order has been received.",
+    "total": "Order total"
   },
   "account": {
     "title": "My Account",

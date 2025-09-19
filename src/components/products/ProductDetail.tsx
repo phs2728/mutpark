@@ -7,6 +7,7 @@ import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { useMemo, useState, type ReactNode } from "react";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { isCurrency } from "@/lib/currency";
+import { resolveImageUrl } from "@/lib/imagekit";
 
 interface ProductDetailProps {
   locale: string;
@@ -150,14 +151,16 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
     [t],
   );
 
+  const mainImage = resolveImageUrl(product.imageUrl, { width: 800, quality: 85 });
+
   return (
     <div className="space-y-12">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
         <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <div className="relative h-96 w-full bg-slate-100 dark:bg-slate-800">
-            {product.imageUrl ? (
+            {mainImage ? (
               <Image
-                src={product.imageUrl}
+                src={mainImage}
                 alt={product.name}
                 fill
                 sizes="(min-width: 1024px) 50vw, 100vw"

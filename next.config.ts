@@ -11,7 +11,14 @@ const nextConfig: NextConfig = {
         protocol: "https",
         hostname: "cdn.mutpark.com",
       },
+      {
+        protocol: "https",
+        hostname: "ik.imagekit.io",
+      },
     ],
+  },
+  env: {
+    NEXT_PUBLIC_IMAGEKIT_URL_ENDPOINT: process.env.IMAGEKIT_URL_ENDPOINT,
   },
 };
 

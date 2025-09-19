@@ -8,6 +8,7 @@ import { useCartStore } from "@/hooks/useCartStore";
 import { useI18n } from "@/providers/I18nProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { isCurrency } from "@/lib/currency";
+import { resolveImageUrl } from "@/lib/imagekit";
 
 export function CartClient({ locale }: { locale: string }) {
   const router = useRouter();
@@ -52,15 +53,19 @@ export function CartClient({ locale }: { locale: string }) {
             className="flex flex-col gap-4 rounded-3xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900 sm:flex-row"
           >
             <div className="relative h-32 w-32 flex-shrink-0 overflow-hidden rounded-2xl bg-slate-100 dark:bg-slate-800">
-              {item.product.imageUrl ? (
-                <Image
-                  src={item.product.imageUrl}
-                  alt={item.product.name}
-                  fill
-                  sizes="128px"
-                  className="object-cover"
-                />
-              ) : null}
+              {(() => {
+                const imageSrc = resolveImageUrl(item.product.imageUrl, { width: 320, height: 320, quality: 80 });
+                if (!imageSrc) return null;
+                return (
+                  <Image
+                    src={imageSrc}
+                    alt={item.product.name}
+                    fill
+                    sizes="128px"
+                    className="object-cover"
+                  />
+                );
+              })()}
             </div>
             <div className="flex flex-1 flex-col justify-between gap-3">
               <div className="flex items-start justify-between gap-3">

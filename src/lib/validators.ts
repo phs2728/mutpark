@@ -53,6 +53,7 @@ export const createOrderSchema = z.object({
   notes: z.string().optional(),
   paymentMethod: z.enum(["iyzico", "papara", "installment"]).default("iyzico"),
   installmentPlan: z.number().int().positive().optional(),
+  shippingMethod: z.enum(["standard", "express"]).default("standard"),
 });
 
 export const upsertAddressSchema = z.object({
