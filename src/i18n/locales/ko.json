@@ -9,7 +9,8 @@
     "login": "로그인",
     "logout": "로그아웃",
     "language": "언어",
-    "admin": "관리자"
+    "admin": "관리자",
+    "currency": "통화"
   },
   "hero": {
     "title": "터키에서 만나는 정통 한국 식재료",

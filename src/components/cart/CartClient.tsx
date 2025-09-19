@@ -6,15 +6,23 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useI18n } from "@/providers/I18nProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
+import { isCurrency } from "@/lib/currency";
 
 export function CartClient({ locale }: { locale: string }) {
   const router = useRouter();
-  const { t } = useI18n();
+  const { t, locale: activeLocale } = useI18n();
   const items = useCartStore((state) => state.items);
-  const subtotal = useCartStore((state) => state.subtotal);
   const fetchCart = useCartStore((state) => state.fetchCart);
   const updateItem = useCartStore((state) => state.updateItem);
   const removeItem = useCartStore((state) => state.removeItem);
+  const { currency: displayCurrency, convert } = useCurrency();
+
+  const subtotalDisplay = items.reduce((acc, item) => {
+    const baseCurrency = isCurrency(item.product.currency) ? item.product.currency : displayCurrency;
+    const lineAmount = convert(item.product.price * item.quantity, baseCurrency);
+    return acc + lineAmount;
+  }, 0);
 
   useEffect(() => {
     fetchCart().catch(() => undefined);
@@ -64,11 +72,17 @@ export function CartClient({ locale }: { locale: string }) {
                     {item.product.name}
                   </Link>
                   <p className="text-sm text-slate-500 dark:text-slate-300">
-                    {item.product.price.toLocaleString(undefined, {
-                      style: "currency",
-                      currency: item.product.currency,
-                      minimumFractionDigits: 0,
-                    })}
+                    {(() => {
+                      const baseCurrency = isCurrency(item.product.currency)
+                        ? item.product.currency
+                        : displayCurrency;
+                      const linePrice = convert(item.product.price, baseCurrency);
+                      return linePrice.toLocaleString(activeLocale, {
+                        style: "currency",
+                        currency: displayCurrency,
+                        minimumFractionDigits: 0,
+                      });
+                    })()}
                   </p>
                 </div>
                 <button
@@ -100,7 +114,11 @@ export function CartClient({ locale }: { locale: string }) {
         <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
           <span>{t("cart.subtotal")}</span>
           <span className="text-lg font-semibold text-emerald-600">
-            {subtotal.toLocaleString(undefined, { style: "currency", currency: "TRY", minimumFractionDigits: 0 })}
+            {subtotalDisplay.toLocaleString(activeLocale, {
+              style: "currency",
+              currency: displayCurrency,
+              minimumFractionDigits: 0,
+            })}
           </span>
         </div>
         <button

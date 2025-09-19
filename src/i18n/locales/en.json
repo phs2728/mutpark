@@ -9,7 +9,8 @@
     "login": "Sign In",
     "logout": "Sign Out",
     "language": "Language",
-    "admin": "Admin"
+    "admin": "Admin",
+    "currency": "Currency"
   },
   "hero": {
     "title": "Authentic Korean flavors in Türkiye",

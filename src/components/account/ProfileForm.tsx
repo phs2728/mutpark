@@ -4,6 +4,7 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
 import { Locale, locales } from "@/i18n/config";
+import { getSupportedCurrencies, getCurrencyLabel, isCurrency } from "@/lib/currency";
 
 const localeOptions: Record<Locale, string> = {
   ko: "한국어",
@@ -85,11 +86,20 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
         </div>
         <div>
           <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">Currency</label>
-          <input
+          <select
             value={profile.currency}
-            onChange={(event) => setProfile((prev) => ({ ...prev, currency: event.target.value }))}
+            onChange={(event) => {
+              const value = event.target.value;
+              setProfile((prev) => ({ ...prev, currency: isCurrency(value) ? value : prev.currency }));
+            }}
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
-          />
+          >
+            {getSupportedCurrencies().map((code) => (
+              <option key={code} value={code}>
+                {getCurrencyLabel(code)}
+              </option>
+            ))}
+          </select>
         </div>
       </div>
       <button

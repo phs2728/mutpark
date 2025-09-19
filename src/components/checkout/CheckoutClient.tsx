@@ -3,6 +3,8 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
+import { useCurrency } from "@/providers/CurrencyProvider";
+import { isCurrency } from "@/lib/currency";
 
 interface CheckoutAddress {
   id: number;
@@ -31,7 +33,7 @@ export function CheckoutClient({
   addresses: CheckoutAddress[];
   items: CheckoutItem[];
 }) {
-  const { t } = useI18n();
+  const { t, locale: activeLocale } = useI18n();
   const router = useRouter();
   const [selectedAddress, setSelectedAddress] = useState(() =>
     addresses.find((address) => address.isDefault)?.id ?? addresses[0]?.id ?? 0,
@@ -42,7 +44,13 @@ export function CheckoutClient({
   const [paymentMethod, setPaymentMethod] = useState<"iyzico" | "papara" | "installment">("iyzico");
   const [installmentPlan, setInstallmentPlan] = useState(3);
 
-  const subtotal = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
+  const { currency: displayCurrency, convert } = useCurrency();
+
+  const subtotalDisplay = items.reduce((acc, item) => {
+    const baseCurrency = isCurrency(item.currency) ? item.currency : displayCurrency;
+    const converted = convert(item.price * item.quantity, baseCurrency);
+    return acc + converted;
+  }, 0);
 
   const paymentOptions: Array<{
     id: "iyzico" | "papara" | "installment";
@@ -198,11 +206,15 @@ export function CheckoutClient({
                 {item.name} × {item.quantity}
               </span>
               <span className="font-semibold">
-                {(item.price * item.quantity).toLocaleString(undefined, {
-                  style: "currency",
-                  currency: item.currency,
-                  minimumFractionDigits: 0,
-                })}
+                {(() => {
+                  const baseCurrency = isCurrency(item.currency) ? item.currency : displayCurrency;
+                  const value = convert(item.price * item.quantity, baseCurrency);
+                  return value.toLocaleString(activeLocale, {
+                    style: "currency",
+                    currency: displayCurrency,
+                    minimumFractionDigits: 0,
+                  });
+                })()}
               </span>
             </div>
           ))}
@@ -268,9 +280,9 @@ export function CheckoutClient({
         <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
           <span>{t("cart.subtotal")}</span>
           <span>
-            {subtotal.toLocaleString(undefined, {
+            {subtotalDisplay.toLocaleString(activeLocale, {
               style: "currency",
-              currency: items[0]?.currency ?? "TRY",
+              currency: displayCurrency,
               minimumFractionDigits: 0,
             })}
           </span>
