@@ -25,9 +25,13 @@ export async function GET(request: NextRequest) {
       ];
     }
 
-    if (filters.category) {
-      where.category = filters.category;
-    }
+  if (filters.category) {
+    where.category = filters.category;
+  }
+
+  if (filters.brand) {
+    where.brand = filters.brand;
+  }
 
     if (filters.halal !== undefined) {
       where.halalCertified = filters.halal;

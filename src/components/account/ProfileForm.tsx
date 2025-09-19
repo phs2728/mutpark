@@ -3,6 +3,15 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
+import { Locale, locales } from "@/i18n/config";
+
+const localeOptions: Record<Locale, string> = {
+  ko: "한국어",
+  tr: "Türkçe",
+  en: "English",
+  ru: "Русский",
+  ar: "العربية",
+};
 
 interface Profile {
   name: string;
@@ -67,8 +76,11 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
             onChange={(event) => setProfile((prev) => ({ ...prev, locale: event.target.value }))}
             className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
           >
-            <option value="ko">한국어</option>
-            <option value="tr">Türkçe</option>
+            {locales.map((locale) => (
+              <option key={locale} value={locale}>
+                {localeOptions[locale] ?? locale.toUpperCase()}
+              </option>
+            ))}
           </select>
         </div>
         <div>

@@ -22,8 +22,10 @@
     "filters": {
       "search": "Ürün ara",
       "category": "Kategori",
+      "brand": "Marka",
       "halal": "Helal sertifikalı",
       "spicy": "Acı tat",
+      "all": "Tümü",
       "apply": "Filtrele",
       "reset": "Sıfırla"
     },

@@ -1,0 +1,140 @@
+{
+  "navigation": {
+    "home": "Home",
+    "products": "Products",
+    "recipes": "Recipes",
+    "community": "Community",
+    "cart": "Cart",
+    "account": "My Account",
+    "login": "Sign In",
+    "logout": "Sign Out",
+    "language": "Language",
+    "admin": "Admin"
+  },
+  "hero": {
+    "title": "Authentic Korean flavors in Türkiye",
+    "subtitle": "Discover halal-certified Korean groceries and recipes with MutPark.",
+    "ctaShop": "Start Shopping",
+    "ctaRecipes": "View Recipes"
+  },
+  "products": {
+    "featured": "Featured Products",
+    "filters": {
+      "search": "Search products",
+      "category": "Category",
+      "brand": "Brand",
+      "halal": "Halal certified",
+      "spicy": "Spicy",
+      "all": "All",
+      "apply": "Apply",
+      "reset": "Reset"
+    },
+    "price": "Price",
+    "stock": "Stock",
+    "halal": "Halal",
+    "spiceLevel": "Spice level",
+    "addToCart": "Add to Cart",
+    "viewDetails": "View Details",
+    "empty": "No products have been added yet."
+  },
+  "community": {
+    "placeholder": "Community features are coming soon. Stay tuned for recipe sharing and reviews!"
+  },
+  "recipes": {
+    "placeholder": "Localized Korean recipes for Türkiye are coming soon."
+  },
+  "productDetail": {
+    "ingredients": "Ingredients",
+    "nutrition": "Nutrition Facts",
+    "recipes": "Recipes",
+    "actions": {
+      "addToCart": "Add to Cart",
+      "checkout": "Buy Now"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Sign In",
+      "email": "Email",
+      "password": "Password",
+      "submit": "Sign In",
+      "withGoogle": "Sign in with Google",
+      "withKakao": "Sign in with Kakao",
+      "registerLink": "Create account"
+    },
+    "register": {
+      "title": "Create Account",
+      "name": "Name",
+      "phone": "Phone",
+      "confirmPassword": "Confirm password",
+      "passwordMismatch": "Passwords do not match.",
+      "submit": "Sign Up",
+      "loginLink": "Already have an account?"
+    }
+  },
+  "cart": {
+    "title": "Shopping Cart",
+    "empty": "Your cart is empty.",
+    "subtotal": "Subtotal",
+    "checkout": "Checkout",
+    "continue": "Continue Shopping",
+    "quantity": "Quantity",
+    "remove": "Remove"
+  },
+  "checkout": {
+    "title": "Checkout",
+    "address": "Shipping Address",
+    "selectAddress": "Select a delivery address",
+    "addAddress": "Add new address",
+    "payment": "Payment",
+    "placeOrder": "Place Order",
+    "notes": "Delivery notes",
+    "success": "Your order has been received."
+  },
+  "account": {
+    "title": "My Account",
+    "profile": "Profile",
+    "orders": "Orders",
+    "addresses": "Addresses",
+    "logout": "Sign Out",
+    "update": "Update",
+    "viewAll": "View All",
+    "addressForm": {
+      "title": "New Address",
+      "name": "Name",
+      "phone": "Phone",
+      "city": "City",
+      "district": "District",
+      "street": "Street",
+      "setDefault": "Set as default",
+      "submit": "Add",
+      "defaultBadge": "Default",
+      "setAsDefault": "Make default",
+      "delete": "Delete"
+    },
+    "orderStatus": {
+      "PENDING": "Order received",
+      "AWAITING_PAYMENT": "Awaiting payment",
+      "PAID": "Payment complete",
+      "PROCESSING": "Processing",
+      "SHIPPED": "Shipped",
+      "DELIVERED": "Delivered",
+      "CANCELLED": "Cancelled"
+    }
+  },
+  "notifications": {
+    "addedToCart": "Added to cart.",
+    "cartUpdated": "Cart updated.",
+    "loginRequired": "Please sign in.",
+    "error": "Something went wrong. Please try again."
+  },
+  "footer": {
+    "tagline": "MutPark – Korean flavors in Türkiye",
+    "customerCenter": "Customer Service",
+    "email": "Email",
+    "phone": "Phone",
+    "hours": "Hours",
+    "policy": "Terms of Use",
+    "privacy": "Privacy Policy"
+  }
+}

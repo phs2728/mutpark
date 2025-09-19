@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { defaultLocale, locales } from "@/i18n/config";
 
 export const registerUserSchema = z
   .object({
@@ -7,7 +8,7 @@ export const registerUserSchema = z
     confirmPassword: z.string().min(8),
     name: z.string().min(2),
     phone: z.string().optional(),
-    locale: z.enum(["ko", "tr"]).default("ko"),
+    locale: z.enum(locales).default(defaultLocale),
   })
   .refine((data) => data.password === data.confirmPassword, {
     message: "Passwords do not match",
@@ -24,6 +25,7 @@ export const productFilterSchema = z.object({
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(50).default(12),
   category: z.string().optional(),
+  brand: z.string().optional(),
   halal: z
     .union([z.string(), z.boolean()])
     .transform((val) => (typeof val === "boolean" ? val : val === "true"))
@@ -67,7 +69,7 @@ export const upsertAddressSchema = z.object({
 export const updateProfileSchema = z.object({
   name: z.string().min(2).optional(),
   phone: z.string().optional(),
-  locale: z.enum(["ko", "tr"]).optional(),
+  locale: z.enum(locales).optional(),
   currency: z.string().optional(),
 });
 

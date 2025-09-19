@@ -1,0 +1,140 @@
+{
+  "navigation": {
+    "home": "Главная",
+    "products": "Товары",
+    "recipes": "Рецепты",
+    "community": "Сообщество",
+    "cart": "Корзина",
+    "account": "Мой аккаунт",
+    "login": "Войти",
+    "logout": "Выйти",
+    "language": "Язык",
+    "admin": "Админ"
+  },
+  "hero": {
+    "title": "Аутентичные корейские вкусы в Турции",
+    "subtitle": "MutPark — ваш путь к халяльной корейской еде и рецептам.",
+    "ctaShop": "Начать покупки",
+    "ctaRecipes": "Смотреть рецепты"
+  },
+  "products": {
+    "featured": "Избранные товары",
+    "filters": {
+      "search": "Поиск товаров",
+      "category": "Категория",
+      "brand": "Бренд",
+      "halal": "Халяль",
+      "spicy": "Острое",
+      "all": "Все",
+      "apply": "Применить",
+      "reset": "Сбросить"
+    },
+    "price": "Цена",
+    "stock": "Наличие",
+    "halal": "Халяль",
+    "spiceLevel": "Острота",
+    "addToCart": "В корзину",
+    "viewDetails": "Подробнее",
+    "empty": "Товары пока не добавлены."
+  },
+  "community": {
+    "placeholder": "Функции сообщества скоро появятся. Делитесь рецептами и отзывами!"
+  },
+  "recipes": {
+    "placeholder": "Скоро здесь будут адаптированные корейские рецепты."
+  },
+  "productDetail": {
+    "ingredients": "Ингредиенты",
+    "nutrition": "Пищевая ценность",
+    "recipes": "Рецепты",
+    "actions": {
+      "addToCart": "В корзину",
+      "checkout": "Купить сейчас"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "Войти",
+      "email": "Email",
+      "password": "Пароль",
+      "submit": "Войти",
+      "withGoogle": "Войти через Google",
+      "withKakao": "Войти через Kakao",
+      "registerLink": "Зарегистрироваться"
+    },
+    "register": {
+      "title": "Регистрация",
+      "name": "Имя",
+      "phone": "Телефон",
+      "confirmPassword": "Подтвердите пароль",
+      "passwordMismatch": "Пароли не совпадают.",
+      "submit": "Создать аккаунт",
+      "loginLink": "Уже есть аккаунт?"
+    }
+  },
+  "cart": {
+    "title": "Корзина",
+    "empty": "Ваша корзина пуста.",
+    "subtotal": "Итого",
+    "checkout": "Оформить заказ",
+    "continue": "Продолжить покупки",
+    "quantity": "Количество",
+    "remove": "Удалить"
+  },
+  "checkout": {
+    "title": "Оформление заказа",
+    "address": "Адрес доставки",
+    "selectAddress": "Выберите адрес доставки",
+    "addAddress": "Добавить адрес",
+    "payment": "Оплата",
+    "placeOrder": "Подтвердить заказ",
+    "notes": "Примечания для доставки",
+    "success": "Ваш заказ принят."
+  },
+  "account": {
+    "title": "Мой аккаунт",
+    "profile": "Профиль",
+    "orders": "Заказы",
+    "addresses": "Адреса",
+    "logout": "Выйти",
+    "update": "Обновить",
+    "viewAll": "Показать всё",
+    "addressForm": {
+      "title": "Новый адрес",
+      "name": "Имя",
+      "phone": "Телефон",
+      "city": "Город",
+      "district": "Район",
+      "street": "Адрес",
+      "setDefault": "Сделать основным",
+      "submit": "Добавить",
+      "defaultBadge": "Основной",
+      "setAsDefault": "Сделать основным",
+      "delete": "Удалить"
+    },
+    "orderStatus": {
+      "PENDING": "Заказ получен",
+      "AWAITING_PAYMENT": "Ожидает оплаты",
+      "PAID": "Оплачен",
+      "PROCESSING": "В обработке",
+      "SHIPPED": "Отправлен",
+      "DELIVERED": "Доставлен",
+      "CANCELLED": "Отменен"
+    }
+  },
+  "notifications": {
+    "addedToCart": "Добавлено в корзину.",
+    "cartUpdated": "Корзина обновлена.",
+    "loginRequired": "Пожалуйста, войдите.",
+    "error": "Произошла ошибка. Попробуйте снова."
+  },
+  "footer": {
+    "tagline": "MutPark — корейские вкусы в Турции",
+    "customerCenter": "Служба поддержки",
+    "email": "Email",
+    "phone": "Телефон",
+    "hours": "Часы работы",
+    "policy": "Условия использования",
+    "privacy": "Политика конфиденциальности"
+  }
+}

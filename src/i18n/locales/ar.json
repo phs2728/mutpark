@@ -1,0 +1,140 @@
+{
+  "navigation": {
+    "home": "الصفحة الرئيسية",
+    "products": "المنتجات",
+    "recipes": "الوصفات",
+    "community": "المجتمع",
+    "cart": "السلة",
+    "account": "حسابي",
+    "login": "تسجيل الدخول",
+    "logout": "تسجيل الخروج",
+    "language": "اللغة",
+    "admin": "المشرف"
+  },
+  "hero": {
+    "title": "نكهات كورية أصلية في تركيا",
+    "subtitle": "اكتشف منتجات ووصفات كورية معتمدة حلال مع موت بارك.",
+    "ctaShop": "ابدأ التسوق",
+    "ctaRecipes": "عرض الوصفات"
+  },
+  "products": {
+    "featured": "منتجات مميزة",
+    "filters": {
+      "search": "ابحث عن المنتجات",
+      "category": "الفئة",
+      "brand": "العلامة التجارية",
+      "halal": "معتمد حلال",
+      "spicy": "حار",
+      "all": "الكل",
+      "apply": "تطبيق",
+      "reset": "إعادة تعيين"
+    },
+    "price": "السعر",
+    "stock": "المخزون",
+    "halal": "حلال",
+    "spiceLevel": "درجة الحدة",
+    "addToCart": "أضف إلى السلة",
+    "viewDetails": "عرض التفاصيل",
+    "empty": "لم يتم إضافة منتجات بعد."
+  },
+  "community": {
+    "placeholder": "ميزات المجتمع ستتوفر قريبًا. ترقبوا مشاركة الوصفات والتقييمات!"
+  },
+  "recipes": {
+    "placeholder": "وصفات كورية مخصصة لتركيا ستتوفر قريبًا."
+  },
+  "productDetail": {
+    "ingredients": "المكونات",
+    "nutrition": "القيمة الغذائية",
+    "recipes": "الوصفات",
+    "actions": {
+      "addToCart": "أضف إلى السلة",
+      "checkout": "اشترِ الآن"
+    }
+  },
+  "auth": {
+    "login": {
+      "title": "تسجيل الدخول",
+      "email": "البريد الإلكتروني",
+      "password": "كلمة المرور",
+      "submit": "تسجيل الدخول",
+      "withGoogle": "تسجيل الدخول باستخدام Google",
+      "withKakao": "تسجيل الدخول باستخدام Kakao",
+      "registerLink": "إنشاء حساب"
+    },
+    "register": {
+      "title": "إنشاء حساب",
+      "name": "الاسم",
+      "phone": "الهاتف",
+      "confirmPassword": "تأكيد كلمة المرور",
+      "passwordMismatch": "كلمتا المرور غير متطابقتين.",
+      "submit": "تسجيل",
+      "loginLink": "لديك حساب بالفعل؟"
+    }
+  },
+  "cart": {
+    "title": "سلة التسوق",
+    "empty": "سلتك فارغة.",
+    "subtotal": "المجموع الفرعي",
+    "checkout": "إتمام الشراء",
+    "continue": "متابعة التسوق",
+    "quantity": "الكمية",
+    "remove": "إزالة"
+  },
+  "checkout": {
+    "title": "الدفع",
+    "address": "عنوان الشحن",
+    "selectAddress": "اختر عنوان التسليم",
+    "addAddress": "إضافة عنوان جديد",
+    "payment": "الدفع",
+    "placeOrder": "تأكيد الطلب",
+    "notes": "ملاحظات التسليم",
+    "success": "تم استلام طلبك."
+  },
+  "account": {
+    "title": "حسابي",
+    "profile": "الملف الشخصي",
+    "orders": "الطلبات",
+    "addresses": "العناوين",
+    "logout": "تسجيل الخروج",
+    "update": "تحديث",
+    "viewAll": "عرض الكل",
+    "addressForm": {
+      "title": "عنوان جديد",
+      "name": "الاسم",
+      "phone": "الهاتف",
+      "city": "المدينة",
+      "district": "الحي",
+      "street": "العنوان",
+      "setDefault": "تعيين كافتراضي",
+      "submit": "إضافة",
+      "defaultBadge": "افتراضي",
+      "setAsDefault": "اجعله افتراضيًا",
+      "delete": "حذف"
+    },
+    "orderStatus": {
+      "PENDING": "تم استلام الطلب",
+      "AWAITING_PAYMENT": "في انتظار الدفع",
+      "PAID": "تم الدفع",
+      "PROCESSING": "قيد التجهيز",
+      "SHIPPED": "تم الشحن",
+      "DELIVERED": "تم التسليم",
+      "CANCELLED": "أُلغي"
+    }
+  },
+  "notifications": {
+    "addedToCart": "تمت الإضافة إلى السلة.",
+    "cartUpdated": "تم تحديث السلة.",
+    "loginRequired": "يرجى تسجيل الدخول.",
+    "error": "حدث خطأ ما. حاول مرة أخرى."
+  },
+  "footer": {
+    "tagline": "موت بارك – النكهات الكورية في تركيا",
+    "customerCenter": "خدمة العملاء",
+    "email": "البريد الإلكتروني",
+    "phone": "الهاتف",
+    "hours": "ساعات العمل",
+    "policy": "شروط الاستخدام",
+    "privacy": "سياسة الخصوصية"
+  }
+}

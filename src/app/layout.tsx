@@ -1,6 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { getDirection, isLocale } from "@/i18n/config";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -30,10 +31,12 @@ export default async function RootLayout({
   params: Promise<{ locale?: string }>;
 }) {
   const resolvedParams = await params;
-  const locale = resolvedParams?.locale ?? "ko";
+  const localeParam = resolvedParams?.locale;
+  const locale = localeParam && isLocale(localeParam) ? localeParam : "ko";
+  const direction = getDirection(locale);
 
   return (
-    <html lang={locale} suppressHydrationWarning>
+    <html lang={locale} dir={direction} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100`}>
         {children}
       </body>

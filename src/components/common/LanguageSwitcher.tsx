@@ -1,8 +1,16 @@
 "use client";
 
 import { usePathname, useRouter } from "next/navigation";
-import { locales } from "@/i18n/config";
+import { Locale, locales } from "@/i18n/config";
 import { useI18n } from "@/providers/I18nProvider";
+
+const labels: Record<Locale, string> = {
+  ko: "한국어",
+  tr: "Türkçe",
+  en: "English",
+  ru: "Русский",
+  ar: "العربية",
+};
 
 export function LanguageSwitcher() {
   const router = useRouter();
@@ -40,7 +48,7 @@ export function LanguageSwitcher() {
               : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
           }`}
         >
-          {loc.toUpperCase()}
+          {labels[loc] ?? loc.toUpperCase()}
         </button>
       ))}
     </div>
