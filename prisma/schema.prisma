@@ -58,6 +58,9 @@ model User {
   recipeLikes    RecipeLike[]
   notifications  Notification[]
   preferences    UserPreference?
+  communityPosts CommunityPost[]
+  communityPostLikes CommunityPostLike[]
+  communityPostComments CommunityPostComment[]
 }
 
 model SocialAccount {
@@ -96,6 +99,7 @@ model Product {
   orderItems      OrderItem[]
   reviews         ProductReview[]
   recipeIngredients RecipeIngredient[]
+  communityPosts  CommunityPost[]
 }
 
 model ProductTranslation {
@@ -291,6 +295,7 @@ model RecipePost {
   author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
   ingredients RecipeIngredient[]
   likes       RecipeLike[]
+  communityPosts CommunityPost[]
 }
 
 model RecipeIngredient {
@@ -391,4 +396,66 @@ model UserPreference {
   updatedAt               DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+enum PostType {
+  RECIPE
+  REVIEW
+  TIP
+}
+
+model CommunityPost {
+  id          Int          @id @default(autoincrement())
+  authorId    Int
+  type        PostType
+  title       String
+  content     String       @db.Text
+  imageUrl    String?
+  tags        Json?
+  likesCount  Int          @default(0)
+  commentsCount Int        @default(0)
+  productId   Int?
+  recipeId    Int?
+  publishedAt DateTime?
+  status      PostStatus   @default(PUBLISHED)
+  metadata    Json?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
+
+  author   User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  product  Product?            @relation(fields: [productId], references: [id])
+  recipe   RecipePost?         @relation(fields: [recipeId], references: [id])
+  likes    CommunityPostLike[]
+  comments CommunityPostComment[]
+
+  @@index([type])
+  @@index([createdAt])
+  @@index([authorId])
+}
+
+model CommunityPostLike {
+  id     Int  @id @default(autoincrement())
+  postId Int
+  userId Int
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+model CommunityPostComment {
+  id       Int    @id @default(autoincrement())
+  postId   Int
+  userId   Int
+  parentId Int?
+  content  String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  post    CommunityPost         @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  CommunityPostComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies CommunityPostComment[] @relation("CommentReplies")
 }

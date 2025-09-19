@@ -5,7 +5,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/providers/I18nProvider";
 import { resolveImageUrl } from "@/lib/imagekit";
-import { formatCurrency, DEFAULT_CURRENCY } from "@/lib/currency";
 
 interface CommunityPost {
   id: number;
@@ -14,28 +13,22 @@ interface CommunityPost {
   content: string;
   imageUrl?: string | null;
   createdAt: string;
+  publishedAt?: string | null;
   author: {
-    id: number;
     name: string;
-    avatar?: string | null;
   };
-  likes: number;
-  comments: number;
-  isLiked: boolean;
+  likesCount: number;
+  commentsCount: number;
+  isLiked?: boolean;
   recipe?: {
     id: number;
-    slug: string;
-    difficulty: "EASY" | "MEDIUM" | "HARD";
-    cookingTime: number;
-    servings: number;
-  };
+    title: string;
+  } | null;
   product?: {
     id: number;
-    slug: string;
     baseName: string;
-    price: number;
     imageUrl?: string | null;
-  };
+  } | null;
   tags: string[];
 }
 
@@ -50,79 +43,7 @@ const postTypeColors = {
   tip: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
 };
 
-const difficultyColors = {
-  EASY: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
-  MEDIUM: "bg-yellow-100 text-yellow-700 dark:bg-yellow-900/30 dark:text-yellow-300",
-  HARD: "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300",
-};
 
-// Mock data for now - replace with API call
-const mockPosts: CommunityPost[] = [
-    {
-      id: 1,
-      type: "recipe",
-      title: "터키에서 만드는 정통 김치찌개",
-      content: "터키에서 구할 수 있는 재료들로 맛있는 김치찌개를 만드는 방법을 공유해요! 현지 슈퍼마켓에서 쉽게 찾을 수 있는 재료들을 사용했습니다.",
-      imageUrl: "/recipe-kimchi-jjigae.jpg",
-      createdAt: "2025-01-15T10:30:00Z",
-      author: {
-        id: 1,
-        name: "김터키",
-        avatar: "/avatar-1.jpg",
-      },
-      likes: 24,
-      comments: 8,
-      isLiked: false,
-      recipe: {
-        id: 1,
-        slug: "kimchi-jjigae-turkey",
-        difficulty: "MEDIUM",
-        cookingTime: 45,
-        servings: 4,
-      },
-      tags: ["김치찌개", "터키현지화", "쉬운레시피"],
-    },
-    {
-      id: 2,
-      type: "review",
-      title: "신라면 블랙 후기",
-      content: "드디어 찾았던 신라면 블랙! 맛이 정말 진하고 좋아요. 터키에서 이런 맛을 느낄 수 있다니 감동입니다.",
-      imageUrl: "/review-nongshim.jpg",
-      createdAt: "2025-01-14T15:20:00Z",
-      author: {
-        id: 2,
-        name: "이스탄불김씨",
-        avatar: "/avatar-2.jpg",
-      },
-      likes: 15,
-      comments: 12,
-      isLiked: true,
-      product: {
-        id: 5,
-        slug: "nongshim-shin-ramyun-black",
-        baseName: "농심 신라면 블랙",
-        price: 25.90,
-        imageUrl: "/product-shin-black.jpg",
-      },
-      tags: ["라면", "농심", "추천"],
-    },
-    {
-      id: 3,
-      type: "tip",
-      title: "터키에서 한국 재료 구하는 꿀팁",
-      content: "아시안 마켓 외에도 일반 슈퍼마켓에서 구할 수 있는 대체 재료들과 온라인 쇼핑몰 정보를 정리했어요!",
-      createdAt: "2025-01-13T12:45:00Z",
-      author: {
-        id: 3,
-        name: "앙카라한국인",
-        avatar: "/avatar-3.jpg",
-      },
-      likes: 35,
-      comments: 22,
-      isLiked: false,
-      tags: ["꿀팁", "쇼핑", "재료구하기"],
-    },
-  ];
 
 export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
   const { locale: activeLocale } = useI18n();
@@ -130,28 +51,48 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState(filter || "all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+  const [page, setPage] = useState(1);
+  const [hasMore, setHasMore] = useState(true);
 
-  const fetchPosts = useCallback(async () => {
+  const fetchPosts = useCallback(async (pageNumber = 1, append = false) => {
     try {
-      setLoading(true);
-      // Simulate API call
-      await new Promise(resolve => setTimeout(resolve, 500));
-
-      let filteredPosts = mockPosts;
-
-      if (activeFilter !== "all") {
-        filteredPosts = mockPosts.filter(post => post.type === activeFilter);
+      if (!append) {
+        setLoading(true);
       }
 
+      const params = new URLSearchParams();
+      if (activeFilter !== "all") {
+        params.append("type", activeFilter.toUpperCase());
+      }
+      params.append("page", pageNumber.toString());
+      params.append("limit", "10");
+
+      const response = await fetch(`/api/community/posts?${params.toString()}`);
+      if (!response.ok) {
+        throw new Error("Failed to fetch posts");
+      }
+
+      const data = await response.json();
+      let filteredPosts = data.posts || [];
+
+      // Client-side search filtering
       if (searchQuery) {
-        filteredPosts = filteredPosts.filter(post =>
+        filteredPosts = filteredPosts.filter((post: CommunityPost) =>
           post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+          post.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
         );
       }
 
-      setPosts(filteredPosts);
+      if (append) {
+        setPosts(prev => [...prev, ...filteredPosts]);
+      } else {
+        setPosts(filteredPosts);
+        setPage(1);
+      }
+
+      setHasMore(data.pagination.page < data.pagination.pages);
     } catch (error) {
       console.error("Error fetching posts:", error);
     } finally {
@@ -165,19 +106,50 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
 
   const handleLike = async (postId: number) => {
     try {
-      // Simulate API call
+      const response = await fetch(`/api/community/posts/${postId}/like`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ userId: 1 }), // TODO: Get actual user ID from auth context
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to toggle like");
+      }
+
+      const data = await response.json();
+
       setPosts(prev => prev.map(post =>
         post.id === postId
           ? {
               ...post,
-              isLiked: !post.isLiked,
-              likes: post.isLiked ? post.likes - 1 : post.likes + 1
+              isLiked: data.liked,
+              likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
             }
           : post
       ));
     } catch (error) {
       console.error("Error toggling like:", error);
     }
+  };
+
+  const handleCommentToggle = (postId: number) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
+  };
+
+  const handleLoadMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchPosts(nextPage, true);
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -194,12 +166,6 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
     }
   };
 
-  const formatDuration = (minutes: number) => {
-    if (minutes < 60) return `${minutes}분`;
-    const hours = Math.floor(minutes / 60);
-    const mins = minutes % 60;
-    return mins > 0 ? `${hours}시간 ${mins}분` : `${hours}시간`;
-  };
 
   if (loading) {
     return (
@@ -279,21 +245,11 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
               <div className="p-6 pb-4">
                 <div className="flex items-center gap-4 mb-4">
                   <div className="w-12 h-12 rounded-full overflow-hidden border-2 border-slate-200 dark:border-slate-700">
-                    {post.author.avatar ? (
-                      <Image
-                        src={post.author.avatar}
-                        alt={post.author.name}
-                        width={48}
-                        height={48}
-                        className="object-cover"
-                      />
-                    ) : (
-                      <div className="w-full h-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
-                        <span className="text-emerald-600 dark:text-emerald-400 font-medium">
-                          {post.author.name.charAt(0)}
-                        </span>
-                      </div>
-                    )}
+                    <div className="w-full h-full bg-emerald-100 dark:bg-emerald-900 flex items-center justify-center">
+                      <span className="text-emerald-600 dark:text-emerald-400 font-medium">
+                        {post.author.name.charAt(0)}
+                      </span>
+                    </div>
                   </div>
 
                   <div className="flex-1">
@@ -306,7 +262,7 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
                       </span>
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">
-                      {formatTimeAgo(post.createdAt)}
+                      {formatTimeAgo(post.publishedAt || post.createdAt)}
                     </div>
                   </div>
                 </div>
@@ -350,19 +306,13 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
                 <div className="mx-6 mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
                   <div className="flex items-center justify-between">
                     <div className="flex items-center gap-4">
-                      <span className={`px-3 py-1 rounded-full text-sm font-semibold ${difficultyColors[post.recipe.difficulty]}`}>
-                        {post.recipe.difficulty === "EASY" ? "쉬움" : post.recipe.difficulty === "MEDIUM" ? "보통" : "어려움"}
+                      <span className="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
+                        레시피
                       </span>
                       <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {formatDuration(post.recipe.cookingTime)} · {post.recipe.servings}인분
+                        {post.recipe.title}
                       </span>
                     </div>
-                    <Link
-                      href={`/${locale}/recipes/${post.recipe.slug}`}
-                      className="text-emerald-600 hover:text-emerald-700 text-sm font-medium"
-                    >
-                      레시피 보기 →
-                    </Link>
                   </div>
                 </div>
               )}
@@ -389,16 +339,8 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
                     </div>
                     <div className="flex-1">
                       <h5 className="font-medium text-slate-900 dark:text-white">{post.product.baseName}</h5>
-                      <div className="text-emerald-600 font-semibold">
-                        {formatCurrency(post.product.price, DEFAULT_CURRENCY, activeLocale)}
-                      </div>
+                      <span className="text-sm text-slate-600 dark:text-slate-400">관련 상품</span>
                     </div>
-                    <Link
-                      href={`/${locale}/products/${post.product.slug}`}
-                      className="text-blue-600 hover:text-blue-700 text-sm font-medium"
-                    >
-                      상품 보기 →
-                    </Link>
                   </div>
                 </div>
               )}
@@ -423,14 +365,17 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
-                      <span>{post.likes}</span>
+                      <span>{post.likesCount}</span>
                     </button>
 
-                    <button className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors">
+                    <button
+                      onClick={() => handleCommentToggle(post.id)}
+                      className="flex items-center gap-2 text-sm text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors"
+                    >
                       <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8 12h.01M12 12h.01M16 12h.01M21 12c0 4.418-4.03 8-9 8a9.863 9.863 0 01-4.255-.949L3 20l1.395-3.72C3.512 15.042 3 13.574 3 12c0-4.418 4.03-8 9-8s9 3.582 9 8z" />
                       </svg>
-                      <span>{post.comments}</span>
+                      <span>{post.commentsCount}</span>
                     </button>
                   </div>
 
@@ -441,17 +386,33 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
                   </button>
                 </div>
               </div>
+
+              {/* Comments Section */}
+              {expandedComments.has(post.id) && (
+                <div className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
+                  <div className="p-6">
+                    <div className="text-center text-slate-500 dark:text-slate-400 text-sm">
+                      댓글 기능은 개발 중입니다.
+                    </div>
+                  </div>
+                </div>
+              )}
             </article>
           ))}
         </div>
       )}
 
       {/* Load More Button */}
-      <div className="text-center">
-        <button className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium">
-          더 많은 게시물 보기
-        </button>
-      </div>
+      {hasMore && !loading && (
+        <div className="text-center">
+          <button
+            onClick={handleLoadMore}
+            className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
+          >
+            더 많은 게시물 보기
+          </button>
+        </div>
+      )}
     </div>
   );
 }
