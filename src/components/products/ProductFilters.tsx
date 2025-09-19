@@ -31,6 +31,8 @@ export function ProductFilters() {
   const [options, setOptions] = useState<FilterOptions>({ categories: [], brands: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [suggestions, setSuggestions] = useState<Array<{ id: number; slug: string; name: string }>>([]);
+  const [suggestionsLoading, setSuggestionsLoading] = useState(false);
 
   useEffect(() => {
     let active = true;
@@ -71,16 +73,75 @@ export function ProductFilters() {
     };
   }, []);
 
+  useEffect(() => {
+    const term = search.trim();
+    if (term.length < 2) {
+      setSuggestions([]);
+      setSuggestionsLoading(false);
+      return;
+    }
+
+    const controller = new AbortController();
+    setSuggestionsLoading(true);
+    const timeoutId = window.setTimeout(async () => {
+      try {
+        const response = await fetch(`/api/search/products?q=${encodeURIComponent(term)}`, {
+          signal: controller.signal,
+        });
+        if (!response.ok) {
+          throw new Error("Failed to load search suggestions");
+        }
+        const json = (await response.json()) as {
+          data?: {
+            suggestions?: Array<{ id: number; slug: string; name: string }>;
+          };
+        };
+        setSuggestions(json.data?.suggestions ?? []);
+      } catch (err) {
+        if ((err as Error).name !== "AbortError") {
+          console.error(err);
+        }
+      } finally {
+        setSuggestionsLoading(false);
+      }
+    }, 200);
+
+    return () => {
+      controller.abort();
+      window.clearTimeout(timeoutId);
+    };
+  }, [search]);
+
+  const applyFilters = (overrides?: {
+    search?: string;
+    category?: string;
+    brand?: string;
+    halal?: boolean;
+    spicy?: boolean;
+    sort?: string;
+  }) => {
+    const nextSearch = (overrides?.search ?? search).trim();
+    const nextCategory = overrides?.category ?? category;
+    const nextBrand = overrides?.brand ?? brand;
+    const nextHalal = overrides?.halal ?? halal;
+    const nextSpicy = overrides?.spicy ?? spicy;
+    const nextSort = overrides?.sort ?? sort;
+
+    const params = new URLSearchParams();
+    if (nextSearch) params.set("search", nextSearch);
+    if (nextCategory) params.set("category", nextCategory);
+    if (nextBrand) params.set("brand", nextBrand);
+    if (nextHalal) params.set("halal", "true");
+    if (nextSpicy) params.set("spicy", "true");
+    if (nextSort && nextSort !== "newest") params.set("sort", nextSort);
+
+    const queryString = params.toString();
+    router.replace(queryString ? `${pathname}?${queryString}` : pathname);
+  };
+
   const handleSubmit = (event: FormEvent) => {
     event.preventDefault();
-    const params = new URLSearchParams();
-    if (search.trim()) params.set("search", search.trim());
-    if (category) params.set("category", category);
-    if (brand) params.set("brand", brand);
-    if (halal) params.set("halal", "true");
-    if (spicy) params.set("spicy", "true");
-    if (sort && sort !== "newest") params.set("sort", sort);
-    router.replace(`${pathname}?${params.toString()}`);
+    applyFilters();
   };
 
   const handleReset = () => {
@@ -90,7 +151,14 @@ export function ProductFilters() {
     setHalal(false);
     setSpicy(false);
     setSort("newest");
+    setSuggestions([]);
     router.replace(pathname);
+  };
+
+  const handleSuggestionSelect = (value: string) => {
+    setSearch(value);
+    setSuggestions([]);
+    applyFilters({ search: value });
   };
 
   const categoryOptions = options.categories.length
@@ -117,6 +185,26 @@ export function ProductFilters() {
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
           placeholder="kimchi, gochujang..."
         />
+        {suggestionsLoading ? (
+          <p className="pt-2 text-xs text-slate-400 dark:text-slate-500">{t("products.filters.loadingSuggestions", "Searching...")}</p>
+        ) : null}
+        {!suggestionsLoading && suggestions.length > 0 ? (
+          <div className="flex flex-wrap gap-2 pt-2">
+            <span className="text-xs uppercase text-slate-400 dark:text-slate-500">
+              {t("products.filters.suggestions")}
+            </span>
+            {suggestions.map((item) => (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => handleSuggestionSelect(item.name)}
+                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-500"
+              >
+                {item.name}
+              </button>
+            ))}
+          </div>
+        ) : null}
       </div>
       <div>
         <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">

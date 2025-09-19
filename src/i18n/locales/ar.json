@@ -32,6 +32,8 @@
       "sortNewest": "الأحدث",
       "sortPriceAsc": "السعر: من الأقل إلى الأعلى",
       "sortPriceDesc": "السعر: من الأعلى إلى الأقل",
+      "suggestions": "اقتراحات البحث",
+      "loadingSuggestions": "جارٍ البحث...",
       "apply": "تطبيق",
       "reset": "إعادة تعيين"
     },

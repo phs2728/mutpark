@@ -32,6 +32,8 @@
       "sortNewest": "Yeni ürünler",
       "sortPriceAsc": "Fiyat artan",
       "sortPriceDesc": "Fiyat azalan",
+      "suggestions": "Önerilen aramalar",
+      "loadingSuggestions": "Aranıyor...",
       "apply": "Filtrele",
       "reset": "Sıfırla"
     },

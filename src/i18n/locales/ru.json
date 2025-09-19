@@ -32,6 +32,8 @@
       "sortNewest": "Сначала новые",
       "sortPriceAsc": "Цена: по возр.",
       "sortPriceDesc": "Цена: по убыв.",
+      "suggestions": "Предложения",
+      "loadingSuggestions": "Поиск...",
       "apply": "Применить",
       "reset": "Сбросить"
     },
