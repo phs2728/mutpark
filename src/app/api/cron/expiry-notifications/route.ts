@@ -51,7 +51,7 @@ export async function POST(request: Request) {
       warningDate.setDate(warningDate.getDate() + daysBefore);
 
       // Find products from user's orders that are expiring soon
-      const expiringProducts = new Map<number, any>();
+      const expiringProducts = new Map<number, unknown>();
 
       for (const order of user.orders) {
         for (const item of order.items) {
@@ -82,20 +82,24 @@ export async function POST(request: Request) {
           where: {
             userId: user.id,
             type: "EXPIRY_WARNING",
-            data: {
-              path: ["productId"],
-              equals: productId,
-            },
             createdAt: {
               gte: new Date(Date.now() - 24 * 60 * 60 * 1000), // Last 24 hours
             },
           },
         });
 
-        if (existingNotification) continue;
+        // Check if this productId already has a notification
+        if (existingNotification) {
+          const notificationData = existingNotification.data as Record<string, unknown>;
+          if (notificationData?.productId === productId) {
+            continue;
+          }
+        }
 
+
+        const productData = product as Record<string, unknown>;
         const daysUntilExpiry = Math.ceil(
-          (new Date(product.expiryDate).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
+          (new Date(productData.expiryDate as string).getTime() - Date.now()) / (1000 * 60 * 60 * 24)
         );
 
         await prisma.notification.create({
@@ -103,13 +107,13 @@ export async function POST(request: Request) {
             userId: user.id,
             type: "EXPIRY_WARNING",
             title: "유통기한 임박 알림",
-            message: `구매하신 ${product.baseName}의 유통기한이 ${daysUntilExpiry}일 남았습니다.`,
+            message: `구매하신 ${productData.baseName}의 유통기한이 ${daysUntilExpiry}일 남았습니다.`,
             data: {
-              productId: product.id,
-              productName: product.baseName,
-              expiryDate: product.expiryDate,
+              productId: productData.id as number,
+              productName: productData.baseName as string,
+              expiryDate: productData.expiryDate as string,
               daysUntilExpiry,
-              quantity: product.quantity,
+              quantity: productData.quantity as number,
             },
           },
         });
@@ -149,17 +153,20 @@ export async function POST(request: Request) {
           where: {
             userId: user.id,
             type: "EXPIRY_WARNING",
-            data: {
-              path: ["productId"],
-              equals: product.id,
-            },
             createdAt: {
               gte: new Date(Date.now() - 7 * 24 * 60 * 60 * 1000), // Last 7 days
             },
           },
         });
 
-        if (existingNotification) continue;
+        // Check if this productId already has a notification
+        if (existingNotification) {
+          const notificationData = existingNotification.data as Record<string, unknown>;
+          if (notificationData?.productId === product.id) {
+            continue;
+          }
+        }
+
 
         const daysUntilExpiry = Math.ceil(
           (new Date(product.expiryDate!).getTime() - Date.now()) / (1000 * 60 * 60 * 24)

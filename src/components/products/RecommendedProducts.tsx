@@ -1,8 +1,7 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
-import { useI18n } from "@/providers/I18nProvider";
 import { ProductCard } from "./ProductCard";
 
 interface RecommendedProduct {
@@ -19,7 +18,7 @@ interface RecommendedProduct {
   priceOriginal?: number | null;
   discountPercentage?: number;
   discountReason?: string | null;
-  translations: any[];
+  translations: Array<{ language: string; name: string; description?: string }>;
   averageRating: number;
   recommendationReason: string;
   score: number;
@@ -36,16 +35,11 @@ export function RecommendedProducts({
   title = "추천 상품",
   maxItems = 8
 }: RecommendedProductsProps) {
-  const { t } = useI18n();
   const [products, setProducts] = useState<RecommendedProduct[]>([]);
   const [loading, setLoading] = useState(true);
   const [recommendationType, setRecommendationType] = useState<string>("");
 
-  useEffect(() => {
-    fetchRecommendations();
-  }, []);
-
-  const fetchRecommendations = async () => {
+  const fetchRecommendations = useCallback(async () => {
     try {
       setLoading(true);
       const response = await fetch(`/api/recommendations?limit=${maxItems}`);
@@ -59,7 +53,11 @@ export function RecommendedProducts({
     } finally {
       setLoading(false);
     }
-  };
+  }, [maxItems]);
+
+  useEffect(() => {
+    fetchRecommendations();
+  }, [fetchRecommendations]);
 
   const getLocalizedProductName = (product: RecommendedProduct) => {
     const translation = product.translations?.find(t => t.language === locale);

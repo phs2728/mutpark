@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { useI18n } from "@/providers/I18nProvider";
@@ -58,11 +58,7 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
     featured: searchParams.featured === "true",
   });
 
-  useEffect(() => {
-    fetchRecipes();
-  }, [filters, pagination.page]);
-
-  const fetchRecipes = async () => {
+  const fetchRecipes = useCallback(async () => {
     try {
       setLoading(true);
       const params = new URLSearchParams({
@@ -84,7 +80,11 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filters, pagination.page, pagination.limit]);
+
+  useEffect(() => {
+    fetchRecipes();
+  }, [fetchRecipes]);
 
   const handleFilterChange = (newFilters: Partial<typeof filters>) => {
     setFilters(prev => ({ ...prev, ...newFilters }));
@@ -173,7 +173,7 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
               <div className="relative aspect-video overflow-hidden">
                 {recipe.mainImageUrl ? (
                   <Image
-                    src={resolveImageUrl(recipe.mainImageUrl, { width: 400, quality: 80 })}
+                    src={resolveImageUrl(recipe.mainImageUrl, { width: 400, quality: 80 }) || '/default-recipe.jpg'}
                     alt={recipe.title}
                     fill
                     sizes="(min-width: 768px) 33vw, 100vw"

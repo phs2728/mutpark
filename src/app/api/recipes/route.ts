@@ -14,7 +14,7 @@ export async function GET(request: Request) {
 
     const skip = (page - 1) * limit;
 
-    const where: any = {
+    const where: Record<string, unknown> = {
       status: "PUBLISHED",
     };
 
@@ -154,7 +154,7 @@ export async function POST(request: Request) {
         turkeyAdapted: turkeyAdapted || false,
         status: "PENDING",
         ingredients: {
-          create: ingredients?.map((ingredient: any, index: number) => ({
+          create: ingredients?.map((ingredient: Record<string, unknown>, index: number) => ({
             name: ingredient.name,
             quantity: ingredient.quantity,
             unit: ingredient.unit,

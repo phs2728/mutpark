@@ -8,10 +8,10 @@ interface Params {
 
 export async function GET(
   request: Request,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
-    const { slug } = params;
+    const { slug } = await params;
 
     const recipe = await prisma.recipePost.findUnique({
       where: {
@@ -88,7 +88,7 @@ export async function GET(
 
 export async function PUT(
   request: Request,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const user = await getAuthenticatedUser();
@@ -96,7 +96,7 @@ export async function PUT(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { slug } = params;
+    const { slug } = await params;
     const body = await request.json();
 
     // Check if recipe exists and user is the author
@@ -154,7 +154,7 @@ export async function PUT(
           turkeyAdapted,
           status: "PENDING", // Reset status for moderation
           ingredients: {
-            create: ingredients?.map((ingredient: any, index: number) => ({
+            create: ingredients?.map((ingredient: Record<string, unknown>, index: number) => ({
               name: ingredient.name,
               quantity: ingredient.quantity,
               unit: ingredient.unit,
@@ -203,7 +203,7 @@ export async function PUT(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const user = await getAuthenticatedUser();
@@ -211,7 +211,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // Check if recipe exists and user is the author
     const existingRecipe = await prisma.recipePost.findUnique({

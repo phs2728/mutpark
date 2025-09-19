@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import React, { useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/providers/I18nProvider";
@@ -12,7 +12,7 @@ interface Recipe {
   id: number;
   slug: string;
   title: string;
-  content: any;
+  content: unknown;
   mainImageUrl?: string | null;
   difficulty: "EASY" | "MEDIUM" | "HARD";
   cookingTime: number;
@@ -33,12 +33,12 @@ interface Recipe {
     quantity: string;
     unit?: string | null;
     isEssential: boolean;
-    alternatives?: any;
+    alternatives?: unknown;
     product?: {
       id: number;
       slug: string;
       baseName: string;
-      translations: any[];
+      translations: unknown[];
       price: number;
       currency: string;
       imageUrl?: string | null;
@@ -95,34 +95,35 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
     }
   };
 
-  const renderContent = (content: any) => {
+  const renderContent = (content: unknown) => {
     if (typeof content === 'string') {
       return <div className="prose dark:prose-invert max-w-none" dangerouslySetInnerHTML={{ __html: content }} />;
     }
 
-    if (content && typeof content === 'object' && content.blocks) {
+    if (content && typeof content === 'object' && 'blocks' in content && content.blocks) {
       return (
         <div className="space-y-4">
-          {content.blocks.map((block: any, index: number) => {
-            switch (block.type) {
+          {(content as Record<string, unknown>).blocks && Array.isArray((content as Record<string, unknown>).blocks) ? ((content as Record<string, unknown>).blocks as unknown[]).map((block: unknown, index: number) => {
+            const blockData = block as Record<string, unknown>;
+            switch (blockData.type) {
               case 'paragraph':
                 return (
                   <p key={index} className="text-slate-700 dark:text-slate-300 leading-relaxed">
-                    {block.data.text}
+                    {(blockData.data as Record<string, unknown>).text as string}
                   </p>
                 );
               case 'header':
-                const HeaderTag = `h${block.data.level}` as keyof JSX.IntrinsicElements;
+                const HeaderTag = `h${(blockData.data as Record<string, unknown>).level}` as keyof React.JSX.IntrinsicElements;
                 return (
                   <HeaderTag key={index} className="font-bold text-slate-900 dark:text-white mt-6 mb-3">
-                    {block.data.text}
+                    {(blockData.data as Record<string, unknown>).text as string}
                   </HeaderTag>
                 );
               case 'list':
-                const ListTag = block.data.style === 'ordered' ? 'ol' : 'ul';
+                const ListTag = (blockData.data as Record<string, unknown>).style === 'ordered' ? 'ol' : 'ul';
                 return (
-                  <ListTag key={index} className={`space-y-2 text-slate-700 dark:text-slate-300 ${block.data.style === 'ordered' ? 'list-decimal' : 'list-disc'} list-inside`}>
-                    {block.data.items.map((item: string, itemIndex: number) => (
+                  <ListTag key={index} className={`space-y-2 text-slate-700 dark:text-slate-300 ${(blockData.data as Record<string, unknown>).style === 'ordered' ? 'list-decimal' : 'list-disc'} list-inside`}>
+                    {((blockData.data as Record<string, unknown>).items as string[]).map((item: string, itemIndex: number) => (
                       <li key={itemIndex}>{item}</li>
                     ))}
                   </ListTag>
@@ -130,7 +131,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
               default:
                 return null;
             }
-          })}
+          }) : null}
         </div>
       );
     }
@@ -207,7 +208,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
       {recipe.mainImageUrl && (
         <div className="relative aspect-video rounded-xl overflow-hidden">
           <Image
-            src={resolveImageUrl(recipe.mainImageUrl, { width: 800, quality: 90 })}
+            src={resolveImageUrl(recipe.mainImageUrl, { width: 800, quality: 90 }) || '/default-recipe.jpg'}
             alt={recipe.title}
             fill
             sizes="(min-width: 768px) 800px, 100vw"
@@ -249,7 +250,9 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
                           <AddToCartButton
                             productId={ingredient.product.id}
                             className="text-xs px-2 py-1"
-                          />
+                          >
+                            장바구니
+                          </AddToCartButton>
                         ) : (
                           <span className="text-xs text-red-500">품절</span>
                         )}
@@ -258,7 +261,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
                         <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
                           {ingredient.product.imageUrl ? (
                             <Image
-                              src={resolveImageUrl(ingredient.product.imageUrl, { width: 40, quality: 80 })}
+                              src={resolveImageUrl(ingredient.product.imageUrl, { width: 40, quality: 80 }) || '/default-product.jpg'}
                               alt={ingredient.product.baseName}
                               width={40}
                               height={40}

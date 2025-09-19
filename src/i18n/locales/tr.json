@@ -57,7 +57,18 @@
     "placeholder": "Topluluk özelliklerimiz yakında açılıyor. Tarif paylaşımı ve yorumlar için bizi takip edin!"
   },
   "recipes": {
-    "placeholder": "Türkiye'ye uyarlanmış Kore tarifleri yakında burada olacak."
+    "title": "Kore Tarifleri",
+    "subtitle": "Türkiye'de yapabileceğiniz geleneksel Kore yemekleri",
+    "placeholder": "Türkiye'ye uyarlanmış Kore tarifleri yakında burada olacak.",
+    "searchPlaceholder": "Tarif ara...",
+    "allDifficulties": "Tüm zorluklar",
+    "featuredOnly": "Sadece öne çıkanlar",
+    "noRecipes": "Tarif bulunamadı.",
+    "difficulty": {
+      "easy": "Kolay",
+      "medium": "Orta",
+      "hard": "Zor"
+    }
   },
   "productDetail": {
     "details": "Detaylar",

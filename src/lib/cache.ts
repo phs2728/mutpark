@@ -7,7 +7,7 @@ interface CacheItem<T> {
 }
 
 class SimpleCache {
-  private cache = new Map<string, CacheItem<any>>();
+  private cache = new Map<string, CacheItem<unknown>>();
   private maxSize = 1000;
 
   set<T>(key: string, data: T, ttlSeconds: number = 300): void {
@@ -74,7 +74,7 @@ const cache = new SimpleCache();
 // Cache utility functions
 export const cacheUtils = {
   // Product caching
-  async getProducts(key: string, fetcher: () => Promise<any>, ttl: number = 300) {
+  async getProducts(key: string, fetcher: () => Promise<unknown>, ttl: number = 300) {
     const cached = cache.get(key);
     if (cached) {
       return cached;
@@ -86,19 +86,19 @@ export const cacheUtils = {
   },
 
   // User-specific caching
-  async getUser(userId: number, fetcher: () => Promise<any>, ttl: number = 600) {
+  async getUser(userId: number, fetcher: () => Promise<unknown>, ttl: number = 600) {
     const key = `user:${userId}`;
     return this.getProducts(key, fetcher, ttl);
   },
 
   // Recommendations caching
-  async getRecommendations(userId: number | null, fetcher: () => Promise<any>, ttl: number = 1800) {
+  async getRecommendations(userId: number | null, fetcher: () => Promise<unknown>, ttl: number = 1800) {
     const key = userId ? `recommendations:${userId}` : 'recommendations:anonymous';
     return this.getProducts(key, fetcher, ttl);
   },
 
   // Recipe caching
-  async getRecipes(key: string, fetcher: () => Promise<any>, ttl: number = 900) {
+  async getRecipes(key: string, fetcher: () => Promise<unknown>, ttl: number = 900) {
     return this.getProducts(key, fetcher, ttl);
   },
 
@@ -131,38 +131,39 @@ export const cacheUtils = {
 };
 
 // For production Redis implementation
+/* eslint-disable @typescript-eslint/no-explicit-any */
 export class RedisCache {
-  private client: any; // Redis client
+  private client: unknown; // Redis client
 
-  constructor(redisClient: any) {
+  constructor(redisClient: unknown) {
     this.client = redisClient;
   }
 
-  async set(key: string, data: any, ttlSeconds: number = 300): Promise<void> {
-    await this.client.setex(key, ttlSeconds, JSON.stringify(data));
+  async set(key: string, data: unknown, ttlSeconds: number = 300): Promise<void> {
+    await (this.client as any).setex(key, ttlSeconds, JSON.stringify(data));
   }
 
   async get<T>(key: string): Promise<T | null> {
-    const result = await this.client.get(key);
+    const result = await (this.client as any).get(key);
     return result ? JSON.parse(result) : null;
   }
 
   async delete(key: string): Promise<void> {
-    await this.client.del(key);
+    await (this.client as any).del(key);
   }
 
   async clear(): Promise<void> {
-    await this.client.flushall();
+    await (this.client as any).flushall();
   }
 }
 
 // Cache keys generator
 export const cacheKeys = {
-  products: (page: number, filters: any) => `products:${page}:${JSON.stringify(filters)}`,
+  products: (page: number, filters: Record<string, unknown>) => `products:${page}:${JSON.stringify(filters)}`,
   product: (id: number) => `product:${id}`,
   user: (id: number) => `user:${id}`,
   recommendations: (userId: number | null) => userId ? `recommendations:${userId}` : 'recommendations:anonymous',
-  recipes: (page: number, filters: any) => `recipes:${page}:${JSON.stringify(filters)}`,
+  recipes: (page: number, filters: Record<string, unknown>) => `recipes:${page}:${JSON.stringify(filters)}`,
   recipe: (slug: string) => `recipe:${slug}`,
   cart: (userId: number) => `cart:${userId}`,
   orders: (userId: number, page: number) => `orders:${userId}:${page}`,

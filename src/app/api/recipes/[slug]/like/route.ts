@@ -8,7 +8,7 @@ interface Params {
 
 export async function POST(
   request: Request,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const user = await getAuthenticatedUser();
@@ -16,7 +16,7 @@ export async function POST(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // Find the recipe
     const recipe = await prisma.recipePost.findUnique({
@@ -79,7 +79,7 @@ export async function POST(
 
 export async function DELETE(
   request: Request,
-  { params }: { params: Params }
+  { params }: { params: Promise<Params> }
 ) {
   try {
     const user = await getAuthenticatedUser();
@@ -87,7 +87,7 @@ export async function DELETE(
       return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
     }
 
-    const { slug } = params;
+    const { slug } = await params;
 
     // Find the recipe
     const recipe = await prisma.recipePost.findUnique({

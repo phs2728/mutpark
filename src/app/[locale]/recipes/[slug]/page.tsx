@@ -1,7 +1,7 @@
 import { notFound } from "next/navigation";
 import { Suspense } from "react";
-import { defaultLocale, isLocale, type Locale } from "@/i18n/config";
-import { getDictionary } from "@/i18n/get-dictionary";
+import { defaultLocale, isLocale } from "@/i18n/config";
+// import { getDictionary } from "@/i18n/get-dictionary";
 import { RecipeDetail } from "@/components/recipes/RecipeDetail";
 
 interface RecipePageProps {
@@ -11,7 +11,7 @@ interface RecipePageProps {
 export default async function RecipePage({ params }: RecipePageProps) {
   const { locale: paramLocale, slug } = await params;
   const locale = isLocale(paramLocale) ? paramLocale : defaultLocale;
-  const dictionary = await getDictionary(locale as Locale);
+  // const dictionary = await getDictionary(locale as Locale);
 
   try {
     const response = await fetch(`${process.env.NEXT_PUBLIC_API_URL || 'http://localhost:3000'}/api/recipes/${slug}`, {
@@ -75,7 +75,7 @@ export async function generateMetadata({ params }: RecipePageProps) {
         images: recipe.mainImageUrl ? [recipe.mainImageUrl] : [],
       },
     };
-  } catch (error) {
+  } catch {
     return {
       title: "Recipe Not Found",
     };

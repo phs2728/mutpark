@@ -184,8 +184,10 @@ export async function GET(request: Request) {
       // Recipe-based recommendations
       prisma.product.findMany({
         where: {
-          id: { in: Array.from(recipeBasedProductIds) },
-          id: { notIn: Array.from(purchasedProductIds) },
+          id: {
+            in: Array.from(recipeBasedProductIds),
+            notIn: Array.from(purchasedProductIds)
+          },
           stock: { gt: 0 },
           freshnessStatus: { not: "EXPIRED" },
         },
