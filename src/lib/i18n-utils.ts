@@ -22,6 +22,7 @@ export function getLocalizedProduct(product: ProductWithTranslations, locale: st
     stock: product.stock,
     brand: product.brand,
     category: product.category,
+    freshnessStatus: product.freshnessStatus,
     expiryDate: pricing.expiryDate,
     isExpired: pricing.isExpired,
     expiresSoon: pricing.expiresSoon,

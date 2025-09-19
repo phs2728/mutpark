@@ -80,6 +80,7 @@ model Product {
   brand           String?
   category        String?
   expiryDate      DateTime?
+  freshnessStatus String               @default("FRESH")
   metadata        Json?
   createdAt       DateTime             @default(now())
   updatedAt       DateTime             @updatedAt

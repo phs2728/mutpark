@@ -16,6 +16,9 @@ interface ProductGridProps {
     halalCertified: boolean;
     spiceLevel?: number | null;
     stock: number;
+    brand?: string | null;
+    category?: string | null;
+    freshnessStatus?: string | null;
     expiryDate?: string | null;
     isExpired?: boolean;
     expiresSoon?: boolean;

@@ -32,6 +32,7 @@ interface ProductDetailProps {
     discountPercentage?: number;
     discountReason?: string | null;
     metadata?: Record<string, unknown> | null;
+    freshnessStatus?: string | null;
   };
   related: Array<{
     id: number;
@@ -236,6 +237,11 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
               {product.isExpired ? (
                 <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-600 dark:bg-red-500/20 dark:text-red-300">
                   {t("products.expired")}
+                </span>
+              ) : null}
+              {!product.isExpired && product.freshnessStatus === "EXPIRING" ? (
+                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
+                  {t("products.expiresSoon")}
                 </span>
               ) : null}
             </div>

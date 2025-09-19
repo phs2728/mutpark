@@ -28,6 +28,7 @@ interface ProductCardProps {
     priceOriginal?: number | null;
     discountPercentage?: number;
     discountReason?: string | null;
+    freshnessStatus?: string | null;
   };
 }
 
@@ -106,16 +107,21 @@ export function ProductCard({ locale, product }: ProductCardProps) {
                 })}
               </p>
             ) : null}
-            {product.isExpired ? (
-              <p className="text-xs font-semibold text-red-600 dark:text-red-400">
-                {t("products.expired")}
-              </p>
-            ) : null}
-            {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
-              <p className="text-xs font-semibold text-emerald-600">
-                {t("products.expiresSoon")} (-{product.discountPercentage}%)
-              </p>
-            ) : null}
+          {product.isExpired ? (
+            <p className="text-xs font-semibold text-red-600 dark:text-red-400">
+              {t("products.expired")}
+            </p>
+          ) : null}
+          {!product.isExpired && product.freshnessStatus === "EXPIRING" ? (
+            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
+              {t("products.expiresSoon")}
+            </p>
+          ) : null}
+          {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
+            <p className="text-xs font-semibold text-emerald-600">
+              {t("products.expiresSoon")} (-{product.discountPercentage}%)
+            </p>
+          ) : null}
             {product.isLowStock && !product.isExpired ? (
               <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
                 {t("products.lowStock")}

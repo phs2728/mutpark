@@ -1,5 +1,6 @@
 "use client";
 
+import { useTransition } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import { Locale, locales } from "@/i18n/config";
 import { useI18n } from "@/providers/I18nProvider";
@@ -12,10 +13,15 @@ const labels: Record<Locale, string> = {
   ar: "العربية",
 };
 
-export function LanguageSwitcher() {
+interface LanguageSwitcherProps {
+  canSync?: boolean;
+}
+
+export function LanguageSwitcher({ canSync = false }: LanguageSwitcherProps) {
   const router = useRouter();
   const pathname = usePathname();
   const { locale } = useI18n();
+  const [isPending, startTransition] = useTransition();
 
   const handleChange = (nextLocale: string) => {
     if (nextLocale === locale) return;
@@ -33,6 +39,16 @@ export function LanguageSwitcher() {
     }
 
     router.push(`/${segments.join("/")}`);
+
+    if (canSync) {
+      startTransition(() => {
+        void fetch("/api/profile", {
+          method: "PATCH",
+          headers: { "Content-Type": "application/json" },
+          body: JSON.stringify({ locale: nextLocale }),
+        }).catch(() => undefined);
+      });
+    }
   };
 
   return (
@@ -47,6 +63,7 @@ export function LanguageSwitcher() {
               ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
               : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
           }`}
+          disabled={isPending}
         >
           {labels[loc] ?? loc.toUpperCase()}
         </button>
