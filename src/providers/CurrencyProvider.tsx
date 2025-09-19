@@ -1,7 +1,7 @@
 "use client";
 
 import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { CurrencyCode, SUPPORTED_CURRENCIES, convertCurrency, isCurrency } from "@/lib/currency";
+import { CurrencyCode, convertCurrency, getDefaultCurrency, getSupportedCurrencies, isCurrency } from "@/lib/currency";
 
 type CurrencyContextValue = {
   currency: CurrencyCode;
@@ -9,7 +9,6 @@ type CurrencyContextValue = {
   convert: (amount: number, from: CurrencyCode) => number;
 };
 
-const DEFAULT_CURRENCY: CurrencyCode = "TRY";
 const STORAGE_KEY = "mutpark:currency";
 
 const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefined);
@@ -25,7 +24,7 @@ export function CurrencyProvider({ children, initialCurrency }: { children: Reac
         return stored;
       }
     }
-    return DEFAULT_CURRENCY;
+    return getDefaultCurrency();
   });
 
   useEffect(() => {
@@ -56,12 +55,4 @@ export function useCurrency() {
     throw new Error("useCurrency must be used within CurrencyProvider");
   }
   return context;
-}
-
-export function getDefaultCurrency(initial?: string) {
-  return initial && isCurrency(initial) ? initial : DEFAULT_CURRENCY;
-}
-
-export function getSupportedCurrencies() {
-  return SUPPORTED_CURRENCIES;
 }

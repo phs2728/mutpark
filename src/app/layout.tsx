@@ -2,7 +2,8 @@ import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDirection, isLocale } from "@/i18n/config";
-import { CurrencyProvider, getDefaultCurrency } from "@/providers/CurrencyProvider";
+import { CurrencyProvider } from "@/providers/CurrencyProvider";
+import { getDefaultCurrency } from "@/lib/currency";
 import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
