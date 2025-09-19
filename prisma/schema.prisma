@@ -142,6 +142,10 @@ model Order {
   totalAmount     Decimal       @db.Decimal(10, 2)
   currency        String        @default("TRY")
   shippingMethod  String        @default("standard")
+  trackingNumber  String?
+  trackingCarrier String?
+  trackingStatus  String?
+  trackingUpdatedAt DateTime?
   notes           String?
   createdAt       DateTime      @default(now())
   updatedAt       DateTime      @updatedAt
