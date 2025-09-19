@@ -71,8 +71,8 @@ export function LanguageSwitcher({ canSync = false }: LanguageSwitcherProps) {
         aria-expanded={isOpen}
         aria-haspopup="true"
       >
-        <span className="text-base">{flags[locale]}</span>
-        <span>{labels[locale]}</span>
+        <span className="text-base">{flags[locale as Locale]}</span>
+        <span>{labels[locale as Locale]}</span>
         <svg
           className={`h-4 w-4 transition-transform ${isOpen ? 'rotate-180' : ''}`}
           fill="none"
