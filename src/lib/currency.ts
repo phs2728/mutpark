@@ -12,6 +12,10 @@ export function isCurrency(code: string): code is CurrencyCode {
   return SUPPORTED_CURRENCIES.includes(code as CurrencyCode);
 }
 
+export function getSupportedCurrencies(): CurrencyCode[] {
+  return [...SUPPORTED_CURRENCIES];
+}
+
 export function convertCurrency(amount: number, from: CurrencyCode, to: CurrencyCode) {
   if (!Number.isFinite(amount)) return 0;
   if (from === to) return amount;
