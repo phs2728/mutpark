@@ -28,6 +28,7 @@
       "spicy": "Острое",
       "all": "Все",
       "sort": "Сортировка",
+      "sortLabel": "Сортировка",
       "sortNewest": "Сначала новые",
       "sortPriceAsc": "Цена: по возр.",
       "sortPriceDesc": "Цена: по убыв.",
@@ -42,6 +43,7 @@
     "expired": "Не продаётся",
     "lowStock": "Мало на складе",
     "expiryDate": "Срок годности",
+    "resultsCount": "Показано товаров: {count}",
     "addToCart": "В корзину",
     "viewDetails": "Подробнее",
     "empty": "Товары пока не добавлены."

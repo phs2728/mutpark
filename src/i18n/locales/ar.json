@@ -28,6 +28,7 @@
       "spicy": "حار",
       "all": "الكل",
       "sort": "ترتيب",
+      "sortLabel": "ترتيب",
       "sortNewest": "الأحدث",
       "sortPriceAsc": "السعر: من الأقل إلى الأعلى",
       "sortPriceDesc": "السعر: من الأعلى إلى الأقل",
@@ -42,6 +43,7 @@
     "expired": "غير متاح للبيع",
     "lowStock": "المخزون منخفض",
     "expiryDate": "تاريخ الانتهاء",
+    "resultsCount": "عرض {count} منتج",
     "addToCart": "أضف إلى السلة",
     "viewDetails": "عرض التفاصيل",
     "empty": "لم يتم إضافة منتجات بعد."

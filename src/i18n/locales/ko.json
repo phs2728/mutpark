@@ -28,6 +28,7 @@
       "spicy": "매운맛",
       "all": "전체",
       "sort": "정렬",
+      "sortLabel": "정렬",
       "sortNewest": "신상품 순",
       "sortPriceAsc": "가격 낮은 순",
       "sortPriceDesc": "가격 높은 순",
@@ -42,6 +43,7 @@
     "expired": "판매 종료",
     "lowStock": "재고 부족",
     "expiryDate": "유통기한",
+    "resultsCount": "총 {count}개 상품",
     "addToCart": "장바구니 담기",
     "viewDetails": "상세 보기",
     "empty": "등록된 상품이 없습니다."

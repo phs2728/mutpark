@@ -23,6 +23,7 @@ export default async function LocaleHome({
     spicy: searchParamsResolved.spicy,
     page: searchParamsResolved.page,
     pageSize: searchParamsResolved.pageSize,
+    sort: searchParamsResolved.sort,
   });
 
   const where: Prisma.ProductWhereInput = {};
@@ -54,6 +55,18 @@ export default async function LocaleHome({
 
   const skip = (parsedFilters.page - 1) * parsedFilters.pageSize;
 
+  const orderBy = (() => {
+    switch (parsedFilters.sort) {
+      case "price-asc":
+        return { price: "asc" as const };
+      case "price-desc":
+        return { price: "desc" as const };
+      case "newest":
+      default:
+        return { createdAt: "desc" as const };
+    }
+  })();
+
   const [products, total] = await Promise.all([
     prisma.product.findMany({
       where,
@@ -62,7 +75,7 @@ export default async function LocaleHome({
       include: {
         translations: true,
       },
-      orderBy: { createdAt: "desc" },
+      orderBy,
     }),
     prisma.product.count({ where }),
   ]);
@@ -75,7 +88,16 @@ export default async function LocaleHome({
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <ProductFilters />
         <div className="space-y-6">
-          <ProductGrid locale={locale} products={localizedProducts} />
+          <ProductGrid
+            locale={locale}
+            products={localizedProducts}
+            meta={{
+              total,
+              sort: parsedFilters.sort,
+              page: parsedFilters.page,
+              pageSize: parsedFilters.pageSize,
+            }}
+          />
           <Pagination
             currentPage={parsedFilters.page}
             pageSize={parsedFilters.pageSize}

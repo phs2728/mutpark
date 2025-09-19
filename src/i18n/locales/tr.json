@@ -28,6 +28,7 @@
       "spicy": "Acı tat",
       "all": "Tümü",
       "sort": "Sırala",
+      "sortLabel": "Sırala",
       "sortNewest": "Yeni ürünler",
       "sortPriceAsc": "Fiyat artan",
       "sortPriceDesc": "Fiyat azalan",
@@ -42,6 +43,7 @@
     "expired": "Satışta değil",
     "lowStock": "Stok azaldı",
     "expiryDate": "Son kullanma tarihi",
+    "resultsCount": "Toplam {count} ürün",
     "addToCart": "Sepete Ekle",
     "viewDetails": "Detayları Gör",
     "empty": "Henüz ürün eklenmedi."

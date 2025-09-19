@@ -68,6 +68,7 @@ async function findOrCreateUser({
   providerUserId,
   email,
   name,
+  locale,
 }: {
   provider: SocialProvider;
   providerUserId: string;
@@ -94,6 +95,12 @@ async function findOrCreateUser({
   const existingUser = await prisma.user.findUnique({ where: { email } });
 
   if (existingUser) {
+    if (locale && existingUser.locale !== locale) {
+      await prisma.user.update({
+        where: { id: existingUser.id },
+        data: { locale },
+      });
+    }
     await prisma.socialAccount.create({
       data: {
         provider,
@@ -136,6 +143,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
     let email: string;
     let name: string;
     let providerUserId: string;
+    let localePref: string | undefined;
     let provider: SocialProvider;
 
     if (providerParam === "google") {
@@ -144,18 +152,19 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       email = profile.email;
       name = profile.name;
       providerUserId = profile.email;
-      // TODO: use profile.locale when available
+      localePref = profile.locale;
     } else if (providerParam === "kakao") {
       provider = SocialProvider.KAKAO;
       const profile = await verifyKakaoToken(token);
       email = profile.email;
       name = profile.name;
       providerUserId = profile.providerUserId ?? profile.email;
+      localePref = profile.locale;
     } else {
       return errorResponse("Unsupported provider", 400);
     }
 
-    const user = await findOrCreateUser({ provider, providerUserId, email, name });
+    const user = await findOrCreateUser({ provider, providerUserId, email, name, locale: localePref });
 
     const response = successResponse({
       user: {
