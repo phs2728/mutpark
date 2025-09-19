@@ -56,6 +56,8 @@ model User {
   reviewHelpful  ReviewHelpful[]
   recipePosts    RecipePost[]
   recipeLikes    RecipeLike[]
+  notifications  Notification[]
+  preferences    UserPreference?
 }
 
 model SocialAccount {
@@ -341,4 +343,52 @@ enum PostStatus {
   PENDING
   PUBLISHED
   REJECTED
+}
+
+enum NotificationType {
+  EXPIRY_WARNING
+  PRICE_DROP
+  STOCK_AVAILABLE
+  ORDER_UPDATE
+  RECIPE_LIKE
+  SYSTEM_ANNOUNCEMENT
+}
+
+enum NotificationStatus {
+  UNREAD
+  READ
+  DISMISSED
+}
+
+model Notification {
+  id        Int                @id @default(autoincrement())
+  userId    Int
+  type      NotificationType
+  title     String
+  message   String
+  data      Json?
+  status    NotificationStatus @default(UNREAD)
+  createdAt DateTime           @default(now())
+  readAt    DateTime?
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId, status])
+  @@index([createdAt])
+}
+
+model UserPreference {
+  id                      Int     @id @default(autoincrement())
+  userId                  Int     @unique
+  emailNotifications      Boolean @default(true)
+  pushNotifications       Boolean @default(true)
+  expiryNotifications     Boolean @default(true)
+  priceDropNotifications  Boolean @default(true)
+  recipeNotifications     Boolean @default(true)
+  marketingNotifications  Boolean @default(false)
+  notificationDaysBefore  Int     @default(3)
+  createdAt               DateTime @default(now())
+  updatedAt               DateTime @updatedAt
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }

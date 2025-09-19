@@ -1,8 +1,10 @@
 import type { ReactNode } from "react";
+import { Suspense } from "react";
 import { Prisma } from "@prisma/client";
 import { HeroSection } from "@/components/home/HeroSection";
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
+import { RecommendedProducts } from "@/components/products/RecommendedProducts";
 import { prisma } from "@/lib/prisma";
 import { getLocalizedProduct } from "@/lib/i18n-utils";
 import { productFilterSchema } from "@/lib/validators";
@@ -85,6 +87,21 @@ export default async function LocaleHome({
   return (
     <div className="flex flex-col gap-10">
       <HeroSection locale={locale} />
+
+      {/* Recommended Products Section */}
+      <Suspense fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-slate-200 rounded w-48 dark:bg-slate-700"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-slate-200 rounded-xl h-48 dark:bg-slate-700"></div>
+            ))}
+          </div>
+        </div>
+      }>
+        <RecommendedProducts locale={locale} maxItems={8} />
+      </Suspense>
+
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
         <ProductFilters />
         <div className="space-y-6">
