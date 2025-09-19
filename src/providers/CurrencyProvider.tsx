@@ -31,7 +31,6 @@ export function CurrencyProvider({ children, initialCurrency }: { children: Reac
   useEffect(() => {
     if (!initialCurrency || !isCurrency(initialCurrency)) return;
     setCurrencyState(initialCurrency);
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [initialCurrency]);
 
   useEffect(() => {

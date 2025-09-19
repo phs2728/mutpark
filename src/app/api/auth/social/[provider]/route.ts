@@ -25,6 +25,7 @@ async function verifyGoogleToken(idToken: string) {
   return {
     email: data.email,
     name: data.name ?? data.email.split("@")[0],
+    locale: data.locale ?? "ko",
   };
 }
 
@@ -44,6 +45,10 @@ async function verifyKakaoToken(accessToken: string) {
       profile?: {
         nickname?: string;
       };
+      profile_needs_agreement?: boolean;
+      has_email?: boolean;
+      email_needs_agreement?: boolean;
+      locale?: string;
     };
   };
   const email = data.kakao_account?.email;
@@ -54,6 +59,7 @@ async function verifyKakaoToken(accessToken: string) {
     email,
     name: data.kakao_account?.profile?.nickname ?? email.split("@")[0],
     providerUserId: data.id.toString(),
+    locale: data.kakao_account?.locale ?? "ko",
   };
 }
 
@@ -67,6 +73,7 @@ async function findOrCreateUser({
   providerUserId: string;
   email: string;
   name: string;
+  locale?: string;
 }) {
   const socialAccount = await prisma.socialAccount.findUnique({
     where: {
@@ -105,7 +112,7 @@ async function findOrCreateUser({
       email,
       name,
       passwordHash,
-      locale: "ko",
+      locale: locale ?? "ko",
       socialAccounts: {
         create: {
           provider,
@@ -137,6 +144,7 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       email = profile.email;
       name = profile.name;
       providerUserId = profile.email;
+      // TODO: use profile.locale when available
     } else if (providerParam === "kakao") {
       provider = SocialProvider.KAKAO;
       const profile = await verifyKakaoToken(token);

@@ -140,7 +140,7 @@ export async function POST(request: NextRequest) {
                 ? {
                     paymentMethod,
                   }
-                : null,
+                : {},
         },
       });
 
