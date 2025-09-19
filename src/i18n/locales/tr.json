@@ -27,6 +27,10 @@
       "halal": "Helal sertifikalı",
       "spicy": "Acı tat",
       "all": "Tümü",
+      "sort": "Sırala",
+      "sortNewest": "Yeni ürünler",
+      "sortPriceAsc": "Fiyat artan",
+      "sortPriceDesc": "Fiyat azalan",
       "apply": "Filtrele",
       "reset": "Sıfırla"
     },

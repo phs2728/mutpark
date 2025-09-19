@@ -27,6 +27,7 @@ export function ProductFilters() {
   const [brand, setBrand] = useState(searchParams.get("brand") ?? "");
   const [halal, setHalal] = useState(searchParams.get("halal") === "true");
   const [spicy, setSpicy] = useState(searchParams.get("spicy") === "true");
+  const [sort, setSort] = useState(searchParams.get("sort") ?? "newest");
   const [options, setOptions] = useState<FilterOptions>({ categories: [], brands: [] });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -78,6 +79,7 @@ export function ProductFilters() {
     if (brand) params.set("brand", brand);
     if (halal) params.set("halal", "true");
     if (spicy) params.set("spicy", "true");
+    if (sort && sort !== "newest") params.set("sort", sort);
     router.replace(`${pathname}?${params.toString()}`);
   };
 
@@ -87,6 +89,7 @@ export function ProductFilters() {
     setBrand("");
     setHalal(false);
     setSpicy(false);
+    setSort("newest");
     router.replace(pathname);
   };
 
@@ -148,6 +151,20 @@ export function ProductFilters() {
               {option}
             </option>
           ))}
+        </select>
+      </div>
+      <div>
+        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+          {t("products.filters.sort")}
+        </label>
+        <select
+          value={sort}
+          onChange={(event) => setSort(event.target.value)}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+        >
+          <option value="newest">{t("products.filters.sortNewest")}</option>
+          <option value="price-asc">{t("products.filters.sortPriceAsc")}</option>
+          <option value="price-desc">{t("products.filters.sortPriceDesc")}</option>
         </select>
       </div>
       <div className="flex flex-col gap-2">

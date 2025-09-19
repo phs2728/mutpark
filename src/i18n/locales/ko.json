@@ -27,6 +27,10 @@
       "halal": "할랄 인증",
       "spicy": "매운맛",
       "all": "전체",
+      "sort": "정렬",
+      "sortNewest": "신상품 순",
+      "sortPriceAsc": "가격 낮은 순",
+      "sortPriceDesc": "가격 높은 순",
       "apply": "필터 적용",
       "reset": "초기화"
     },

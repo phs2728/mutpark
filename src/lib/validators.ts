@@ -34,6 +34,7 @@ export const productFilterSchema = z.object({
     .union([z.string(), z.boolean()])
     .transform((val) => (typeof val === "boolean" ? val : val === "true"))
     .optional(),
+  sort: z.enum(["newest", "price-asc", "price-desc"]).default("newest"),
 });
 
 const translationSchema = z.object({
@@ -50,7 +51,7 @@ export const upsertCartSchema = z.object({
 export const createOrderSchema = z.object({
   addressId: z.number().int(),
   notes: z.string().optional(),
-  paymentMethod: z.enum(["iyzico", "papara", "installment"]).optional(),
+  paymentMethod: z.enum(["iyzico", "papara", "installment"]).default("iyzico"),
   installmentPlan: z.number().int().positive().optional(),
 });
 

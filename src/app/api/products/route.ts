@@ -44,6 +44,18 @@ export async function GET(request: NextRequest) {
 
     const skip = (filters.page - 1) * filters.pageSize;
 
+    const orderBy = (() => {
+      switch (filters.sort) {
+        case "price-asc":
+          return { price: "asc" as const };
+        case "price-desc":
+          return { price: "desc" as const };
+        case "newest":
+        default:
+          return { createdAt: "desc" as const };
+      }
+    })();
+
     const [items, total] = await Promise.all([
       prisma.product.findMany({
         where,
@@ -52,9 +64,7 @@ export async function GET(request: NextRequest) {
         include: {
           translations: true,
         },
-        orderBy: {
-          createdAt: "desc",
-        },
+        orderBy,
       }),
       prisma.product.count({ where }),
     ]);

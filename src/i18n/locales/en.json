@@ -27,6 +27,10 @@
       "halal": "Halal certified",
       "spicy": "Spicy",
       "all": "All",
+      "sort": "Sort",
+      "sortNewest": "Newest",
+      "sortPriceAsc": "Price: Low to High",
+      "sortPriceDesc": "Price: High to Low",
       "apply": "Apply",
       "reset": "Reset"
     },

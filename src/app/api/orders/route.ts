@@ -75,6 +75,10 @@ export async function POST(request: NextRequest) {
     const shippingFee = subtotal.gte(SHIPPING_THRESHOLD) ? new Prisma.Decimal(0) : new Prisma.Decimal(SHIPPING_FEE);
     const total = subtotal.add(shippingFee);
 
+    const paymentMethod = data.paymentMethod ?? "iyzico";
+    const paymentProvider = paymentMethod === "papara" ? "papara" : "iyzico";
+    const installmentPlan = paymentMethod === "installment" ? data.installmentPlan ?? 3 : undefined;
+
     const order = await prisma.$transaction(async (tx) => {
       const createdOrder = await tx.order.create({
         data: {
@@ -123,8 +127,20 @@ export async function POST(request: NextRequest) {
         data: {
           orderId: createdOrder.id,
           status: "PENDING",
+          provider: paymentProvider,
           amount: total,
           currency: createdOrder.currency,
+          rawResponse:
+            paymentMethod === "installment"
+              ? {
+                  paymentMethod,
+                  installmentPlan,
+                }
+              : paymentMethod === "papara"
+                ? {
+                    paymentMethod,
+                  }
+                : null,
         },
       });
 
