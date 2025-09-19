@@ -3,9 +3,6 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDirection, isLocale } from "@/i18n/config";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
-import type { CurrencyCode } from "@/lib/currency";
-import { getAuthenticatedUser } from "@/lib/session";
-import { prisma } from "@/lib/prisma";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -39,24 +36,10 @@ export default async function RootLayout({
   const locale = localeParam && isLocale(localeParam) ? localeParam : "ko";
   const direction = getDirection(locale);
 
-  const auth = await getAuthenticatedUser();
-  const supportedCurrencies = new Set<CurrencyCode>(["TRY", "USD", "EUR", "KRW"]);
-  let currency: CurrencyCode = "TRY";
-  if (auth) {
-    const user = await prisma.user.findUnique({
-      where: { id: auth.userId },
-      select: { currency: true },
-    });
-    const preferred = user?.currency;
-    if (preferred && supportedCurrencies.has(preferred as CurrencyCode)) {
-      currency = preferred as CurrencyCode;
-    }
-  }
-
   return (
     <html lang={locale} dir={direction} suppressHydrationWarning>
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased bg-slate-50 text-slate-900 dark:bg-slate-950 dark:text-slate-100`}>
-        <CurrencyProvider initialCurrency={currency}>{children}</CurrencyProvider>
+        <CurrencyProvider>{children}</CurrencyProvider>
       </body>
     </html>
   );

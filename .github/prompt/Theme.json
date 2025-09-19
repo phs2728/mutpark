@@ -1,8 +1,21 @@
 {
   "designSystemName": "Chilkabmall-Style-Guide",
-  "lastUpdated": "2025-09-18",
+  "lastUpdated": "2025-01-17",
   "theme": {
     "mode": "light",
+    "brandGuide": {
+      "voice": "Trustworthy, warm, ingredient-focused. Copy emphasizes authenticity, freshness, and halal compliance.",
+      "designPrinciples": [
+        "Use generous white space to mirror a premium grocery experience.",
+        "Pair rounded corners and soft shadows to convey freshness and approachability.",
+        "Highlight halal, freshness, and locality badges consistently across cards and lists.",
+        "Support quick scanning with strong hierarchy, especially for pricing and availability metadata."
+      ],
+      "market": {
+        "defaultCurrency": "TRY",
+        "currencyDisplay": "Prefix prices with ₺ and avoid secondary currency selectors."
+      }
+    },
     "modes": {
       "light": {
         "colors": {
@@ -87,6 +100,110 @@
         }
       }
     },
+    "tokens": {
+      "color": {
+        "brand": {
+          "50": "#f2faf5",
+          "100": "#d9f0e3",
+          "200": "#b7dec8",
+          "300": "#92cba9",
+          "400": "#5cab7d",
+          "500": "#2f8355",
+          "600": "#256a44",
+          "700": "#1f5932",
+          "800": "#1a4625",
+          "900": "#0f2c16"
+        },
+        "neutral": {
+          "50": "#fafafa",
+          "100": "#f5f5f5",
+          "200": "#eeeeee",
+          "300": "#e0e0e0",
+          "400": "#bdbdbd",
+          "500": "#9e9e9e",
+          "600": "#757575",
+          "700": "#616161",
+          "800": "#424242",
+          "900": "#212121"
+        },
+        "state": {
+          "success": "#2f8355",
+          "warning": "#ff9800",
+          "danger": "#e53935",
+          "info": "#3b82f6"
+        },
+        "surface": {
+          "page": "#ffffff",
+          "card": "#ffffff",
+          "muted": "#fafafa",
+          "dark": "#1f2a44"
+        }
+      },
+      "typography": {
+        "fontFamilies": {
+          "display": "'Archivo', 'Noto Sans KR', sans-serif",
+          "body": "'Noto Sans KR', sans-serif"
+        },
+        "weights": {
+          "regular": 400,
+          "medium": 500,
+          "semibold": 600,
+          "bold": 700
+        },
+        "sizes": {
+          "xs": "0.75rem",
+          "sm": "0.875rem",
+          "base": "1rem",
+          "lg": "1.125rem",
+          "xl": "1.25rem",
+          "2xl": "1.5rem",
+          "3xl": "2rem",
+          "4xl": "2.5rem"
+        },
+        "lineHeights": {
+          "tight": "1.25",
+          "snug": "1.35",
+          "normal": "1.6"
+        }
+      },
+      "spacing": {
+        "0": "0rem",
+        "px": "1px",
+        "0.5": "0.125rem",
+        "1": "0.25rem",
+        "2": "0.5rem",
+        "3": "0.75rem",
+        "4": "1rem",
+        "6": "1.5rem",
+        "8": "2rem",
+        "10": "2.5rem",
+        "16": "4rem"
+      },
+      "radius": {
+        "pill": "9999px",
+        "sm": "4px",
+        "md": "12px",
+        "lg": "20px"
+      },
+      "shadows": {
+        "ambient": "0 4px 20px rgba(19, 41, 30, 0.08)",
+        "card": "0 12px 32px rgba(19, 41, 30, 0.12)",
+        "hover": "0 16px 36px rgba(37, 106, 68, 0.16)"
+      },
+      "tailwind": {
+        "primary": "emerald",
+        "neutral": "slate",
+        "radius": {
+          "sm": "rounded-md",
+          "md": "rounded-2xl",
+          "pill": "rounded-full"
+        },
+        "shadow": {
+          "card": "shadow-lg",
+          "hover": "shadow-xl"
+        }
+      }
+    },
     "typography": {
       "fontFamily": "'Noto Sans KR', sans-serif",
       "headings": {
@@ -147,6 +264,35 @@
           "sm": 2,
           "md": 3,
           "lg": 4
+        }
+      },
+      "templates": {
+        "productDetail": {
+          "columns": "minmax(0, 1.2fr) minmax(0, 1fr)",
+          "priorityZones": ["media", "pricing", "actions", "metadata", "reviews"],
+          "breakpoints": {
+            "md": "stack",
+            "lg": "two-column"
+          }
+        },
+        "reviews": {
+          "header": "ratingSummary",
+          "layout": "sidebar + list",
+          "sidebarWidth": "320px",
+          "listSpacing": "{theme.spacing.md}",
+          "emptyState": {
+            "icon": "chat-bubble",
+            "copy": "믿을 수 있는 후기를 기다리고 있어요."
+          }
+        },
+        "recipesFeed": {
+          "cardWidth": "360px",
+          "grid": "auto-fill, minmax(280px, 1fr)",
+          "filters": "sticky-horizontal",
+          "cta": {
+            "label": "레시피 공유하기",
+            "buttonVariant": "secondary"
+          }
         }
       }
     },
@@ -229,6 +375,7 @@
           "marginTop": "{theme.spacing.sm}"
         },
         "price": {
+          "currencySymbol": "₺",
           "salePrice": {
             "fontSize": "1.25rem",
             "fontWeight": "700",
@@ -430,6 +577,7 @@
         "infoSection": {
           "titleFont": "{theme.typography.headings.h2}",
           "priceFont": "{theme.typography.headings.h3}",
+          "currencySymbol": "₺",
           "descriptionColor": "{theme.modes.{theme.mode}.colors.text.secondary}"
         },
         "addToCartButton": {
@@ -470,6 +618,122 @@
             "color": "{theme.modes.{theme.mode}.colors.text.secondary}",
             "hoverColor": "{theme.modes.{theme.mode}.colors.primary.default}"
           }
+        }
+      },
+      "badge": {
+        "base": {
+          "borderRadius": "{theme.tokens.radius.pill}",
+          "fontSize": "{theme.typography.body.small.fontSize}",
+          "fontWeight": "{theme.typography.body.emphasized.fontWeight}",
+          "padding": "0.25rem 0.625rem",
+          "letterSpacing": "0.02em"
+        },
+        "halal": {
+          "backgroundColor": "{theme.tokens.color.state.success}",
+          "textColor": "#ffffff"
+        },
+        "fresh": {
+          "backgroundColor": "#256a44",
+          "textColor": "#ffffff"
+        },
+        "warning": {
+          "backgroundColor": "{theme.tokens.color.state.warning}",
+          "textColor": "#1f2a44"
+        }
+      },
+      "card": {
+        "base": {
+          "backgroundColor": "{theme.tokens.color.surface.card}",
+          "padding": "{theme.spacing.md}",
+          "borderRadius": "{theme.tokens.radius.md}",
+          "boxShadow": "{theme.tokens.shadows.card}",
+          "gap": "{theme.spacing.md}"
+        },
+        "list": {
+          "border": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+          "hover": {
+            "boxShadow": "{theme.tokens.shadows.hover}",
+            "transform": "translateY(-2px)"
+          }
+        },
+        "product": {
+          "imageRatio": "4:5",
+          "priceColor": "{theme.modes.{theme.mode}.colors.primary.default}",
+          "metadataLayout": "stack"
+        }
+      },
+      "list": {
+        "divider": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+        "itemPadding": "{theme.spacing.sm} {theme.spacing.md}",
+        "hoverBackground": "rgba(47, 131, 85, 0.06)",
+        "selectedIndicator": {
+          "width": "3px",
+          "color": "{theme.tokens.color.brand.500}",
+          "radius": "{theme.tokens.radius.sm}"
+        }
+      },
+      "tabs": {
+        "background": "{theme.tokens.color.surface.muted}",
+        "item": {
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "radius": "{theme.tokens.radius.pill}",
+          "active": {
+            "backgroundColor": "{theme.tokens.color.brand.500}",
+            "textColor": "#ffffff",
+            "shadow": "{theme.tokens.shadows.ambient}"
+          },
+          "inactive": {
+            "textColor": "{theme.modes.{theme.mode}.colors.text.secondary}"
+          }
+        }
+      },
+      "languageSelector": {
+        "layout": "grid",
+        "columns": 5,
+        "gap": "{theme.spacing.sm}",
+        "tile": {
+          "padding": "{theme.spacing.sm} {theme.spacing.md}",
+          "borderRadius": "{theme.tokens.radius.md}",
+          "border": "1px solid {theme.modes.{theme.mode}.colors.border.default}",
+          "backgroundColor": "{theme.tokens.color.surface.card}",
+          "textStyle": "{theme.typography.body.label}",
+          "inactive": {
+            "textColor": "{theme.modes.{theme.mode}.colors.text.secondary}"
+          },
+          "active": {
+            "backgroundColor": "{theme.tokens.color.brand.500}",
+            "textColor": "#ffffff",
+            "boxShadow": "{theme.tokens.shadows.ambient}",
+            "border": "1px solid {theme.tokens.color.brand.600}"
+          }
+        },
+        "indicator": {
+          "icon": "check-circle",
+          "position": "top-right"
+        }
+      },
+      "reviewCard": {
+        "layout": "vertical",
+        "avatarSize": "48px",
+        "ratingColor": "#f59e0b",
+        "verifiedBadge": {
+          "icon": "check-badge",
+          "backgroundColor": "rgba(47, 131, 85, 0.1)",
+          "textColor": "{theme.tokens.color.state.success}"
+        },
+        "media": {
+          "thumbnailRadius": "{theme.tokens.radius.md}",
+          "thumbnailSize": "80px"
+        }
+      },
+      "recipeCard": {
+        "imageRatio": "16:9",
+        "tagColor": "{theme.tokens.color.brand.400}",
+        "prepTimeIcon": "clock",
+        "difficultyBadges": {
+          "easy": "#4caf50",
+          "medium": "#ff9800",
+          "hard": "#ef5350"
         }
       }
     }

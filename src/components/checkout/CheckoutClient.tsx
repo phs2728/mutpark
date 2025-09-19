@@ -3,8 +3,7 @@
 import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
-import { useCurrency } from "@/providers/CurrencyProvider";
-import { isCurrency, type CurrencyCode } from "@/lib/currency";
+import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { SHIPPING_THRESHOLD_TRY, getShippingFee } from "@/lib/shipping";
 
 interface CheckoutAddress {
@@ -46,24 +45,12 @@ export function CheckoutClient({
   const [installmentPlan, setInstallmentPlan] = useState(3);
   const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
 
-  const { currency: displayCurrency, convert } = useCurrency();
-
-  const subtotalDisplay = items.reduce((acc, item) => {
-    const baseCurrency = isCurrency(item.currency) ? item.currency : displayCurrency;
-    const converted = convert(item.price * item.quantity, baseCurrency);
-    return acc + converted;
-  }, 0);
   const subtotalRaw = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const baseCurrency: CurrencyCode = "TRY";
+  const subtotalDisplay = subtotalRaw;
   const shippingFeeValue = getShippingFee(shippingMethod, subtotalRaw);
-  const shippingFeeDisplay = convert(shippingFeeValue, baseCurrency);
+  const shippingFeeDisplay = shippingFeeValue;
   const totalDisplay = subtotalDisplay + shippingFeeDisplay;
-  const thresholdDisplay = convert(SHIPPING_THRESHOLD_TRY, baseCurrency);
-  const thresholdLabel = thresholdDisplay.toLocaleString(activeLocale, {
-    style: "currency",
-    currency: displayCurrency,
-    minimumFractionDigits: 0,
-  });
+  const thresholdLabel = formatCurrency(SHIPPING_THRESHOLD_TRY, DEFAULT_CURRENCY, activeLocale);
 
   const paymentOptions: Array<{
     id: "iyzico" | "papara" | "installment";
@@ -263,14 +250,9 @@ export function CheckoutClient({
                   if (optionFeeValue === 0) {
                     return <p className="text-xs font-semibold text-emerald-600">{t("checkout.shipping.free")}</p>;
                   }
-                  const optionFeeDisplay = convert(optionFeeValue, baseCurrency);
                   return (
                     <p className="text-xs font-semibold text-emerald-600">
-                      {optionFeeDisplay.toLocaleString(activeLocale, {
-                        style: "currency",
-                        currency: displayCurrency,
-                        minimumFractionDigits: 0,
-                      })}
+                      {formatCurrency(optionFeeValue, DEFAULT_CURRENCY, activeLocale)}
                     </p>
                   );
                 })()}
@@ -288,15 +270,7 @@ export function CheckoutClient({
                 {item.name} × {item.quantity}
               </span>
               <span className="font-semibold">
-                {(() => {
-                  const baseCurrency = isCurrency(item.currency) ? item.currency : displayCurrency;
-                  const value = convert(item.price * item.quantity, baseCurrency);
-                  return value.toLocaleString(activeLocale, {
-                    style: "currency",
-                    currency: displayCurrency,
-                    minimumFractionDigits: 0,
-                  });
-                })()}
+                {formatCurrency(item.price * item.quantity, DEFAULT_CURRENCY, activeLocale)}
               </span>
             </div>
           ))}
@@ -361,35 +335,19 @@ export function CheckoutClient({
         </div>
         <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
           <span>{t("cart.subtotal")}</span>
-          <span>
-            {subtotalDisplay.toLocaleString(activeLocale, {
-              style: "currency",
-              currency: displayCurrency,
-              minimumFractionDigits: 0,
-            })}
-          </span>
+          <span>{formatCurrency(subtotalDisplay, DEFAULT_CURRENCY, activeLocale)}</span>
         </div>
         <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
           <span>{t("checkout.shipping.label")}</span>
           <span className="font-semibold text-slate-900 dark:text-white">
             {shippingFeeValue === 0
               ? t("checkout.shipping.free")
-              : shippingFeeDisplay.toLocaleString(activeLocale, {
-                  style: "currency",
-                  currency: displayCurrency,
-                  minimumFractionDigits: 0,
-                })}
+              : formatCurrency(shippingFeeDisplay, DEFAULT_CURRENCY, activeLocale)}
           </span>
         </div>
         <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
           <span>{t("checkout.total")}</span>
-          <span>
-            {totalDisplay.toLocaleString(activeLocale, {
-              style: "currency",
-              currency: displayCurrency,
-              minimumFractionDigits: 0,
-            })}
-          </span>
+          <span>{formatCurrency(totalDisplay, DEFAULT_CURRENCY, activeLocale)}</span>
         </div>
         {error ? <p className="text-sm text-red-500">{error}</p> : null}
         <button

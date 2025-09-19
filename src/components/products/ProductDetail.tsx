@@ -6,8 +6,7 @@ import { useI18n } from "@/providers/I18nProvider";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ProductReviews } from "@/components/products/ProductReviews";
 import { useMemo, useState, type ReactNode } from "react";
-import { useCurrency } from "@/providers/CurrencyProvider";
-import { isCurrency } from "@/lib/currency";
+import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { resolveImageUrl } from "@/lib/imagekit";
 
 interface ProductDetailProps {
@@ -105,7 +104,6 @@ function renderContent(value: unknown, emptyFallback: string): ReactNode {
 
 export function ProductDetail({ locale, product, related, currentUserId }: ProductDetailProps) {
   const { t, locale: activeLocale } = useI18n();
-  const { currency: displayCurrency, convert } = useCurrency();
   const [activeTab, setActiveTab] = useState<DetailTab>("details");
 
   const metadata = useMemo(() => (product.metadata ?? {}) as Record<string, unknown>, [product.metadata]);
@@ -191,34 +189,16 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
               {product.description}
             </p>
             <div className="flex flex-wrap items-center gap-4">
-              {(() => {
-                const baseCurrency = isCurrency(product.currency) ? product.currency : displayCurrency;
-                const priceValue = convert(product.price, baseCurrency);
-                const originalValue =
-                  product.priceOriginal && product.priceOriginal > product.price
-                    ? convert(product.priceOriginal, baseCurrency)
-                    : null;
-                return (
-                  <>
-                    <span className="text-2xl font-bold" style={{ color: "var(--mut-color-primary)" }}>
-                      {priceValue.toLocaleString(activeLocale, {
-                        style: "currency",
-                        currency: displayCurrency,
-                        minimumFractionDigits: 0,
-                      })}
-                    </span>
-                    {originalValue && originalValue > priceValue ? (
-                      <span className="text-lg font-semibold line-through" style={{ color: "var(--mut-color-text-secondary)" }}>
-                        {originalValue.toLocaleString(activeLocale, {
-                          style: "currency",
-                          currency: displayCurrency,
-                          minimumFractionDigits: 0,
-                        })}
-                      </span>
-                    ) : null}
-                  </>
-                );
-              })()}
+              <>
+                <span className="text-2xl font-bold" style={{ color: "var(--mut-color-primary)" }}>
+                  {formatCurrency(product.price, DEFAULT_CURRENCY, activeLocale)}
+                </span>
+                {product.priceOriginal && product.priceOriginal > product.price ? (
+                  <span className="text-lg font-semibold line-through" style={{ color: "var(--mut-color-text-secondary)" }}>
+                    {formatCurrency(product.priceOriginal, DEFAULT_CURRENCY, activeLocale)}
+                  </span>
+                ) : null}
+              </>
               {product.spiceLevel ? (
                 <span className="rounded-full bg-orange-100 px-3 py-1 text-sm font-semibold text-orange-600">
                   {t("products.spiceLevel")}: {"🌶️".repeat(product.spiceLevel)}
@@ -286,15 +266,7 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
               >
                 <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.name}</span>
                 <span className="text-sm font-semibold text-emerald-500">
-                  {(() => {
-                    const base = isCurrency(item.currency) ? item.currency : displayCurrency;
-                    const value = convert(item.price, base);
-                    return value.toLocaleString(activeLocale, {
-                      style: "currency",
-                      currency: displayCurrency,
-                      minimumFractionDigits: 0,
-                    });
-                  })()}
+                  {formatCurrency(item.price, DEFAULT_CURRENCY, activeLocale)}
                 </span>
               </Link>
             ))}

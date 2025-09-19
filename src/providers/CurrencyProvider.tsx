@@ -1,7 +1,7 @@
 "use client";
 
-import { createContext, useContext, useEffect, useMemo, useState } from "react";
-import { CurrencyCode, convertCurrency, getDefaultCurrency, getSupportedCurrencies, isCurrency } from "@/lib/currency";
+import { createContext, useContext, useMemo } from "react";
+import { CurrencyCode, convertCurrency, DEFAULT_CURRENCY } from "@/lib/currency";
 
 type CurrencyContextValue = {
   currency: CurrencyCode;
@@ -9,41 +9,16 @@ type CurrencyContextValue = {
   convert: (amount: number, from: CurrencyCode) => number;
 };
 
-const STORAGE_KEY = "mutpark:currency";
-
 const CurrencyContext = createContext<CurrencyContextValue | undefined>(undefined);
 
-export function CurrencyProvider({ children, initialCurrency }: { children: React.ReactNode; initialCurrency?: string }) {
-  const [currency, setCurrencyState] = useState<CurrencyCode>(() => {
-    if (initialCurrency && isCurrency(initialCurrency)) {
-      return initialCurrency;
-    }
-    if (typeof window !== "undefined") {
-      const stored = window.localStorage.getItem(STORAGE_KEY);
-      if (stored && isCurrency(stored)) {
-        return stored;
-      }
-    }
-    return getDefaultCurrency();
-  });
-
-  useEffect(() => {
-    if (!initialCurrency || !isCurrency(initialCurrency)) return;
-    setCurrencyState(initialCurrency);
-  }, [initialCurrency]);
-
-  useEffect(() => {
-    if (typeof window === "undefined") return;
-    window.localStorage.setItem(STORAGE_KEY, currency);
-  }, [currency]);
-
+export function CurrencyProvider({ children }: { children: React.ReactNode }) {
   const value = useMemo<CurrencyContextValue>(
     () => ({
-      currency,
-      setCurrency: setCurrencyState,
-      convert: (amount: number, from: CurrencyCode) => convertCurrency(amount, from, currency),
+      currency: DEFAULT_CURRENCY,
+      setCurrency: () => undefined,
+      convert: (amount: number) => convertCurrency(amount, DEFAULT_CURRENCY, DEFAULT_CURRENCY),
     }),
-    [currency],
+    [],
   );
 
   return <CurrencyContext.Provider value={value}>{children}</CurrencyContext.Provider>;

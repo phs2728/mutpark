@@ -6,8 +6,7 @@ import { useEffect } from "react";
 import { useRouter } from "next/navigation";
 import { useCartStore } from "@/hooks/useCartStore";
 import { useI18n } from "@/providers/I18nProvider";
-import { useCurrency } from "@/providers/CurrencyProvider";
-import { isCurrency } from "@/lib/currency";
+import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { resolveImageUrl } from "@/lib/imagekit";
 
 export function CartClient({ locale }: { locale: string }) {
@@ -17,13 +16,8 @@ export function CartClient({ locale }: { locale: string }) {
   const fetchCart = useCartStore((state) => state.fetchCart);
   const updateItem = useCartStore((state) => state.updateItem);
   const removeItem = useCartStore((state) => state.removeItem);
-  const { currency: displayCurrency, convert } = useCurrency();
 
-  const subtotalDisplay = items.reduce((acc, item) => {
-    const baseCurrency = isCurrency(item.product.currency) ? item.product.currency : displayCurrency;
-    const lineAmount = convert(item.product.price * item.quantity, baseCurrency);
-    return acc + lineAmount;
-  }, 0);
+  const subtotalDisplay = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
 
   useEffect(() => {
     fetchCart().catch(() => undefined);
@@ -74,17 +68,7 @@ export function CartClient({ locale }: { locale: string }) {
                     {item.product.name}
                   </Link>
                   <p className="text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
-                    {(() => {
-                      const baseCurrency = isCurrency(item.product.currency)
-                        ? item.product.currency
-                        : displayCurrency;
-                      const linePrice = convert(item.product.price, baseCurrency);
-                      return linePrice.toLocaleString(activeLocale, {
-                        style: "currency",
-                        currency: displayCurrency,
-                        minimumFractionDigits: 0,
-                      });
-                    })()}
+                    {formatCurrency(item.product.price, DEFAULT_CURRENCY, activeLocale)}
                   </p>
                 </div>
                 <button type="button" className="btn-outline" onClick={() => void removeItem(item.productId)}>
@@ -116,11 +100,7 @@ export function CartClient({ locale }: { locale: string }) {
         <div className="flex items-center justify-between text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
           <span>{t("cart.subtotal")}</span>
           <span className="text-lg font-semibold" style={{ color: "var(--mut-color-primary)" }}>
-            {subtotalDisplay.toLocaleString(activeLocale, {
-              style: "currency",
-              currency: displayCurrency,
-              minimumFractionDigits: 0,
-            })}
+            {formatCurrency(subtotalDisplay, DEFAULT_CURRENCY, activeLocale)}
           </span>
         </div>
         <button type="button" onClick={() => router.push(`/${locale}/checkout`)} className="btn-primary w-full">

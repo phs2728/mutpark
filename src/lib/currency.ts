@@ -1,31 +1,23 @@
-export const SUPPORTED_CURRENCIES = ["TRY", "USD", "EUR", "KRW"] as const;
+export const SUPPORTED_CURRENCIES = ["TRY"] as const;
 export type CurrencyCode = (typeof SUPPORTED_CURRENCIES)[number];
 export const DEFAULT_CURRENCY: CurrencyCode = "TRY";
 
-const EXCHANGE_RATES: Record<CurrencyCode, number> = {
-  TRY: 1,
-  USD: 0.032,
-  EUR: 0.029,
-  KRW: 43,
-};
-
 export function isCurrency(code: string): code is CurrencyCode {
-  return SUPPORTED_CURRENCIES.includes(code as CurrencyCode);
+  return code === DEFAULT_CURRENCY;
 }
 
-export function convertCurrency(amount: number, from: CurrencyCode, to: CurrencyCode) {
-  if (!Number.isFinite(amount)) return 0;
-  if (from === to) return amount;
-  const base = amount / EXCHANGE_RATES[from];
-  return base * EXCHANGE_RATES[to];
+export function convertCurrency(amount: number, _from?: CurrencyCode, _to?: CurrencyCode): number {
+  void _from;
+  void _to;
+  return Number.isFinite(amount) ? amount : 0;
 }
 
-export function getDefaultCurrency(initial?: string): CurrencyCode {
-  return initial && isCurrency(initial) ? (initial as CurrencyCode) : DEFAULT_CURRENCY;
+export function getDefaultCurrency(): CurrencyCode {
+  return DEFAULT_CURRENCY;
 }
 
 export function getSupportedCurrencies(): CurrencyCode[] {
-  return [...SUPPORTED_CURRENCIES];
+  return SUPPORTED_CURRENCIES as unknown as CurrencyCode[];
 }
 
 export function formatCurrency(amount: number, currency: CurrencyCode, locale: string) {
@@ -37,16 +29,5 @@ export function formatCurrency(amount: number, currency: CurrencyCode, locale: s
 }
 
 export function getCurrencyLabel(code: CurrencyCode) {
-  switch (code) {
-    case "TRY":
-      return "TRY ₺";
-    case "USD":
-      return "USD $";
-    case "EUR":
-      return "EUR €";
-    case "KRW":
-      return "KRW ₩";
-    default:
-      return code;
-  }
+  return code === "TRY" ? "TRY ₺" : code;
 }

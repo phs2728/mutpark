@@ -4,7 +4,6 @@ import { FormEvent, useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
 import { Locale, locales } from "@/i18n/config";
-import { getSupportedCurrencies, getCurrencyLabel, isCurrency } from "@/lib/currency";
 
 const localeOptions: Record<Locale, string> = {
   ko: "한국어",
@@ -24,7 +23,7 @@ interface Profile {
 export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
   const { t } = useI18n();
   const router = useRouter();
-  const [profile, setProfile] = useState(initialProfile);
+  const [profile, setProfile] = useState({ ...initialProfile, currency: "TRY" });
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | undefined>();
 
@@ -33,10 +32,11 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
     setLoading(true);
     setError(undefined);
     try {
+      const payload = { ...profile, currency: "TRY" };
       const response = await fetch("/api/profile", {
         method: "PATCH",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(profile),
+        body: JSON.stringify(payload),
       });
       if (!response.ok) {
         const json = await response.json();
@@ -69,38 +69,20 @@ export function ProfileForm({ initialProfile }: { initialProfile: Profile }) {
           className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
         />
       </div>
-      <div className="grid gap-4 sm:grid-cols-2">
-        <div>
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">Locale</label>
-          <select
-            value={profile.locale}
-            onChange={(event) => setProfile((prev) => ({ ...prev, locale: event.target.value }))}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
-          >
-            {locales.map((locale) => (
-              <option key={locale} value={locale}>
-                {localeOptions[locale] ?? locale.toUpperCase()}
-              </option>
-            ))}
-          </select>
-        </div>
-        <div>
-          <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">Currency</label>
-          <select
-            value={profile.currency}
-            onChange={(event) => {
-              const value = event.target.value;
-              setProfile((prev) => ({ ...prev, currency: isCurrency(value) ? value : prev.currency }));
-            }}
-            className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
-          >
-            {getSupportedCurrencies().map((code) => (
-              <option key={code} value={code}>
-                {getCurrencyLabel(code)}
-              </option>
-            ))}
-          </select>
-        </div>
+      <div>
+        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">Locale</label>
+        <select
+          value={profile.locale}
+          onChange={(event) => setProfile((prev) => ({ ...prev, locale: event.target.value }))}
+          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+        >
+          {locales.map((locale) => (
+            <option key={locale} value={locale}>
+              {localeOptions[locale] ?? locale.toUpperCase()}
+            </option>
+          ))}
+        </select>
+        <p className="mt-2 text-xs uppercase tracking-wide text-slate-400 dark:text-slate-500">Currency: TRY (₺)</p>
       </div>
       <button
         type="submit"

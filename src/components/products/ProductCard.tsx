@@ -4,8 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/providers/I18nProvider";
 import { useCartStore } from "@/hooks/useCartStore";
-import { useCurrency } from "@/providers/CurrencyProvider";
-import { isCurrency } from "@/lib/currency";
+import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { resolveImageUrl } from "@/lib/imagekit";
 
 interface ProductCardProps {
@@ -35,14 +34,9 @@ interface ProductCardProps {
 export function ProductCard({ locale, product }: ProductCardProps) {
   const { t, locale: activeLocale } = useI18n();
   const { addItem } = useCartStore();
-  const { currency: displayCurrency, convert } = useCurrency();
 
-  const baseCurrency = isCurrency(product.currency) ? product.currency : displayCurrency;
-  const displayPrice = isCurrency(baseCurrency) ? convert(product.price, baseCurrency) : product.price;
-  const originalPrice =
-    product.priceOriginal && isCurrency(baseCurrency)
-      ? convert(product.priceOriginal, baseCurrency)
-      : product.priceOriginal ?? null;
+  const displayPrice = product.price;
+  const originalPrice = product.priceOriginal ?? null;
   const imageSrc = resolveImageUrl(product.imageUrl, { width: 400, quality: 80 });
 
   const handleAddToCart = () => {
@@ -86,19 +80,11 @@ export function ProductCard({ locale, product }: ProductCardProps) {
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
             <p className="product-card__price text-lg font-semibold">
-              {displayPrice.toLocaleString(activeLocale, {
-                style: "currency",
-                currency: displayCurrency,
-                minimumFractionDigits: 0,
-              })}
+              {formatCurrency(displayPrice, DEFAULT_CURRENCY, activeLocale)}
             </p>
             {originalPrice && originalPrice > displayPrice ? (
               <p className="text-xs line-through" style={{ color: "var(--mut-color-text-secondary)" }}>
-                {originalPrice.toLocaleString(activeLocale, {
-                  style: "currency",
-                  currency: displayCurrency,
-                  minimumFractionDigits: 0,
-                })}
+                {formatCurrency(originalPrice, DEFAULT_CURRENCY, activeLocale)}
               </p>
             ) : null}
             {product.isExpired ? (

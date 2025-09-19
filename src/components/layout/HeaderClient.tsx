@@ -4,7 +4,6 @@ import Link from "next/link";
 import { useEffect } from "react";
 import { useI18n } from "@/providers/I18nProvider";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
-import { CurrencySwitcher } from "@/components/common/CurrencySwitcher";
 import { useCartStore } from "@/hooks/useCartStore";
 
 interface HeaderClientProps {
@@ -42,7 +41,6 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher canSync={Boolean(user)} />
-          <CurrencySwitcher canSync={Boolean(user)} />
           <Link href={`/${locale}/cart`} className="btn-secondary" style={{ position: "relative" }}>
             {t("navigation.cart")}
             {cartCount > 0 && (

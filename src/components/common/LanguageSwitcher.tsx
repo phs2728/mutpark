@@ -52,18 +52,31 @@ export function LanguageSwitcher({ canSync = false }: LanguageSwitcherProps) {
   };
 
   return (
-    <div className="flex items-center gap-2">
-      {locales.map((loc) => (
-        <button
-          key={loc}
-          type="button"
-          onClick={() => handleChange(loc)}
-          className={`chip ${loc === locale ? "chip-active" : ""}`}
-          disabled={isPending}
-        >
-          {labels[loc] ?? loc.toUpperCase()}
-        </button>
-      ))}
+    <div className="grid grid-cols-2 gap-2 sm:grid-cols-3 lg:grid-cols-5">
+      {locales.map((loc) => {
+        const isActive = loc === locale;
+        return (
+          <button
+            key={loc}
+            type="button"
+            onClick={() => handleChange(loc)}
+            className={`relative flex items-center justify-between rounded-2xl border px-4 py-3 text-sm font-semibold transition-colors ${
+              isActive
+                ? "border-emerald-500 bg-emerald-500 text-white shadow-lg"
+                : "border-slate-200 bg-white text-slate-600 hover:border-emerald-300 hover:bg-emerald-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:border-emerald-500"
+            }`}
+            disabled={isPending}
+            aria-pressed={isActive}
+          >
+            <span>{labels[loc] ?? loc.toUpperCase()}</span>
+            {isActive ? (
+              <span className="ml-2 text-xs font-bold" aria-hidden>
+                ✓
+              </span>
+            ) : null}
+          </button>
+        );
+      })}
     </div>
   );
 }
