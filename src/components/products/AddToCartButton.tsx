@@ -18,7 +18,7 @@ export function AddToCartButton({ productId, quantity = 1, children, className, 
   return (
     <button
       type="button"
-      className={`rounded-full bg-emerald-500 px-5 py-2 text-sm font-semibold text-white transition hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300 ${className ?? ""}`}
+      className={["btn-primary", className].filter(Boolean).join(" ")}
       disabled={isPending || disabled}
       onClick={() =>
         startTransition(() => {

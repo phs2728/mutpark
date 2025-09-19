@@ -157,8 +157,8 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
   return (
     <div className="space-y-12">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <div className="overflow-hidden rounded-3xl border border-slate-200 bg-white shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <div className="relative h-96 w-full bg-slate-100 dark:bg-slate-800">
+        <div className="card overflow-hidden">
+          <div className="relative h-96 w-full" style={{ background: "var(--mut-color-background-subtle)" }}>
             {mainImage ? (
               <Image
                 src={mainImage}
@@ -173,25 +173,21 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
               </div>
             )}
             <div className="absolute left-4 top-4 flex flex-col gap-2">
-              {product.halalCertified ? (
-                <span className="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-sm font-semibold text-white">
-                  {t("products.halal")}
-                </span>
-              ) : null}
+              {product.halalCertified ? <span className="badge badge-success">{t("products.halal")}</span> : null}
               {product.isExpired ? (
-                <span className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-sm font-semibold text-white">
-                  {t("products.expired")}
-                </span>
-              ) : product.expiresSoon ? (
-                <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-sm font-semibold text-white">
-                  {t("products.expiresSoon")}
-                </span>
+                <span className="badge badge-error">{t("products.expired")}</span>
+              ) : product.freshnessStatus === "EXPIRING" ? (
+                <span className="badge badge-warning">{t("products.expiresSoon")}</span>
               ) : null}
             </div>
           </div>
           <div className="space-y-4 p-6">
-            <h1 className="text-3xl font-semibold text-slate-900 dark:text-white">{product.name}</h1>
-            <p className="text-lg text-slate-600 dark:text-slate-300">{product.description}</p>
+            <h1 className="text-3xl font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
+              {product.name}
+            </h1>
+            <p className="text-lg" style={{ color: "var(--mut-color-text-secondary)" }}>
+              {product.description}
+            </p>
             <div className="flex flex-wrap items-center gap-4">
               {(() => {
                 const baseCurrency = isCurrency(product.currency) ? product.currency : displayCurrency;
@@ -202,7 +198,7 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                     : null;
                 return (
                   <>
-                    <span className="text-2xl font-bold text-emerald-600">
+                    <span className="text-2xl font-bold" style={{ color: "var(--mut-color-primary)" }}>
                       {priceValue.toLocaleString(activeLocale, {
                         style: "currency",
                         currency: displayCurrency,
@@ -210,7 +206,7 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                       })}
                     </span>
                     {originalValue && originalValue > priceValue ? (
-                      <span className="text-lg font-semibold text-slate-400 line-through">
+                      <span className="text-lg font-semibold line-through" style={{ color: "var(--mut-color-text-secondary)" }}>
                         {originalValue.toLocaleString(activeLocale, {
                           style: "currency",
                           currency: displayCurrency,
@@ -226,7 +222,7 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
                   {t("products.spiceLevel")}: {"🌶️".repeat(product.spiceLevel)}
                 </span>
               ) : null}
-              <span className="rounded-full bg-slate-100 px-3 py-1 text-sm font-medium text-slate-500 dark:bg-slate-800 dark:text-slate-300">
+              <span className="chip" style={{ background: "var(--mut-color-secondary)", border: "none" }}>
                 {t("products.stock")}: {product.stock}
               </span>
               {product.isLowStock && !product.isExpired ? (

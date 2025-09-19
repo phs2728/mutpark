@@ -168,38 +168,35 @@ export function ProductFilters() {
   const brandOptions = options.brands;
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-4 rounded-2xl border border-slate-200 bg-white p-4 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+    <form onSubmit={handleSubmit} className="card flex flex-col gap-4 p-4">
       {error ? (
         <p className="rounded-lg bg-red-50 px-3 py-2 text-sm text-red-600 dark:bg-red-500/10 dark:text-red-300">
           {t("notifications.error")}
         </p>
       ) : null}
       <div>
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
           {t("products.filters.search")}
         </label>
         <input
           type="text"
           value={search}
           onChange={(event) => setSearch(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+          className="input-field"
           placeholder="kimchi, gochujang..."
         />
         {suggestionsLoading ? (
-          <p className="pt-2 text-xs text-slate-400 dark:text-slate-500">{t("products.filters.loadingSuggestions", "Searching...")}</p>
+          <p className="pt-2 text-xs" style={{ color: "var(--mut-color-text-secondary)" }}>
+            {t("products.filters.loadingSuggestions", "Searching...")}
+          </p>
         ) : null}
         {!suggestionsLoading && suggestions.length > 0 ? (
-          <div className="flex flex-wrap gap-2 pt-2">
-            <span className="text-xs uppercase text-slate-400 dark:text-slate-500">
+          <div className="suggestion-chips">
+            <span className="text-xs uppercase" style={{ color: "var(--mut-color-text-secondary)" }}>
               {t("products.filters.suggestions")}
             </span>
             {suggestions.map((item) => (
-              <button
-                key={item.id}
-                type="button"
-                onClick={() => handleSuggestionSelect(item.name)}
-                className="rounded-full border border-slate-200 px-3 py-1 text-xs text-slate-600 transition hover:border-emerald-400 hover:text-emerald-600 dark:border-slate-700 dark:text-slate-300 dark:hover:border-emerald-500"
-              >
+              <button key={item.id} type="button" onClick={() => handleSuggestionSelect(item.name)}>
                 {item.name}
               </button>
             ))}
@@ -207,13 +204,13 @@ export function ProductFilters() {
         ) : null}
       </div>
       <div>
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
           {t("products.filters.category")}
         </label>
         <select
           value={category}
           onChange={(event) => setCategory(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+          className="select-input"
         >
           <option value="">{t("products.filters.all")}</option>
           {categoryOptions.map((option) => (
@@ -224,13 +221,13 @@ export function ProductFilters() {
         </select>
       </div>
       <div>
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
           {t("products.filters.brand")}
         </label>
         <select
           value={brand}
           onChange={(event) => setBrand(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+          className="select-input"
           disabled={loading && !brandOptions.length}
         >
           <option value="">{t("products.filters.all")}</option>
@@ -242,13 +239,13 @@ export function ProductFilters() {
         </select>
       </div>
       <div>
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
           {t("products.filters.sort")}
         </label>
         <select
           value={sort}
           onChange={(event) => setSort(event.target.value)}
-          className="mt-1 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
+          className="select-input"
         >
           <option value="newest">{t("products.filters.sortNewest")}</option>
           <option value="price-asc">{t("products.filters.sortPriceAsc")}</option>
@@ -256,10 +253,10 @@ export function ProductFilters() {
         </select>
       </div>
       <div className="flex flex-col gap-2">
-        <label className="text-sm font-semibold text-slate-700 dark:text-slate-200">
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
           {t("products.filters.halal")}
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
           <input
             type="checkbox"
             checked={halal}
@@ -268,7 +265,7 @@ export function ProductFilters() {
           />
           {t("products.halal")}
         </label>
-        <label className="flex items-center gap-2 text-sm text-slate-600 dark:text-slate-300">
+        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
           <input
             type="checkbox"
             checked={spicy}
@@ -279,17 +276,10 @@ export function ProductFilters() {
         </label>
       </div>
       <div className="mt-2 flex gap-2">
-        <button
-          type="submit"
-          className="flex-1 rounded-full bg-emerald-500 px-4 py-2 text-sm font-semibold text-white hover:bg-emerald-600"
-        >
+        <button type="submit" className="btn-primary flex-1">
           {t("products.filters.apply")}
         </button>
-        <button
-          type="button"
-          onClick={handleReset}
-          className="flex-1 rounded-full border border-slate-200 px-4 py-2 text-sm font-semibold text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:text-slate-300"
-        >
+        <button type="button" onClick={handleReset} className="btn-outline flex-1">
           {t("products.filters.reset")}
         </button>
       </div>

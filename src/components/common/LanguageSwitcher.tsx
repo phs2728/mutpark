@@ -52,17 +52,13 @@ export function LanguageSwitcher({ canSync = false }: LanguageSwitcherProps) {
   };
 
   return (
-    <div className="flex items-center gap-1">
+    <div className="flex items-center gap-2">
       {locales.map((loc) => (
         <button
           key={loc}
           type="button"
           onClick={() => handleChange(loc)}
-          className={`rounded-full px-3 py-1 text-sm transition-colors ${
-            loc === locale
-              ? "bg-slate-900 text-white dark:bg-slate-100 dark:text-slate-900"
-              : "bg-slate-100 text-slate-500 hover:bg-slate-200 dark:bg-slate-800 dark:text-slate-300"
-          }`}
+          className={`chip ${loc === locale ? "chip-active" : ""}`}
           disabled={isPending}
         >
           {labels[loc] ?? loc.toUpperCase()}

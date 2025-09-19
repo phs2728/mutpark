@@ -51,6 +51,11 @@ model User {
   orders        Order[]
   addresses     Address[]
   refreshTokens RefreshToken[]
+  productReviews ProductReview[]
+  reviewComments ReviewComment[]
+  reviewHelpful  ReviewHelpful[]
+  recipePosts    RecipePost[]
+  recipeLikes    RecipeLike[]
 }
 
 model SocialAccount {
@@ -87,6 +92,8 @@ model Product {
   translations    ProductTranslation[]
   cartItems       CartItem[]
   orderItems      OrderItem[]
+  reviews         ProductReview[]
+  recipeIngredients RecipeIngredient[]
 }
 
 model ProductTranslation {
@@ -201,4 +208,137 @@ model WebhookEvent {
   status      String   @default("received")
   createdAt   DateTime @default(now())
   processedAt DateTime?
+}
+
+model ProductReview {
+  id               Int           @id @default(autoincrement())
+  productId        Int
+  userId           Int
+  rating           Int
+  title            String?
+  content          String
+  imageUrls        Json?
+  helpfulCount     Int           @default(0)
+  reportCount      Int           @default(0)
+  verifiedPurchase Boolean       @default(false)
+  moderatorNotes   String?
+  moderatedAt      DateTime?
+  moderatedBy      Int?
+  status           ReviewStatus  @default(PENDING)
+  createdAt        DateTime      @default(now())
+  updatedAt        DateTime      @updatedAt
+
+  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  comments ReviewComment[]
+  helpful  ReviewHelpful[]
+
+  @@unique([productId, userId])
+}
+
+model ReviewHelpful {
+  id       Int      @id @default(autoincrement())
+  reviewId Int
+  userId   Int
+  createdAt DateTime @default(now())
+
+  review ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([reviewId, userId])
+}
+
+model ReviewComment {
+  id        Int            @id @default(autoincrement())
+  reviewId  Int
+  userId    Int
+  parentId  Int?
+  content   String
+  tags      Json?
+  status    CommentStatus @default(PUBLISHED)
+  createdAt DateTime       @default(now())
+  updatedAt DateTime       @updatedAt
+
+  review ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent ReviewComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  replies ReviewComment[] @relation("CommentReplies")
+}
+
+model RecipePost {
+  id            Int        @id @default(autoincrement())
+  authorId      Int
+  title         String
+  slug          String     @unique
+  content       Json
+  mainImageUrl  String?
+  difficulty    Difficulty @default(EASY)
+  cookingTime   Int
+  servings      Int
+  dietaryTags   Json?
+  koreanOrigin  Boolean    @default(false)
+  turkeyAdapted Boolean    @default(false)
+  likesCount    Int        @default(0)
+  featuredAt    DateTime?
+  publishedAt   DateTime?
+  status        PostStatus @default(DRAFT)
+  metadata      Json?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
+
+  author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  ingredients RecipeIngredient[]
+  likes       RecipeLike[]
+}
+
+model RecipeIngredient {
+  id          Int     @id @default(autoincrement())
+  recipeId    Int
+  name        String
+  quantity    String
+  unit        String?
+  productId   Int?
+  isEssential Boolean @default(true)
+  alternatives Json?
+  order       Int     @default(0)
+
+  recipe  RecipePost @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product?   @relation(fields: [productId], references: [id])
+}
+
+model RecipeLike {
+  id        Int      @id @default(autoincrement())
+  recipeId  Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  recipe RecipePost @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, userId])
+}
+
+enum ReviewStatus {
+  PENDING
+  PUBLISHED
+  REJECTED
+}
+
+enum CommentStatus {
+  PUBLISHED
+  DELETED
+  MODERATED
+}
+
+enum Difficulty {
+  EASY
+  MEDIUM
+  HARD
+}
+
+enum PostStatus {
+  DRAFT
+  PENDING
+  PUBLISHED
+  REJECTED
 }

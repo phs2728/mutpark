@@ -50,8 +50,8 @@ export function ProductCard({ locale, product }: ProductCardProps) {
   };
 
   return (
-    <div className="flex flex-col overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm transition hover:-translate-y-1 hover:shadow-lg dark:border-slate-800 dark:bg-slate-900">
-      <div className="relative h-48 w-full bg-slate-100 dark:bg-slate-800">
+    <div className="product-card overflow-hidden">
+      <div className="relative h-48 w-full" style={{ background: "var(--mut-color-background-subtle)" }}>
         {imageSrc ? (
           <Image
             src={imageSrc}
@@ -66,32 +66,26 @@ export function ProductCard({ locale, product }: ProductCardProps) {
           </div>
         )}
         <div className="absolute left-3 top-3 flex flex-col gap-2">
-          {product.halalCertified ? (
-            <span className="inline-flex items-center rounded-full bg-emerald-500 px-3 py-1 text-xs font-semibold text-white">
-              {t("products.halal")}
-            </span>
-          ) : null}
+          {product.halalCertified ? <span className="badge badge-success">{t("products.halal")}</span> : null}
           {product.isExpired ? (
-            <span className="inline-flex items-center rounded-full bg-red-600 px-3 py-1 text-xs font-semibold text-white">
-              {t("products.expired")}
-            </span>
-          ) : product.expiresSoon ? (
-            <span className="inline-flex items-center rounded-full bg-amber-500 px-3 py-1 text-xs font-semibold text-white">
-              {t("products.expiresSoon")}
-            </span>
+            <span className="badge badge-error">{t("products.expired")}</span>
+          ) : product.freshnessStatus === "EXPIRING" ? (
+            <span className="badge badge-warning">{t("products.expiresSoon")}</span>
           ) : null}
         </div>
       </div>
       <div className="flex flex-1 flex-col gap-3 p-4">
         <div>
-          <h3 className="text-lg font-semibold text-slate-900 dark:text-white">{product.name}</h3>
-          <p className="mt-1 line-clamp-2 text-sm text-slate-500 dark:text-slate-300">
+          <h3 className="text-lg font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
+            {product.name}
+          </h3>
+          <p className="mt-1 line-clamp-2 text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
             {product.description}
           </p>
         </div>
         <div className="mt-auto flex items-center justify-between">
           <div className="flex flex-col">
-            <p className="text-lg font-semibold text-slate-900 dark:text-white">
+            <p className="product-card__price text-lg font-semibold">
               {displayPrice.toLocaleString(activeLocale, {
                 style: "currency",
                 currency: displayCurrency,
@@ -99,7 +93,7 @@ export function ProductCard({ locale, product }: ProductCardProps) {
               })}
             </p>
             {originalPrice && originalPrice > displayPrice ? (
-              <p className="text-xs text-slate-400 line-through">
+              <p className="text-xs line-through" style={{ color: "var(--mut-color-text-secondary)" }}>
                 {originalPrice.toLocaleString(activeLocale, {
                   style: "currency",
                   currency: displayCurrency,
@@ -107,23 +101,19 @@ export function ProductCard({ locale, product }: ProductCardProps) {
                 })}
               </p>
             ) : null}
-          {product.isExpired ? (
-            <p className="text-xs font-semibold text-red-600 dark:text-red-400">
-              {t("products.expired")}
-            </p>
-          ) : null}
-          {!product.isExpired && product.freshnessStatus === "EXPIRING" ? (
-            <p className="text-xs font-semibold text-amber-600 dark:text-amber-400">
-              {t("products.expiresSoon")}
-            </p>
-          ) : null}
-          {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
-            <p className="text-xs font-semibold text-emerald-600">
-              {t("products.expiresSoon")} (-{product.discountPercentage}%)
-            </p>
-          ) : null}
+            {product.isExpired ? (
+              <p className="text-xs font-semibold text-red-600">{t("products.expired")}</p>
+            ) : null}
+            {!product.isExpired && product.freshnessStatus === "EXPIRING" ? (
+              <p className="text-xs font-semibold text-amber-600">{t("products.expiresSoon")}</p>
+            ) : null}
+            {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
+              <p className="text-xs font-semibold" style={{ color: "var(--mut-color-accent-free)" }}>
+                {t("products.expiresSoon")} (-{product.discountPercentage}%)
+              </p>
+            ) : null}
             {product.isLowStock && !product.isExpired ? (
-              <p className="text-xs font-medium text-amber-600 dark:text-amber-400">
+              <p className="text-xs font-medium text-amber-600">
                 {t("products.lowStock")}
               </p>
             ) : null}
@@ -134,15 +124,12 @@ export function ProductCard({ locale, product }: ProductCardProps) {
             ) : null}
           </div>
           <div className="flex gap-2">
-            <Link
-              href={`/${locale}/products/${product.slug}`}
-              className="rounded-full border border-slate-200 px-4 py-2 text-sm font-medium text-slate-600 hover:border-slate-400 hover:text-slate-900 dark:border-slate-700 dark:text-slate-200 dark:hover:border-slate-500"
-            >
+            <Link href={`/${locale}/products/${product.slug}`} className="btn-outline">
               {t("products.viewDetails")}
             </Link>
             <button
               type="button"
-              className="rounded-full bg-slate-900 px-4 py-2 text-sm font-semibold text-white hover:bg-slate-700 disabled:cursor-not-allowed disabled:bg-slate-400 dark:bg-slate-100 dark:text-slate-900 dark:hover:bg-slate-300"
+              className="btn-primary"
               onClick={handleAddToCart}
               disabled={product.isExpired}
             >

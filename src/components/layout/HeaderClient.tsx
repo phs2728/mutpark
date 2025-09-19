@@ -24,48 +24,51 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
     fetchCart().catch(() => undefined);
   }, [fetchCart]);
 
-  const navClass = "text-sm font-medium text-slate-600 hover:text-slate-900 dark:text-slate-300 dark:hover:text-white";
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 
   return (
-    <header className="border-b border-slate-200 bg-white/80 backdrop-blur dark:border-slate-800 dark:bg-slate-950/70">
-      <div className="mx-auto flex max-w-6xl items-center justify-between px-4 py-4">
+    <header className="app-header">
+      <div className="app-header__inner">
         <div className="flex items-center gap-8">
-          <Link href={`/${locale}`} className="text-xl font-semibold text-slate-900 dark:text-white">
+          <Link href={`/${locale}`} className="text-xl font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
             MutPark
           </Link>
-          <nav className="hidden items-center gap-4 md:flex">
-            <Link href={`/${locale}`} className={navClass}>
-              {t("navigation.home")}
-            </Link>
-            <Link href={`/${locale}/products`} className={navClass}>
-              {t("navigation.products")}
-            </Link>
-            <Link href={`/${locale}/community`} className={navClass}>
-              {t("navigation.community")}
-            </Link>
-            <Link href={`/${locale}/recipes`} className={navClass}>
-              {t("navigation.recipes")}
-            </Link>
+          <nav className="app-header__nav hidden md:flex">
+            <Link href={`/${locale}`}>{t("navigation.home")}</Link>
+            <Link href={`/${locale}/products`}>{t("navigation.products")}</Link>
+            <Link href={`/${locale}/community`}>{t("navigation.community")}</Link>
+            <Link href={`/${locale}/recipes`}>{t("navigation.recipes")}</Link>
           </nav>
         </div>
         <div className="flex items-center gap-3">
           <LanguageSwitcher canSync={Boolean(user)} />
           <CurrencySwitcher canSync={Boolean(user)} />
-          <Link href={`/${locale}/cart`} className="relative rounded-full bg-slate-100 px-4 py-2 text-sm font-medium text-slate-700 dark:bg-slate-800 dark:text-slate-200">
+          <Link href={`/${locale}/cart`} className="btn-secondary" style={{ position: "relative" }}>
             {t("navigation.cart")}
             {cartCount > 0 && (
-              <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-emerald-500 text-xs text-white">
+              <span
+                className="badge badge-success"
+                style={{
+                  position: "absolute",
+                  top: "-6px",
+                  right: "-6px",
+                  minWidth: "20px",
+                  height: "20px",
+                  display: "flex",
+                  alignItems: "center",
+                  justifyContent: "center",
+                }}
+              >
                 {cartCount}
               </span>
             )}
           </Link>
           {user ? (
-            <Link href={`/${locale}/account`} className={navClass}>
+            <Link href={`/${locale}/account`} className="chip">
               {user.name}
             </Link>
           ) : (
-            <Link href={`/${locale}/auth/login`} className={navClass}>
+            <Link href={`/${locale}/auth/login`} className="chip">
               {t("navigation.login")}
             </Link>
           )}

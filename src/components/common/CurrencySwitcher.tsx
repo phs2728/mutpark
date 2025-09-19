@@ -33,7 +33,7 @@ export function CurrencySwitcher({ canSync = false }: CurrencySwitcherProps) {
             });
           }
         }}
-        className="rounded-full border border-slate-200 bg-white px-3 py-1 text-sm font-medium text-slate-700 shadow-sm transition hover:border-emerald-300 focus:border-emerald-500 focus:outline-none disabled:opacity-60 dark:border-slate-700 dark:bg-slate-900 dark:text-slate-200"
+        className="select-input"
         disabled={isPending}
       >
         {getSupportedCurrencies().map((code) => (
