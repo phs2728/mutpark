@@ -230,27 +230,289 @@ FE: 사용자 경험 고도화
 [x] 레시피/커뮤니티 피드 UI 리뉴얼
 
 Phase 4: Admin Console 구축
-핵심 목표: 운영 인력을 위한 관리 도구를 제공하여 주문, 재고, 커뮤니티 콘텐츠를 효율적으로 관리한다.
+핵심 목표: 터키 이커머스 운영에 특화된 관리 도구를 제공하여 주문, 재고, 콘텐츠, 세금계산, 배송업체 연동을 효율적으로 관리한다.
 
-BE: 어드민 지원 기능
-[ ] 주문/배송 현황 조회 및 상태 변경 API
+🏗️ 데이터베이스 확장
+[ ] 관리자 권한 및 감사 로그 모델 추가
+```sql
+- AdminRole (SUPER_ADMIN, ADMIN, MODERATOR, OPERATOR)
+- AuditLog (관리자 활동 기록)
+- SystemSettings (배송업체, 세금, 배너 등 설정)
+- TaxInvoice (세금계산서 발행 관리)
+- Banner (홈페이지 배너 관리)
+- ShippingProvider (배송업체 설정 및 API 연동)
+```
 
-[ ] 재고/유통기한 모니터링 API (임박/품절 알림 포함)
+[ ] 터키 세금계산서 및 주소 관리 모델
+```sql
+- TaxAddress (세금계산용 주소 - TCKN/VKN 포함)
+- InvoiceTemplate (영수증 템플릿 관리)
+- CompanyInfo (회사 정보 및 세금 정보)
+```
 
-[ ] 리뷰/레시피 모더레이션 워크플로 API
+🔧 BE: 어드민 지원 기능
 
-[ ] 관리자/운영자 권한 관리 및 감사 로그
+주문 관리 시스템
+[ ] 주문 현황 대시보드 API (실시간 통계, 일/월/년 매출)
+[ ] 주문 상세 조회 및 상태 변경 API
+[ ] 배송 추적 정보 업데이트 API (배송업체별 연동)
+[ ] 주문 취소/환불 처리 워크플로 API
+[ ] 대량 주문 처리 (CSV 업로드/다운로드)
 
-FE: 어드민 콘솔 UI
-[ ] /admin 라우트 기반 기본 레이아웃 설계 (Next.js App Router)
+상품 및 재고 관리
+[ ] 상품 상세페이지 생성/수정 API (다국어 지원)
+[ ] 재고 모니터링 및 자동 알림 API
+[ ] 유통기한 관리 및 임박 상품 알림
+[ ] 상품 이미지 업로드 및 관리 API
+[ ] 가격 변경 이력 관리 및 일괄 가격 수정
 
-[ ] 주문 관리 대시보드 및 상세 뷰 구현
+콘텐츠 관리 시스템 (CMS)
+[ ] 홈페이지 배너 관리 API (위치별, 기간별 설정)
+[ ] 이벤트/프로모션 관리 API
+[ ] SEO 메타데이터 관리 API
+[ ] 다국어 콘텐츠 관리 API (터키어, 한국어, 영어, 아랍어, 러시아어)
 
-[ ] 재고 현황/임박 알림 보드 구현
+터키 특화 기능
+[ ] 세금계산서 자동 발행 API (TCKN/VKN 기반)
+[ ] 터키 개인정보보호법(KVKK) 준수 데이터 관리
+[ ] 할랄 인증 상품 관리 및 필터링
+[ ] 터키 결제 시스템 (Iyzico, PayU) 설정 관리
 
-[ ] 리뷰/레시피 신고/승인 화면 구현
+배송 관리 시스템
+[ ] 배송업체 API 연동 설정 (Yurtiçi Kargo, Aras Kargo, MNG Kargo)
+[ ] 배송비 계산 룰 엔진 (지역별, 무게별, 수량별)
+[ ] 배송 추적 통합 API
+[ ] 배송 지연 자동 알림 시스템
 
-[ ] 권한 관리 및 운영자 계정 설정 화면
+사용자 및 권한 관리
+[ ] 관리자 계정 생성/수정/삭제 API
+[ ] 역할 기반 권한 관리 (RBAC) API
+[ ] 관리자 활동 감사 로그 API
+[ ] 2FA (Two-Factor Authentication) 지원
+
+분석 및 리포팅
+[ ] 매출 분석 API (일/주/월/년, 상품별, 지역별)
+[ ] 고객 행동 분석 API
+[ ] 재고 회전율 분석 API
+[ ] 커뮤니티 활동 통계 API
+
+🎨 FE: 어드민 콘솔 UI
+
+1. 기본 레이아웃 및 인증
+[ ] /admin 라우트 보호 및 인증 시스템
+[ ] 반응형 관리자 대시보드 레이아웃
+[ ] 다크모드 지원 및 사용자 설정
+[ ] 실시간 알림 시스템 (WebSocket 기반)
+
+2. 메인 대시보드 (/admin/dashboard)
+[ ] 실시간 주문 현황 위젯
+[ ] 매출 트렌드 차트 (Chart.js/Recharts)
+[ ] 재고 부족 알림 카드
+[ ] 신규 리뷰/게시물 알림
+[ ] 시스템 상태 모니터링
+
+3. 주문 관리 (/admin/orders)
+[ ] 주문 목록 테이블 (필터링, 정렬, 페이지네이션)
+[ ] 주문 상세 뷰 및 편집 모달
+[ ] 배송 상태 일괄 업데이트
+[ ] 주문서/송장 프린트 기능
+[ ] 환불/취소 처리 워크플로
+
+4. 상품 관리 (/admin/products)
+[ ] 상품 목록 그리드/테이블 뷰
+[ ] 상품 생성/수정 폼 (위지윅 에디터 포함)
+[ ] 이미지 드래그앤드롭 업로드
+[ ] 재고 관리 및 알림 설정
+[ ] 가격 변경 이력 뷰어
+[ ] 상품 일괄 수정 (CSV 업로드)
+
+5. 콘텐츠 관리 (/admin/content)
+[ ] 배너 관리 인터페이스 (위치별 드래그앤드롭)
+[ ] 이벤트/프로모션 캘린더
+[ ] 다국어 콘텐츠 편집기
+[ ] SEO 설정 패널
+[ ] 페이지 미리보기 기능
+
+6. 고객 관리 (/admin/customers)
+[ ] 고객 목록 및 상세 정보
+[ ] 주소 관리 (배송용/세금계산용 구분)
+[ ] 주문 이력 및 통계
+[ ] KVKK 개인정보 처리 기록
+[ ] 고객 문의 및 지원 기록
+
+7. 세금 및 회계 (/admin/finance)
+[ ] 세금계산서 발행 관리
+[ ] 영수증 템플릿 편집기
+[ ] 매출 및 세금 리포트
+[ ] 정산 관리 (일/월별)
+[ ] 환율 관리 (TRY 기준)
+
+8. 배송 관리 (/admin/shipping)
+[ ] 배송업체 설정 및 API 키 관리
+[ ] 배송비 룰 엔진 설정
+[ ] 배송 추적 통합 대시보드
+[ ] 배송 지연 알림 관리
+[ ] 배송 통계 및 성과 분석
+
+9. 시스템 설정 (/admin/settings)
+[ ] 일반 설정 (회사 정보, 연락처, 로고)
+[ ] 결제 설정 (PG사 API 키, 수수료)
+[ ] 이메일 설정 (SMTP, 템플릿)
+[ ] 알림 설정 (푸시, SMS, 이메일)
+[ ] API 연동 설정 (배송, 결제, 분석)
+
+10. 사용자 및 권한 (/admin/users)
+[ ] 관리자 계정 관리
+[ ] 역할 및 권한 설정 매트릭스
+[ ] 로그인 이력 및 보안 로그
+[ ] 2FA 설정 관리
+
+11. 분석 및 리포팅 (/admin/analytics)
+[ ] 매출 대시보드 (다양한 차트)
+[ ] 고객 분석 (연령, 지역, 구매 패턴)
+[ ] 상품 성과 분석
+[ ] 트래픽 분석 연동 (Google Analytics)
+[ ] 커스텀 리포트 생성기
+
+12. 커뮤니티 관리 (/admin/community)
+[ ] 게시물 모더레이션 큐
+[ ] 신고 처리 워크플로
+[ ] 사용자 활동 모니터링
+[ ] 커뮤니티 통계 대시보드
+
+🔐 권한 관리 체계
+
+SUPER_ADMIN (최고 관리자)
+- 모든 기능 접근 가능
+- 관리자 계정 생성/삭제
+- 시스템 설정 변경
+- 감사 로그 조회
+
+ADMIN (일반 관리자)
+- 주문, 상품, 고객 관리
+- 콘텐츠 및 배너 관리
+- 리포트 조회 및 생성
+- 시스템 설정 조회만 가능
+
+MODERATOR (커뮤니티 관리자)
+- 커뮤니티 게시물 관리
+- 리뷰 승인/거부
+- 신고 처리
+- 사용자 제재
+
+OPERATOR (운영자)
+- 주문 상태 변경
+- 재고 관리
+- 배송 처리
+- 고객 문의 응답
+
+💾 데이터베이스 스키마 확장
+
+```prisma
+enum AdminRole {
+  SUPER_ADMIN
+  ADMIN
+  MODERATOR
+  OPERATOR
+}
+
+model AdminUser {
+  id          Int       @id @default(autoincrement())
+  email       String    @unique
+  password    String
+  name        String
+  role        AdminRole
+  permissions Json?     // 세부 권한 설정
+  lastLoginAt DateTime?
+  createdAt   DateTime  @default(now())
+  updatedAt   DateTime  @updatedAt
+  auditLogs   AuditLog[]
+}
+
+model AuditLog {
+  id           Int      @id @default(autoincrement())
+  adminId      Int
+  action       String   // CREATE, UPDATE, DELETE
+  resourceType String   // ORDER, PRODUCT, USER, etc.
+  resourceId   String
+  oldValues    Json?
+  newValues    Json?
+  ipAddress    String
+  userAgent    String
+  createdAt    DateTime @default(now())
+  admin        AdminUser @relation(fields: [adminId], references: [id])
+}
+
+model TaxAddress {
+  id          Int     @id @default(autoincrement())
+  userId      Int
+  companyName String?
+  taxNumber   String  // TCKN or VKN
+  address     String
+  city        String
+  district    String
+  postalCode  String?
+  isCompany   Boolean @default(false)
+  user        User    @relation(fields: [userId], references: [id])
+}
+
+model Banner {
+  id          Int      @id @default(autoincrement())
+  title       String
+  imageUrl    String
+  linkUrl     String?
+  position    String   // HERO, SIDEBAR, FOOTER
+  isActive    Boolean  @default(true)
+  startDate   DateTime
+  endDate     DateTime?
+  order       Int      @default(0)
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+}
+
+model SystemSettings {
+  id       Int    @id @default(autoincrement())
+  category String // SHIPPING, PAYMENT, EMAIL, etc.
+  key      String
+  value    Json
+  updatedAt DateTime @updatedAt
+
+  @@unique([category, key])
+}
+
+model TaxInvoice {
+  id           Int      @id @default(autoincrement())
+  orderId      Int      @unique
+  invoiceNumber String  @unique
+  taxNumber    String
+  companyName  String?
+  amount       Decimal  @db.Decimal(10, 2)
+  taxAmount    Decimal  @db.Decimal(10, 2)
+  totalAmount  Decimal  @db.Decimal(10, 2)
+  issuedAt     DateTime @default(now())
+  order        Order    @relation(fields: [orderId], references: [id])
+}
+```
+
+🎯 개발 우선순위
+
+1단계 (필수 - 4주)
+[ ] 기본 인증 및 권한 시스템
+[ ] 주문 관리 기본 기능
+[ ] 상품 관리 기본 기능
+[ ] 메인 대시보드
+
+2단계 (중요 - 3주)
+[ ] 재고 관리 및 알림
+[ ] 배송 관리 시스템
+[ ] 세금계산서 발행
+[ ] 배너 관리
+
+3단계 (고도화 - 3주)
+[ ] 분석 및 리포팅
+[ ] 커뮤니티 관리
+[ ] 고급 권한 관리
+[ ] API 연동 설정
 
 📊 비기능 요구사항 (Non-Functional Requirements)
 성능 (Performance)

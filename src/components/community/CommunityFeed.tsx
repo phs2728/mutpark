@@ -290,13 +290,17 @@ export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
 
               {/* Post Image */}
               {post.imageUrl && (
-                <div className="relative aspect-video mx-6 mb-4 rounded-xl overflow-hidden">
+                <div className="relative aspect-video mx-6 mb-4 rounded-xl overflow-hidden bg-slate-100 dark:bg-slate-800">
                   <Image
                     src={post.imageUrl}
                     alt={post.title}
                     fill
                     sizes="(min-width: 768px) 600px, 100vw"
                     className="object-cover"
+                    onError={(e) => {
+                      const target = e.target as HTMLImageElement;
+                      target.src = '/default-post.jpg';
+                    }}
                   />
                 </div>
               )}
