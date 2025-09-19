@@ -18,6 +18,9 @@
     "ctaShop": "ابدأ التسوق",
     "ctaRecipes": "عرض الوصفات"
   },
+  "common": {
+    "loading": "جارٍ التحميل..."
+  },
   "products": {
     "featured": "منتجات مميزة",
     "filters": {
@@ -68,6 +71,30 @@
       "addToCart": "أضف إلى السلة",
       "checkout": "اشترِ الآن"
     }
+  },
+  "reviews": {
+    "title": "تقييمات العملاء",
+    "subtitle": "إجمالي التقييمات",
+    "average": "متوسط التقييم",
+    "ratingBreakdown": "توزيع التقييمات",
+    "createTitle": "اكتب تقييمًا",
+    "updateTitle": "تعديل تقييمي",
+    "delete": "حذف التقييم",
+    "ratingLabel": "التقييم",
+    "titleLabel": "العنوان",
+    "titlePlaceholder": "عنوان التقييم (اختياري)",
+    "contentLabel": "المحتوى",
+    "contentPlaceholder": "شارك تجربتك مع هذا المنتج.",
+    "contentHelper": "يرجى كتابة 10 أحرف على الأقل.",
+    "submit": "إرسال التقييم",
+    "save": "حفظ التعديلات",
+    "loginPrompt": "سجّل الدخول لكتابة تقييم.",
+    "empty": "لا توجد تقييمات بعد.",
+    "verified": "عملية شراء مؤكدة",
+    "viewImage": "عرض الصورة",
+    "prev": "السابق",
+    "next": "التالي",
+    "pageIndicator": "الصفحة"
   },
   "auth": {
     "login": {

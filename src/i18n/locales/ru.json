@@ -18,6 +18,9 @@
     "ctaShop": "Начать покупки",
     "ctaRecipes": "Смотреть рецепты"
   },
+  "common": {
+    "loading": "Загрузка..."
+  },
   "products": {
     "featured": "Избранные товары",
     "filters": {
@@ -68,6 +71,30 @@
       "addToCart": "В корзину",
       "checkout": "Купить сейчас"
     }
+  },
+  "reviews": {
+    "title": "Отзывы покупателей",
+    "subtitle": "Всего отзывов",
+    "average": "Средняя оценка",
+    "ratingBreakdown": "Распределение оценок",
+    "createTitle": "Написать отзыв",
+    "updateTitle": "Изменить мой отзыв",
+    "delete": "Удалить отзыв",
+    "ratingLabel": "Оценка",
+    "titleLabel": "Заголовок",
+    "titlePlaceholder": "Заголовок отзыва (необязательно)",
+    "contentLabel": "Отзыв",
+    "contentPlaceholder": "Поделитесь впечатлениями о товаре.",
+    "contentHelper": "Пожалуйста, напишите минимум 10 символов.",
+    "submit": "Отправить отзыв",
+    "save": "Сохранить изменения",
+    "loginPrompt": "Войдите, чтобы оставить отзыв.",
+    "empty": "Отзывов пока нет.",
+    "verified": "Подтвержденная покупка",
+    "viewImage": "Открыть изображение",
+    "prev": "Назад",
+    "next": "Вперёд",
+    "pageIndicator": "Страница"
   },
   "auth": {
     "login": {

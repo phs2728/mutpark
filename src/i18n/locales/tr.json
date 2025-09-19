@@ -18,6 +18,9 @@
     "ctaShop": "Alışverişe Başla",
     "ctaRecipes": "Tarifleri Gör"
   },
+  "common": {
+    "loading": "Yükleniyor..."
+  },
   "products": {
     "featured": "Öne Çıkan Ürünler",
     "filters": {
@@ -68,6 +71,30 @@
       "addToCart": "Sepete Ekle",
       "checkout": "Hemen Satın Al"
     }
+  },
+  "reviews": {
+    "title": "Müşteri Yorumları",
+    "subtitle": "Toplam yorum",
+    "average": "Ortalama puan",
+    "ratingBreakdown": "Puan dağılımı",
+    "createTitle": "Yorum Yaz",
+    "updateTitle": "Yorumunu Güncelle",
+    "delete": "Yorumu sil",
+    "ratingLabel": "Puan",
+    "titleLabel": "Başlık",
+    "titlePlaceholder": "Yorum başlığı (opsiyonel)",
+    "contentLabel": "Yorum",
+    "contentPlaceholder": "Bu ürünle deneyimini paylaş.",
+    "contentHelper": "Lütfen en az 10 karakter yazın.",
+    "submit": "Yorumu gönder",
+    "save": "Değişiklikleri kaydet",
+    "loginPrompt": "Yorum yazmak için giriş yapın.",
+    "empty": "Henüz yorum yok.",
+    "verified": "Onaylı satın alma",
+    "viewImage": "Görseli aç",
+    "prev": "Önceki",
+    "next": "Sonraki",
+    "pageIndicator": "Sayfa"
   },
   "auth": {
     "login": {

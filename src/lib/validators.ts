@@ -99,5 +99,24 @@ export const updateProductSchema = createProductSchema.partial().extend({
   translations: z.array(translationSchema).optional(),
 });
 
+export const productReviewListSchema = z.object({
+  page: z.coerce.number().min(1).default(1),
+  pageSize: z.coerce.number().min(1).max(50).default(10),
+});
+
+export const createProductReviewSchema = z.object({
+  rating: z.number().int().min(1).max(5),
+  title: z.string().min(1).max(200).optional(),
+  content: z.string().min(10).max(2000),
+  imageUrls: z.array(z.string().url()).max(6).optional(),
+});
+
+export const updateProductReviewSchema = createProductReviewSchema.partial().refine(
+  (data) => Object.keys(data).length > 0,
+  {
+    message: "At least one field must be provided",
+  },
+);
+
 export type RegisterUserInput = z.infer<typeof registerUserSchema>;
 export type LoginInput = z.infer<typeof loginSchema>;

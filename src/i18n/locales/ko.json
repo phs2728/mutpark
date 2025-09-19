@@ -18,6 +18,9 @@
     "ctaShop": "지금 쇼핑하기",
     "ctaRecipes": "레시피 보기"
   },
+  "common": {
+    "loading": "로딩 중..."
+  },
   "products": {
     "featured": "추천 상품",
     "filters": {
@@ -68,6 +71,30 @@
       "addToCart": "장바구니 담기",
       "checkout": "바로 구매"
     }
+  },
+  "reviews": {
+    "title": "고객 리뷰",
+    "subtitle": "전체 리뷰",
+    "average": "평균 평점",
+    "ratingBreakdown": "평점 분포",
+    "createTitle": "리뷰 작성",
+    "updateTitle": "내 리뷰 수정",
+    "delete": "리뷰 삭제",
+    "ratingLabel": "평점 선택",
+    "titleLabel": "제목",
+    "titlePlaceholder": "리뷰 제목 (선택)",
+    "contentLabel": "내용",
+    "contentPlaceholder": "상품 사용 후기를 작성해주세요.",
+    "contentHelper": "최소 10자 이상 작성해주세요.",
+    "submit": "작성하기",
+    "save": "저장하기",
+    "loginPrompt": "리뷰를 작성하려면 로그인해주세요.",
+    "empty": "아직 등록된 리뷰가 없습니다.",
+    "verified": "구매 인증",
+    "viewImage": "이미지 보기",
+    "prev": "이전",
+    "next": "다음",
+    "pageIndicator": "페이지"
   },
   "auth": {
     "login": {

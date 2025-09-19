@@ -4,6 +4,7 @@ import Image from "next/image";
 import Link from "next/link";
 import { useI18n } from "@/providers/I18nProvider";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
+import { ProductReviews } from "@/components/products/ProductReviews";
 import { useMemo, useState, type ReactNode } from "react";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { isCurrency } from "@/lib/currency";
@@ -41,6 +42,7 @@ interface ProductDetailProps {
     price: number;
     currency: string;
   }>;
+  currentUserId?: number | null;
 }
 
 type DetailTab = "details" | "ingredients" | "nutrition" | "recipes";
@@ -101,7 +103,7 @@ function renderContent(value: unknown, emptyFallback: string): ReactNode {
   return <p className="text-sm text-slate-600 dark:text-slate-300">{String(value)}</p>;
 }
 
-export function ProductDetail({ locale, product, related }: ProductDetailProps) {
+export function ProductDetail({ locale, product, related, currentUserId }: ProductDetailProps) {
   const { t, locale: activeLocale } = useI18n();
   const { currency: displayCurrency, convert } = useCurrency();
   const [activeTab, setActiveTab] = useState<DetailTab>("details");
@@ -320,6 +322,7 @@ export function ProductDetail({ locale, product, related }: ProductDetailProps) 
           {tabContent[activeTab]}
         </div>
       </section>
+      <ProductReviews productId={product.id} locale={locale} currentUserId={currentUserId} />
     </div>
   );
 }

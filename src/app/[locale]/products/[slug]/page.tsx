@@ -1,6 +1,7 @@
 import { notFound } from "next/navigation";
 import { prisma } from "@/lib/prisma";
 import { getLocalizedProduct } from "@/lib/i18n-utils";
+import { getAuthenticatedUser } from "@/lib/session";
 import { ProductDetail } from "@/components/products/ProductDetail";
 
 export default async function ProductDetailPage({
@@ -19,6 +20,8 @@ export default async function ProductDetailPage({
   if (!product) {
     notFound();
   }
+
+  const auth = await getAuthenticatedUser();
 
   const relatedProducts = await prisma.product.findMany({
     where: {
@@ -45,6 +48,7 @@ export default async function ProductDetailPage({
         price: item.price,
         currency: item.currency,
       }))}
+      currentUserId={auth?.userId}
     />
   );
 }

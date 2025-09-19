@@ -18,6 +18,9 @@
     "ctaShop": "Start Shopping",
     "ctaRecipes": "View Recipes"
   },
+  "common": {
+    "loading": "Loading..."
+  },
   "products": {
     "featured": "Featured Products",
     "filters": {
@@ -68,6 +71,30 @@
       "addToCart": "Add to Cart",
       "checkout": "Buy Now"
     }
+  },
+  "reviews": {
+    "title": "Customer Reviews",
+    "subtitle": "Total reviews",
+    "average": "Average rating",
+    "ratingBreakdown": "Rating breakdown",
+    "createTitle": "Write a review",
+    "updateTitle": "Edit your review",
+    "delete": "Delete review",
+    "ratingLabel": "Rating",
+    "titleLabel": "Title",
+    "titlePlaceholder": "Review title (optional)",
+    "contentLabel": "Review",
+    "contentPlaceholder": "Share your experience with this product.",
+    "contentHelper": "Please write at least 10 characters.",
+    "submit": "Submit review",
+    "save": "Save changes",
+    "loginPrompt": "Sign in to leave a review.",
+    "empty": "No reviews yet.",
+    "verified": "Verified purchase",
+    "viewImage": "View image",
+    "prev": "Previous",
+    "next": "Next",
+    "pageIndicator": "Page"
   },
   "auth": {
     "login": {
