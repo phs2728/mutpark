@@ -3,7 +3,7 @@ import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 import { getDirection, isLocale } from "@/i18n/config";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
-import { getDefaultCurrency } from "@/lib/currency";
+import type { CurrencyCode } from "@/lib/currency";
 import { getAuthenticatedUser } from "@/lib/session";
 import { prisma } from "@/lib/prisma";
 
@@ -40,13 +40,17 @@ export default async function RootLayout({
   const direction = getDirection(locale);
 
   const auth = await getAuthenticatedUser();
-  let currency = getDefaultCurrency();
+  const supportedCurrencies = new Set<CurrencyCode>(["TRY", "USD", "EUR", "KRW"]);
+  let currency: CurrencyCode = "TRY";
   if (auth) {
     const user = await prisma.user.findUnique({
       where: { id: auth.userId },
       select: { currency: true },
     });
-    currency = getDefaultCurrency(user?.currency);
+    const preferred = user?.currency;
+    if (preferred && supportedCurrencies.has(preferred as CurrencyCode)) {
+      currency = preferred as CurrencyCode;
+    }
   }
 
   return (
