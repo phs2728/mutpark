@@ -5,9 +5,7 @@ import { errorResponse, successResponse } from "@/lib/api";
 import { requireAuth } from "@/lib/auth-guard";
 import { createOrderSchema } from "@/lib/validators";
 
-const SHIPPING_THRESHOLD = 500;
-const SHIPPING_FEE_STANDARD = 29.9;
-const SHIPPING_FEE_EXPRESS = 49.9;
+import { getShippingFee } from "@/lib/shipping";
 
 export async function GET(request: NextRequest) {
   try {
@@ -73,12 +71,8 @@ export async function POST(request: NextRequest) {
       return errorResponse(`재고가 부족한 상품이 있습니다: ${outOfStock.join(", ")}`, 400);
     }
 
-    const freeShipping = subtotal.gte(SHIPPING_THRESHOLD);
-    const shippingFeeValue = freeShipping
-      ? 0
-      : data.shippingMethod === "express"
-      ? SHIPPING_FEE_EXPRESS
-      : SHIPPING_FEE_STANDARD;
+    const subtotalNumber = subtotal.toNumber();
+    const shippingFeeValue = getShippingFee(data.shippingMethod, subtotalNumber);
     const shippingFee = new Prisma.Decimal(shippingFeeValue);
     const total = subtotal.add(shippingFee);
 

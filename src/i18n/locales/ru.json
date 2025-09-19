@@ -124,7 +124,7 @@
       "title": "Доставка",
       "label": "Доставка",
       "free": "Бесплатно",
-      "freeThreshold": "Бесплатная доставка от ₺{amount}",
+      "freeThreshold": "Бесплатная доставка от {amount}",
       "options": {
         "standard": {
           "title": "Стандартная",

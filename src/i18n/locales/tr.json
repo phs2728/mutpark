@@ -124,7 +124,7 @@
       "title": "Teslimat",
       "label": "Kargo",
       "free": "Ücretsiz",
-      "freeThreshold": "₺{amount} ve üzeri siparişlerde ücretsiz kargo",
+      "freeThreshold": "{amount} ve üzeri siparişlerde ücretsiz kargo",
       "options": {
         "standard": {
           "title": "Standart kargo",

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
 import { useCurrency } from "@/providers/CurrencyProvider";
 import { isCurrency, type CurrencyCode } from "@/lib/currency";
+import { SHIPPING_THRESHOLD_TRY, getShippingFee } from "@/lib/shipping";
 
 interface CheckoutAddress {
   id: number;
@@ -52,20 +53,17 @@ export function CheckoutClient({
     const converted = convert(item.price * item.quantity, baseCurrency);
     return acc + converted;
   }, 0);
-
   const subtotalRaw = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const SHIPPING_THRESHOLD = 500;
-  const SHIPPING_FEE_STANDARD = 29.9;
-  const SHIPPING_FEE_EXPRESS = 49.9;
   const baseCurrency: CurrencyCode = "TRY";
-  const freeShipping = subtotalRaw >= SHIPPING_THRESHOLD;
-  const shippingFeeValue = freeShipping
-    ? 0
-    : shippingMethod === "express"
-    ? SHIPPING_FEE_EXPRESS
-    : SHIPPING_FEE_STANDARD;
+  const shippingFeeValue = getShippingFee(shippingMethod, subtotalRaw);
   const shippingFeeDisplay = convert(shippingFeeValue, baseCurrency);
   const totalDisplay = subtotalDisplay + shippingFeeDisplay;
+  const thresholdDisplay = convert(SHIPPING_THRESHOLD_TRY, baseCurrency);
+  const thresholdLabel = thresholdDisplay.toLocaleString(activeLocale, {
+    style: "currency",
+    currency: displayCurrency,
+    minimumFractionDigits: 0,
+  });
 
   const paymentOptions: Array<{
     id: "iyzico" | "papara" | "installment";
@@ -96,21 +94,18 @@ export function CheckoutClient({
     title: string;
     description: string;
     estimate: string;
-    fee: number;
   }> = [
     {
       id: "standard",
       title: t("checkout.shipping.options.standard.title"),
       description: t("checkout.shipping.options.standard.description"),
       estimate: t("checkout.shipping.options.standard.estimate"),
-      fee: SHIPPING_FEE_STANDARD,
     },
     {
       id: "express",
       title: t("checkout.shipping.options.express.title"),
       description: t("checkout.shipping.options.express.description"),
       estimate: t("checkout.shipping.options.express.estimate"),
-      fee: SHIPPING_FEE_EXPRESS,
     },
   ];
 
@@ -238,7 +233,7 @@ export function CheckoutClient({
         <section className="space-y-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
           <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.shipping.title")}</h2>
           <p className="text-xs text-slate-500 dark:text-slate-300">
-            {t("checkout.shipping.freeThreshold", { amount: SHIPPING_THRESHOLD })}
+            {t("checkout.shipping.freeThreshold").replace("{amount}", thresholdLabel)}
           </p>
           <div className="flex flex-col gap-3">
             {shippingOptions.map((option) => (
@@ -263,15 +258,22 @@ export function CheckoutClient({
                   <span className="text-xs text-slate-500 dark:text-slate-300">{option.estimate}</span>
                 </div>
                 <p className="text-xs text-slate-500 dark:text-slate-300">{option.description}</p>
-                {!freeShipping ? (
-                  <p className="text-xs font-semibold text-emerald-600">
-                    {convert(option.fee, baseCurrency).toLocaleString(activeLocale, {
-                      style: "currency",
-                      currency: displayCurrency,
-                      minimumFractionDigits: 0,
-                    })}
-                  </p>
-                ) : null}
+                {(() => {
+                  const optionFeeValue = getShippingFee(option.id, subtotalRaw);
+                  if (optionFeeValue === 0) {
+                    return <p className="text-xs font-semibold text-emerald-600">{t("checkout.shipping.free")}</p>;
+                  }
+                  const optionFeeDisplay = convert(optionFeeValue, baseCurrency);
+                  return (
+                    <p className="text-xs font-semibold text-emerald-600">
+                      {optionFeeDisplay.toLocaleString(activeLocale, {
+                        style: "currency",
+                        currency: displayCurrency,
+                        minimumFractionDigits: 0,
+                      })}
+                    </p>
+                  );
+                })()}
               </label>
             ))}
           </div>

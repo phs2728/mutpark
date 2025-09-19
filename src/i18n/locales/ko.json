@@ -124,7 +124,7 @@
       "title": "배송 방법",
       "label": "배송비",
       "free": "무료",
-      "freeThreshold": "₺{amount} 이상 주문 시 무료 배송",
+      "freeThreshold": "{amount} 이상 주문 시 무료 배송",
       "options": {
         "standard": {
           "title": "일반 배송",

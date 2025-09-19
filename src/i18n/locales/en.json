@@ -124,7 +124,7 @@
       "title": "Shipping",
       "label": "Shipping",
       "free": "Free",
-      "freeThreshold": "Free shipping on orders over ₺{amount}",
+      "freeThreshold": "Free shipping on orders over {amount}",
       "options": {
         "standard": {
           "title": "Standard shipping",

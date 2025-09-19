@@ -44,7 +44,7 @@ export function ProductGrid({ locale, products, meta }: ProductGridProps) {
     <div className="space-y-3">
       {meta ? (
         <div className="flex items-center justify-between text-sm text-slate-500 dark:text-slate-300">
-          <span>{t("products.resultsCount", { count: meta.total })}</span>
+          <span>{t("products.resultsCount").replace("{count}", meta.total.toString())}</span>
           <span className="flex items-center gap-2">
             <span className="text-xs uppercase text-slate-400">{t("products.filters.sortLabel", "Sort")}</span>
             <SortLabel sortKey={meta.sort} />

@@ -124,7 +124,7 @@
       "title": "طريقة الشحن",
       "label": "رسوم الشحن",
       "free": "مجاني",
-      "freeThreshold": "شحن مجاني للطلبات التي تتجاوز ₺{amount}",
+      "freeThreshold": "شحن مجاني للطلبات التي تتجاوز {amount}",
       "options": {
         "standard": {
           "title": "شحن عادي",
