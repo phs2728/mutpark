@@ -144,16 +144,16 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
       {/* Header */}
       <div className="text-center space-y-4">
         <div className="flex items-center justify-center gap-3 flex-wrap">
-          <span className={`px-3 py-1 rounded-full text-sm font-semibold ${difficultyColors[recipe.difficulty]}`}>
+          <span className={`px-4 py-2 rounded-full text-sm font-bold shadow-lg ${difficultyColors[recipe.difficulty]}`}>
             {t(`recipes.difficulty.${recipe.difficulty.toLowerCase()}`)}
           </span>
           {recipe.koreanOrigin && (
-            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+            <span className="px-4 py-2 rounded-full text-sm font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 shadow-lg">
               🇰🇷 한국 전통
             </span>
           )}
           {recipe.turkeyAdapted && (
-            <span className="px-3 py-1 rounded-full text-sm font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+            <span className="px-4 py-2 rounded-full text-sm font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 shadow-lg">
               🇹🇷 터키 현지화
             </span>
           )}
@@ -185,7 +185,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
           <button
             onClick={handleLikeToggle}
             disabled={liking}
-            className={`flex items-center gap-2 px-4 py-2 rounded-lg transition-colors ${
+            className={`flex items-center gap-2 px-6 py-3 rounded-xl transition-all duration-200 shadow-lg hover:shadow-xl ${
               liked
                 ? "bg-red-100 text-red-700 dark:bg-red-900/30 dark:text-red-300"
                 : "bg-slate-100 text-slate-700 dark:bg-slate-800 dark:text-slate-300 hover:bg-slate-200 dark:hover:bg-slate-700"
@@ -206,7 +206,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
 
       {/* Main Image */}
       {recipe.mainImageUrl && (
-        <div className="relative aspect-video rounded-xl overflow-hidden">
+        <div className="relative aspect-video rounded-2xl overflow-hidden shadow-xl">
           <Image
             src={resolveImageUrl(recipe.mainImageUrl, { width: 800, quality: 90 }) || '/default-recipe.jpg'}
             alt={recipe.title}
@@ -220,7 +220,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
         {/* Ingredients */}
         <div className="lg:col-span-1">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6 sticky top-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 sticky top-6 shadow-lg">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-4">
               재료 ({recipe.servings}인분)
             </h2>
@@ -249,16 +249,16 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
                         {ingredient.product.stock > 0 ? (
                           <AddToCartButton
                             productId={ingredient.product.id}
-                            className="text-xs px-2 py-1"
+                            className="text-xs px-3 py-1 rounded-lg bg-emerald-500 text-white hover:bg-emerald-600 transition-colors"
                           >
                             장바구니
                           </AddToCartButton>
                         ) : (
-                          <span className="text-xs text-red-500">품절</span>
+                          <span className="text-xs text-red-500 font-medium">품절</span>
                         )}
                       </div>
-                      <Link href={`/${locale}/products/${ingredient.product.slug}`}>
-                        <div className="w-10 h-10 rounded-lg overflow-hidden border border-slate-200 dark:border-slate-700">
+                      <Link href={`/${locale}/products/${ingredient.product.slug}`} className="transition-transform hover:scale-105">
+                        <div className="w-10 h-10 rounded-xl overflow-hidden border border-slate-200 dark:border-slate-700 shadow-md">
                           {ingredient.product.imageUrl ? (
                             <Image
                               src={resolveImageUrl(ingredient.product.imageUrl, { width: 40, quality: 80 }) || '/default-product.jpg'}
@@ -286,7 +286,7 @@ export function RecipeDetail({ recipe, locale }: RecipeDetailProps) {
 
         {/* Instructions */}
         <div className="lg:col-span-2">
-          <div className="bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 p-6">
+          <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6 shadow-lg">
             <h2 className="text-xl font-bold text-slate-900 dark:text-white mb-6">
               조리법
             </h2>

@@ -117,20 +117,20 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
   return (
     <div className="space-y-6">
       {/* Filters */}
-      <div className="flex flex-wrap gap-4 items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-xl border border-slate-200 dark:border-slate-800">
+      <div className="flex flex-wrap gap-4 items-center justify-between bg-white dark:bg-slate-900 p-6 rounded-2xl border border-slate-200 dark:border-slate-800 shadow-lg">
         <div className="flex flex-wrap gap-4 items-center">
           <input
             type="text"
             placeholder={t("recipes.searchPlaceholder")}
             value={filters.search}
             onChange={(e) => handleFilterChange({ search: e.target.value })}
-            className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-all duration-200"
           />
 
           <select
             value={filters.difficulty}
             onChange={(e) => handleFilterChange({ difficulty: e.target.value })}
-            className="px-4 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white"
+            className="px-4 py-2 border border-slate-200 rounded-xl focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white transition-all duration-200"
           >
             <option value="">{t("recipes.allDifficulties")}</option>
             <option value="EASY">{t("recipes.difficulty.easy")}</option>
@@ -158,8 +158,9 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
 
       {/* Recipe Grid */}
       {recipes.length === 0 ? (
-        <div className="text-center py-12">
-          <div className="text-slate-400 text-lg">{t("recipes.noRecipes")}</div>
+        <div className="text-center py-12 bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800">
+          <div className="text-slate-400 text-lg mb-2">{t("recipes.noRecipes")}</div>
+          <div className="text-slate-500 text-sm">새로운 레시피를 기다리고 있습니다</div>
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
@@ -167,17 +168,17 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
             <Link
               key={recipe.id}
               href={`/${locale}/recipes/${recipe.slug}`}
-              className="group block bg-white dark:bg-slate-900 rounded-xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-lg transition-all duration-300 hover:-translate-y-1"
+              className="group block bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 overflow-hidden hover:shadow-xl transition-all duration-300 hover:-translate-y-2 shadow-lg"
             >
               {/* Recipe Image */}
-              <div className="relative aspect-video overflow-hidden">
+              <div className="relative aspect-video overflow-hidden rounded-t-2xl">
                 {recipe.mainImageUrl ? (
                   <Image
                     src={resolveImageUrl(recipe.mainImageUrl, { width: 400, quality: 80 }) || '/default-recipe.jpg'}
                     alt={recipe.title}
                     fill
                     sizes="(min-width: 768px) 33vw, 100vw"
-                    className="object-cover transition-transform duration-300 group-hover:scale-105"
+                    className="object-cover transition-transform duration-500 group-hover:scale-110"
                   />
                 ) : (
                   <div className="flex h-full items-center justify-center bg-slate-100 dark:bg-slate-800">
@@ -188,17 +189,17 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
                 )}
 
                 {/* Badges */}
-                <div className="absolute top-3 left-3 flex flex-col gap-2">
-                  <span className={`px-2 py-1 rounded-full text-xs font-semibold ${difficultyColors[recipe.difficulty]}`}>
+                <div className="absolute top-4 left-4 flex flex-col gap-2">
+                  <span className={`px-3 py-1 rounded-full text-xs font-bold shadow-lg backdrop-blur-sm ${difficultyColors[recipe.difficulty]}`}>
                     {t(`recipes.difficulty.${recipe.difficulty.toLowerCase()}`)}
                   </span>
                   {recipe.koreanOrigin && (
-                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300 shadow-lg backdrop-blur-sm">
                       🇰🇷 한국 전통
                     </span>
                   )}
                   {recipe.turkeyAdapted && (
-                    <span className="px-2 py-1 rounded-full text-xs font-semibold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300">
+                    <span className="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300 shadow-lg backdrop-blur-sm">
                       🇹🇷 터키 현지화
                     </span>
                   )}
@@ -206,8 +207,8 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
               </div>
 
               {/* Recipe Info */}
-              <div className="p-4">
-                <h3 className="text-lg font-semibold text-slate-900 dark:text-white line-clamp-1 mb-2">
+              <div className="p-6">
+                <h3 className="text-lg font-bold text-slate-900 dark:text-white line-clamp-1 mb-3">
                   {recipe.title}
                 </h3>
 
@@ -251,7 +252,7 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
           <button
             onClick={() => setPagination(prev => ({ ...prev, page: prev.page - 1 }))}
             disabled={!pagination.hasPrev}
-            className="px-4 py-2 border border-slate-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+            className="px-6 py-3 border border-slate-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 transition-all duration-200 font-medium"
           >
             이전
           </button>
@@ -263,7 +264,7 @@ export function RecipeBoard({ locale, searchParams }: RecipeBoardProps) {
           <button
             onClick={() => setPagination(prev => ({ ...prev, page: prev.page + 1 }))}
             disabled={!pagination.hasNext}
-            className="px-4 py-2 border border-slate-200 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800"
+            className="px-6 py-3 border border-slate-200 rounded-xl disabled:opacity-50 disabled:cursor-not-allowed hover:bg-slate-50 dark:border-slate-700 dark:hover:bg-slate-800 transition-all duration-200 font-medium"
           >
             다음
           </button>
