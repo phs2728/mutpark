@@ -57,7 +57,18 @@
     "placeholder": "커뮤니티 기능이 곧 오픈됩니다. 레시피 공유와 리뷰 작성을 기대해주세요!"
   },
   "recipes": {
-    "placeholder": "터키에 맞춘 한식 레시피 콘텐츠가 준비 중입니다."
+    "title": "한식 레시피",
+    "subtitle": "터키에서 만날 수 있는 정통 한식 요리법을 소개합니다",
+    "placeholder": "터키에 맞춘 한식 레시피 콘텐츠가 준비 중입니다.",
+    "searchPlaceholder": "레시피 검색...",
+    "allDifficulties": "모든 난이도",
+    "featuredOnly": "추천 레시피만",
+    "noRecipes": "등록된 레시피가 없습니다",
+    "difficulty": {
+      "easy": "쉬움",
+      "medium": "보통",
+      "hard": "어려움"
+    }
   },
   "productDetail": {
     "details": "상세 정보",
