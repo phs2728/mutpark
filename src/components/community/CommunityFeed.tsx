@@ -6,7 +6,7 @@ import { resolveImageUrl } from "@/lib/imagekit";
 
 interface CommunityPost {
   id: number;
-  type: "recipe" | "review" | "tip";
+  type: "review" | "tip" | "question";
   title: string;
   content: string;
   imageUrl?: string | null;
@@ -18,10 +18,6 @@ interface CommunityPost {
   likesCount: number;
   commentsCount: number;
   isLiked?: boolean;
-  recipe?: {
-    id: number;
-    title: string;
-  } | null;
   product?: {
     id: number;
     baseName: string;
@@ -35,9 +31,9 @@ interface CommunityFeedProps {
 }
 
 const postTypeColors = {
-  recipe: "bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300",
   review: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   tip: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
+  question: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
 };
 
 
@@ -194,9 +190,9 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
           <div className="flex flex-wrap gap-2">
             {[
               { key: "all", label: "전체" },
-              { key: "recipe", label: "레시피" },
               { key: "review", label: "후기" },
               { key: "tip", label: "꿀팁" },
+              { key: "question", label: "질문" },
             ].map(({ key, label }) => (
               <button
                 key={key}
@@ -254,7 +250,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                         {post.author.name}
                       </h4>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${postTypeColors[post.type]}`}>
-                        {post.type === "recipe" ? "레시피" : post.type === "review" ? "후기" : "꿀팁"}
+                        {post.type === "review" ? "후기" : post.type === "tip" ? "꿀팁" : "질문"}
                       </span>
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -301,22 +297,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                 </div>
               )}
 
-              {/* Recipe/Product Info */}
-              {post.recipe && (
-                <div className="mx-6 mb-4 p-4 bg-emerald-50 dark:bg-emerald-900/20 rounded-xl border border-emerald-200 dark:border-emerald-800">
-                  <div className="flex items-center justify-between">
-                    <div className="flex items-center gap-4">
-                      <span className="px-3 py-1 rounded-full text-sm font-semibold bg-emerald-100 text-emerald-700 dark:bg-emerald-900/30 dark:text-emerald-300">
-                        레시피
-                      </span>
-                      <span className="text-sm text-slate-600 dark:text-slate-400">
-                        {post.recipe.title}
-                      </span>
-                    </div>
-                  </div>
-                </div>
-              )}
-
+              {/* Product Info */}
               {post.product && (
                 <div className="mx-6 mb-4 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-xl border border-blue-200 dark:border-blue-800">
                   <div className="flex items-center gap-4">

@@ -19,7 +19,7 @@ export async function POST(
     const { slug } = await params;
 
     // Find the recipe
-    const recipe = await prisma.recipePost.findUnique({
+    const recipe = await prisma.recipe.findUnique({
       where: { slug, status: "PUBLISHED" },
       select: { id: true },
     });
@@ -57,7 +57,7 @@ export async function POST(
         },
       });
 
-      await tx.recipePost.update({
+      await tx.recipe.update({
         where: { id: recipe.id },
         data: {
           likesCount: {
@@ -90,7 +90,7 @@ export async function DELETE(
     const { slug } = await params;
 
     // Find the recipe
-    const recipe = await prisma.recipePost.findUnique({
+    const recipe = await prisma.recipe.findUnique({
       where: { slug, status: "PUBLISHED" },
       select: { id: true },
     });
@@ -127,7 +127,7 @@ export async function DELETE(
         },
       });
 
-      await tx.recipePost.update({
+      await tx.recipe.update({
         where: { id: recipe.id },
         data: {
           likesCount: {

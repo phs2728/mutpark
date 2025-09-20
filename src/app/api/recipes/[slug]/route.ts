@@ -13,7 +13,7 @@ export async function GET(
   try {
     const { slug } = await params;
 
-    const recipe = await prisma.recipePost.findUnique({
+    const recipe = await prisma.recipe.findUnique({
       where: {
         slug,
         status: "PUBLISHED",
@@ -100,7 +100,7 @@ export async function PUT(
     const body = await request.json();
 
     // Check if recipe exists and user is the author
-    const existingRecipe = await prisma.recipePost.findUnique({
+    const existingRecipe = await prisma.recipe.findUnique({
       where: { slug },
       select: { id: true, authorId: true },
     });
@@ -140,7 +140,7 @@ export async function PUT(
       });
 
       // Update recipe
-      const recipe = await tx.recipePost.update({
+      const recipe = await tx.recipe.update({
         where: { id: existingRecipe.id },
         data: {
           title,
@@ -214,7 +214,7 @@ export async function DELETE(
     const { slug } = await params;
 
     // Check if recipe exists and user is the author
-    const existingRecipe = await prisma.recipePost.findUnique({
+    const existingRecipe = await prisma.recipe.findUnique({
       where: { slug },
       select: { id: true, authorId: true },
     });
@@ -233,7 +233,7 @@ export async function DELETE(
       );
     }
 
-    await prisma.recipePost.delete({
+    await prisma.recipe.delete({
       where: { id: existingRecipe.id },
     });
 

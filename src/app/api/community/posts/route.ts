@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const offset = (page - 1) * limit;
 
-    const where = type ? { type: type as "RECIPE" | "REVIEW" | "TIP" } : {};
+    const where = type ? { type: type as "REVIEW" | "TIP" | "QUESTION" } : {};
 
     const posts = await prisma.communityPost.findMany({
       where: {
@@ -28,12 +28,6 @@ export async function GET(request: NextRequest) {
             id: true,
             baseName: true,
             imageUrl: true,
-          },
-        },
-        recipe: {
-          select: {
-            id: true,
-            title: true,
           },
         },
         _count: {
@@ -68,7 +62,6 @@ export async function GET(request: NextRequest) {
         name: post.author.name,
       },
       product: post.product,
-      recipe: post.recipe,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
       publishedAt: post.publishedAt,
@@ -96,7 +89,7 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { authorId, type, title, content, imageUrl, tags, productId, recipeId } = body;
+    const { authorId, type, title, content, imageUrl, tags, productId } = body;
 
     if (!authorId || !type || !title || !content) {
       return NextResponse.json(
@@ -114,7 +107,6 @@ export async function POST(request: NextRequest) {
         imageUrl,
         tags,
         productId,
-        recipeId,
         publishedAt: new Date(),
         status: "PUBLISHED",
       },
@@ -130,12 +122,6 @@ export async function POST(request: NextRequest) {
             id: true,
             baseName: true,
             imageUrl: true,
-          },
-        },
-        recipe: {
-          select: {
-            id: true,
-            title: true,
           },
         },
         _count: {
@@ -158,7 +144,6 @@ export async function POST(request: NextRequest) {
         name: post.author.name,
       },
       product: post.product,
-      recipe: post.recipe,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
       publishedAt: post.publishedAt,

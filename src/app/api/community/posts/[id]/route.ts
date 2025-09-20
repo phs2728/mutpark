@@ -29,12 +29,6 @@ export async function GET(
             imageUrl: true,
           },
         },
-        recipe: {
-          select: {
-            id: true,
-            title: true,
-          },
-        },
         likes: {
           include: {
             user: {
@@ -82,7 +76,6 @@ export async function GET(
         name: post.author.name,
       },
       product: post.product,
-      recipe: post.recipe,
       likes: post.likes.map((like) => ({
         id: like.id,
         user: like.user,

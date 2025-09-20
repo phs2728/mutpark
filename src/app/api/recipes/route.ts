@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { getAuthenticatedUser } from "@/lib/session";
 
 export async function GET(request: Request) {
   try {
@@ -9,6 +8,7 @@ export async function GET(request: Request) {
     const limit = Math.min(50, Math.max(1, parseInt(searchParams.get("limit") || "12")));
     const search = searchParams.get("search") || "";
     const difficulty = searchParams.get("difficulty");
+    const category = searchParams.get("category");
     const dietaryTags = searchParams.get("dietaryTags");
     const featured = searchParams.get("featured") === "true";
 
@@ -16,17 +16,22 @@ export async function GET(request: Request) {
 
     const where: Record<string, unknown> = {
       status: "PUBLISHED",
+      publishedAt: { not: null },
     };
 
     if (search) {
       where.OR = [
-        { title: { contains: search } },
-        { content: { search: search } },
+        { title: { contains: search, mode: "insensitive" } },
+        { description: { contains: search, mode: "insensitive" } },
       ];
     }
 
     if (difficulty) {
       where.difficulty = difficulty;
+    }
+
+    if (category) {
+      where.category = category;
     }
 
     if (dietaryTags) {
@@ -37,11 +42,11 @@ export async function GET(request: Request) {
     }
 
     if (featured) {
-      where.featuredAt = { not: null };
+      where.featured = true;
     }
 
     const [recipes, total] = await Promise.all([
-      prisma.recipePost.findMany({
+      prisma.recipe.findMany({
         where,
         include: {
           author: {
@@ -57,11 +62,31 @@ export async function GET(request: Request) {
                   id: true,
                   slug: true,
                   baseName: true,
-                  translations: true,
+                  imageUrl: true,
+                  price: true,
+                  currency: true,
                 },
               },
             },
-            orderBy: { order: "asc" },
+          },
+          products: {
+            include: {
+              product: {
+                select: {
+                  id: true,
+                  slug: true,
+                  baseName: true,
+                  imageUrl: true,
+                  price: true,
+                  currency: true,
+                },
+              },
+            },
+          },
+          steps: {
+            orderBy: {
+              stepNumber: "asc",
+            },
           },
           _count: {
             select: {
@@ -70,14 +95,14 @@ export async function GET(request: Request) {
           },
         },
         orderBy: [
-          { featuredAt: "desc" },
+          { featured: "desc" },
           { publishedAt: "desc" },
           { createdAt: "desc" },
         ],
         skip,
         take: limit,
       }),
-      prisma.recipePost.count({ where }),
+      prisma.recipe.count({ where }),
     ]);
 
     const totalPages = Math.ceil(total / limit);
@@ -102,98 +127,4 @@ export async function GET(request: Request) {
   }
 }
 
-export async function POST(request: Request) {
-  try {
-    const user = await getAuthenticatedUser();
-    if (!user?.userId) {
-      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
-    }
-
-    const body = await request.json();
-    const {
-      title,
-      content,
-      mainImageUrl,
-      difficulty,
-      cookingTime,
-      servings,
-      dietaryTags,
-      koreanOrigin,
-      turkeyAdapted,
-      ingredients,
-    } = body;
-
-    if (!title || !content || !cookingTime || !servings) {
-      return NextResponse.json(
-        { error: "Missing required fields" },
-        { status: 400 }
-      );
-    }
-
-    // Generate slug from title
-    const slug = title
-      .toLowerCase()
-      .replace(/[^a-z0-9\s-]/g, "")
-      .replace(/\s+/g, "-")
-      .replace(/-+/g, "-")
-      .trim()
-      + "-" + Date.now();
-
-    const recipe = await prisma.recipePost.create({
-      data: {
-        authorId: user.userId,
-        title,
-        slug,
-        content,
-        mainImageUrl,
-        difficulty: difficulty || "EASY",
-        cookingTime,
-        servings,
-        dietaryTags: dietaryTags || [],
-        koreanOrigin: koreanOrigin || false,
-        turkeyAdapted: turkeyAdapted || false,
-        status: "PENDING",
-        ingredients: {
-          create: ingredients?.map((ingredient: Record<string, unknown>, index: number) => ({
-            name: ingredient.name,
-            quantity: ingredient.quantity,
-            unit: ingredient.unit,
-            productId: ingredient.productId,
-            isEssential: ingredient.isEssential ?? true,
-            alternatives: ingredient.alternatives || [],
-            order: index,
-          })) || [],
-        },
-      },
-      include: {
-        author: {
-          select: {
-            id: true,
-            name: true,
-          },
-        },
-        ingredients: {
-          include: {
-            product: {
-              select: {
-                id: true,
-                slug: true,
-                baseName: true,
-                translations: true,
-              },
-            },
-          },
-          orderBy: { order: "asc" },
-        },
-      },
-    });
-
-    return NextResponse.json(recipe, { status: 201 });
-  } catch (error) {
-    console.error("Error creating recipe:", error);
-    return NextResponse.json(
-      { error: "Failed to create recipe" },
-      { status: 500 }
-    );
-  }
-}
+// POST method removed - only admins can create official recipes through admin panel

@@ -36,74 +36,75 @@ enum PaymentStatus {
 }
 
 model User {
-  id            Int              @id @default(autoincrement())
-  email         String           @unique
-  passwordHash  String
-  name          String
-  phone         String?
-  role          UserRole         @default(CUSTOMER)
-  locale        String           @default("ko")
-  currency      String           @default("TRY")
-  createdAt     DateTime         @default(now())
-  updatedAt     DateTime         @updatedAt
-  socialAccounts SocialAccount[]
-  cartItems     CartItem[]
-  orders        Order[]
-  addresses     Address[]
-  refreshTokens RefreshToken[]
-  productReviews ProductReview[]
-  reviewComments ReviewComment[]
-  reviewHelpful  ReviewHelpful[]
-  recipePosts    RecipePost[]
-  recipeLikes    RecipeLike[]
-  notifications  Notification[]
-  preferences    UserPreference?
-  communityPosts CommunityPost[]
-  communityPostLikes CommunityPostLike[]
+  id                    Int                    @id @default(autoincrement())
+  email                 String                 @unique
+  passwordHash          String
+  name                  String
+  phone                 String?
+  role                  UserRole               @default(CUSTOMER)
+  locale                String                 @default("ko")
+  currency              String                 @default("TRY")
+  createdAt             DateTime               @default(now())
+  updatedAt             DateTime               @updatedAt
+  socialAccounts        SocialAccount[]
+  cartItems             CartItem[]
+  orders                Order[]
+  addresses             Address[]
+  refreshTokens         RefreshToken[]
+  productReviews        ProductReview[]
+  reviewComments        ReviewComment[]
+  reviewHelpful         ReviewHelpful[]
+  recipes               Recipe[]
+  recipeLikes           RecipeLike[]
+  notifications         Notification[]
+  preferences           UserPreference?
+  communityPosts        CommunityPost[]
+  communityPostLikes    CommunityPostLike[]
   communityPostComments CommunityPostComment[]
 }
 
 model SocialAccount {
-  id               Int             @id @default(autoincrement())
-  provider         SocialProvider
-  providerUserId   String
-  userId           Int
-  createdAt        DateTime        @default(now())
-  user             User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  id             Int            @id @default(autoincrement())
+  provider       SocialProvider
+  providerUserId String
+  userId         Int
+  createdAt      DateTime       @default(now())
+  user           User           @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([provider, providerUserId])
 }
 
 model Product {
-  id              Int                  @id @default(autoincrement())
-  sku             String               @unique
-  slug            String               @unique
-  baseName        String
-  baseDescription String?
-  price           Decimal              @db.Decimal(10, 2)
-  currency        String               @default("TRY")
-  stock           Int                  @default(0)
-  halalCertified  Boolean              @default(false)
-  spiceLevel      Int?
-  weightGrams     Int?
-  imageUrl        String?
-  brand           String?
-  category        String?
-  expiryDate      DateTime?
-  freshnessStatus String               @default("FRESH")
-  metadata        Json?
-  createdAt       DateTime             @default(now())
-  updatedAt       DateTime             @updatedAt
-  translations    ProductTranslation[]
-  cartItems       CartItem[]
-  orderItems      OrderItem[]
-  reviews         ProductReview[]
+  id                Int                  @id @default(autoincrement())
+  sku               String               @unique
+  slug              String               @unique
+  baseName          String
+  baseDescription   String?
+  price             Decimal              @db.Decimal(10, 2)
+  currency          String               @default("TRY")
+  stock             Int                  @default(0)
+  halalCertified    Boolean              @default(false)
+  spiceLevel        Int?
+  weightGrams       Int?
+  imageUrl          String?
+  brand             String?
+  category          String?
+  expiryDate        DateTime?
+  freshnessStatus   String               @default("FRESH")
+  metadata          Json?
+  createdAt         DateTime             @default(now())
+  updatedAt         DateTime             @updatedAt
+  translations      ProductTranslation[]
+  cartItems         CartItem[]
+  orderItems        OrderItem[]
+  reviews           ProductReview[]
   recipeIngredients RecipeIngredient[]
-  communityPosts  CommunityPost[]
+  recipeProducts    RecipeProduct[]
+  communityPosts    CommunityPost[]
 }
 
 model ProductTranslation {
-  id          Int      @id @default(autoincrement())
+  id          Int     @id @default(autoincrement())
   language    String
   name        String
   description String?
@@ -146,31 +147,31 @@ model Address {
 }
 
 model Order {
-  id              Int           @id @default(autoincrement())
-  orderNumber     String        @unique @default(uuid())
-  userId          Int
-  addressId       Int
-  status          OrderStatus   @default(PENDING)
-  subtotalAmount  Decimal       @db.Decimal(10, 2)
-  shippingFee     Decimal       @db.Decimal(10, 2) @default(0)
-  totalAmount     Decimal       @db.Decimal(10, 2)
-  currency        String        @default("TRY")
-  shippingMethod  String        @default("standard")
-  trackingNumber  String?
-  trackingCarrier String?
-  trackingStatus  String?
+  id                Int         @id @default(autoincrement())
+  orderNumber       String      @unique @default(uuid())
+  userId            Int
+  addressId         Int
+  status            OrderStatus @default(PENDING)
+  subtotalAmount    Decimal     @db.Decimal(10, 2)
+  shippingFee       Decimal     @default(0) @db.Decimal(10, 2)
+  totalAmount       Decimal     @db.Decimal(10, 2)
+  currency          String      @default("TRY")
+  shippingMethod    String      @default("standard")
+  trackingNumber    String?
+  trackingCarrier   String?
+  trackingStatus    String?
   trackingUpdatedAt DateTime?
-  notes           String?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  user            User          @relation(fields: [userId], references: [id])
-  address         Address       @relation(fields: [addressId], references: [id])
-  items           OrderItem[]
-  payment         Payment?
+  notes             String?
+  createdAt         DateTime    @default(now())
+  updatedAt         DateTime    @updatedAt
+  user              User        @relation(fields: [userId], references: [id])
+  address           Address     @relation(fields: [addressId], references: [id])
+  items             OrderItem[]
+  payment           Payment?
 }
 
 model OrderItem {
-  id           Int      @id @default(autoincrement())
+  id           Int     @id @default(autoincrement())
   orderId      Int
   productId    Int
   quantity     Int
@@ -184,17 +185,17 @@ model OrderItem {
 }
 
 model Payment {
-  id              Int           @id @default(autoincrement())
-  orderId         Int           @unique
-  provider        String        @default("iyzico")
-  status          PaymentStatus @default(PENDING)
-  amount          Decimal       @db.Decimal(10, 2)
-  currency        String        @default("TRY")
-  transactionId   String?
-  rawResponse     Json?
-  createdAt       DateTime      @default(now())
-  updatedAt       DateTime      @updatedAt
-  order           Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  id            Int           @id @default(autoincrement())
+  orderId       Int           @unique
+  provider      String        @default("iyzico")
+  status        PaymentStatus @default(PENDING)
+  amount        Decimal       @db.Decimal(10, 2)
+  currency      String        @default("TRY")
+  transactionId String?
+  rawResponse   Json?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+  order         Order         @relation(fields: [orderId], references: [id], onDelete: Cascade)
 }
 
 model RefreshToken {
@@ -207,35 +208,35 @@ model RefreshToken {
 }
 
 model WebhookEvent {
-  id          Int      @id @default(autoincrement())
+  id          Int       @id @default(autoincrement())
   provider    String
   eventType   String
   payload     Json
-  status      String   @default("received")
-  createdAt   DateTime @default(now())
+  status      String    @default("received")
+  createdAt   DateTime  @default(now())
   processedAt DateTime?
 }
 
 model ProductReview {
-  id               Int           @id @default(autoincrement())
+  id               Int          @id @default(autoincrement())
   productId        Int
   userId           Int
   rating           Int
   title            String?
   content          String
   imageUrls        Json?
-  helpfulCount     Int           @default(0)
-  reportCount      Int           @default(0)
-  verifiedPurchase Boolean       @default(false)
+  helpfulCount     Int          @default(0)
+  reportCount      Int          @default(0)
+  verifiedPurchase Boolean      @default(false)
   moderatorNotes   String?
   moderatedAt      DateTime?
   moderatedBy      Int?
-  status           ReviewStatus  @default(PENDING)
-  createdAt        DateTime      @default(now())
-  updatedAt        DateTime      @updatedAt
+  status           ReviewStatus @default(PENDING)
+  createdAt        DateTime     @default(now())
+  updatedAt        DateTime     @updatedAt
 
-  product  Product @relation(fields: [productId], references: [id], onDelete: Cascade)
-  user     User    @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product  Product         @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user     User            @relation(fields: [userId], references: [id], onDelete: Cascade)
   comments ReviewComment[]
   helpful  ReviewHelpful[]
 
@@ -243,9 +244,9 @@ model ProductReview {
 }
 
 model ReviewHelpful {
-  id       Int      @id @default(autoincrement())
-  reviewId Int
-  userId   Int
+  id        Int      @id @default(autoincrement())
+  reviewId  Int
+  userId    Int
   createdAt DateTime @default(now())
 
   review ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
@@ -255,62 +256,100 @@ model ReviewHelpful {
 }
 
 model ReviewComment {
-  id        Int            @id @default(autoincrement())
+  id        Int           @id @default(autoincrement())
   reviewId  Int
   userId    Int
   parentId  Int?
   content   String
   tags      Json?
   status    CommentStatus @default(PUBLISHED)
-  createdAt DateTime       @default(now())
-  updatedAt DateTime       @updatedAt
+  createdAt DateTime      @default(now())
+  updatedAt DateTime      @updatedAt
 
-  review ProductReview @relation(fields: [reviewId], references: [id], onDelete: Cascade)
-  user   User          @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent ReviewComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  review  ProductReview   @relation(fields: [reviewId], references: [id], onDelete: Cascade)
+  user    User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  ReviewComment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies ReviewComment[] @relation("CommentReplies")
 }
 
-model RecipePost {
-  id            Int        @id @default(autoincrement())
-  authorId      Int
-  title         String
-  slug          String     @unique
-  content       Json
-  mainImageUrl  String?
-  difficulty    Difficulty @default(EASY)
-  cookingTime   Int
-  servings      Int
-  dietaryTags   Json?
-  koreanOrigin  Boolean    @default(false)
-  turkeyAdapted Boolean    @default(false)
-  likesCount    Int        @default(0)
-  featuredAt    DateTime?
-  publishedAt   DateTime?
-  status        PostStatus @default(DRAFT)
-  metadata      Json?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
+// 공식 레시피 (관리자가 관리하는 전문 레시피)
+model Recipe {
+  id             Int        @id @default(autoincrement())
+  authorId       Int // 관리자만 작성 가능
+  title          String
+  slug           String     @unique
+  description    String?
+  content        Json // 상세 조리법
+  mainImageUrl   String?
+  difficulty     Difficulty @default(EASY)
+  cookingTime    Int // 분 단위
+  servings       Int // 인분
+  category       String? // 카테고리 (국물요리, 반찬, 메인요리 등)
+  dietaryTags    Json? // 할랄, 비건, 매운맛 등
+  koreanOrigin   Boolean    @default(true)
+  turkeyAdapted  Boolean    @default(false)
+  viewsCount     Int        @default(0)
+  likesCount     Int        @default(0)
+  featured       Boolean    @default(false)
+  publishedAt    DateTime?
+  status         PostStatus @default(DRAFT)
+  seoTitle       String?
+  seoDescription String?
+  metadata       Json?
+  createdAt      DateTime   @default(now())
+  updatedAt      DateTime   @updatedAt
 
-  author      User             @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  author      User               @relation(fields: [authorId], references: [id], onDelete: Cascade)
   ingredients RecipeIngredient[]
   likes       RecipeLike[]
-  communityPosts CommunityPost[]
+  steps       RecipeStep[]
+  products    RecipeProduct[] // 연관 상품들
+}
+
+// 레시피 단계별 조리법
+model RecipeStep {
+  id          Int     @id @default(autoincrement())
+  recipeId    Int
+  stepNumber  Int
+  title       String?
+  description String
+  imageUrl    String?
+  tips        String?
+  duration    Int? // 이 단계 소요시간 (분)
+
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, stepNumber])
+}
+
+// 레시피-상품 연결 (레시피에서 사용되는 상품들)
+model RecipeProduct {
+  id        Int     @id @default(autoincrement())
+  recipeId  Int
+  productId Int
+  amount    String? // 필요한 양 (예: "200g", "1개")
+  essential Boolean @default(true) // 필수 재료 여부
+  notes     String? // 대체재료 정보 등
+
+  recipe  Recipe  @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([recipeId, productId])
 }
 
 model RecipeIngredient {
-  id          Int     @id @default(autoincrement())
-  recipeId    Int
-  name        String
-  quantity    String
-  unit        String?
-  productId   Int?
-  isEssential Boolean @default(true)
+  id           Int     @id @default(autoincrement())
+  recipeId     Int
+  name         String
+  quantity     String
+  unit         String?
+  productId    Int?
+  isEssential  Boolean @default(true)
   alternatives Json?
-  order       Int     @default(0)
+  order        Int     @default(0)
 
-  recipe  RecipePost @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  product Product?   @relation(fields: [productId], references: [id])
+  recipe  Recipe   @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  product Product? @relation(fields: [productId], references: [id])
 }
 
 model RecipeLike {
@@ -319,8 +358,8 @@ model RecipeLike {
   userId    Int
   createdAt DateTime @default(now())
 
-  recipe RecipePost @relation(fields: [recipeId], references: [id], onDelete: Cascade)
-  user   User       @relation(fields: [userId], references: [id], onDelete: Cascade)
+  recipe Recipe @relation(fields: [recipeId], references: [id], onDelete: Cascade)
+  user   User   @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([recipeId, userId])
 }
@@ -383,48 +422,46 @@ model Notification {
 }
 
 model UserPreference {
-  id                      Int     @id @default(autoincrement())
-  userId                  Int     @unique
-  emailNotifications      Boolean @default(true)
-  pushNotifications       Boolean @default(true)
-  expiryNotifications     Boolean @default(true)
-  priceDropNotifications  Boolean @default(true)
-  recipeNotifications     Boolean @default(true)
-  marketingNotifications  Boolean @default(false)
-  notificationDaysBefore  Int     @default(3)
-  createdAt               DateTime @default(now())
-  updatedAt               DateTime @updatedAt
+  id                     Int      @id @default(autoincrement())
+  userId                 Int      @unique
+  emailNotifications     Boolean  @default(true)
+  pushNotifications      Boolean  @default(true)
+  expiryNotifications    Boolean  @default(true)
+  priceDropNotifications Boolean  @default(true)
+  recipeNotifications    Boolean  @default(true)
+  marketingNotifications Boolean  @default(false)
+  notificationDaysBefore Int      @default(3)
+  createdAt              DateTime @default(now())
+  updatedAt              DateTime @updatedAt
 
   user User @relation(fields: [userId], references: [id], onDelete: Cascade)
 }
 
 enum PostType {
-  RECIPE
   REVIEW
   TIP
+  QUESTION
 }
 
 model CommunityPost {
-  id          Int          @id @default(autoincrement())
-  authorId    Int
-  type        PostType
-  title       String
-  content     String       @db.Text
-  imageUrl    String?
-  tags        Json?
-  likesCount  Int          @default(0)
+  id            Int        @id @default(autoincrement())
+  authorId      Int
+  type          PostType
+  title         String
+  content       String     @db.Text
+  imageUrl      String?
+  tags          Json?
+  likesCount    Int        @default(0)
   commentsCount Int        @default(0)
-  productId   Int?
-  recipeId    Int?
-  publishedAt DateTime?
-  status      PostStatus   @default(PUBLISHED)
-  metadata    Json?
-  createdAt   DateTime     @default(now())
-  updatedAt   DateTime     @updatedAt
+  productId     Int?
+  publishedAt   DateTime?
+  status        PostStatus @default(PUBLISHED)
+  metadata      Json?
+  createdAt     DateTime   @default(now())
+  updatedAt     DateTime   @updatedAt
 
-  author   User                @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  product  Product?            @relation(fields: [productId], references: [id])
-  recipe   RecipePost?         @relation(fields: [recipeId], references: [id])
+  author   User                   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  product  Product?               @relation(fields: [productId], references: [id])
   likes    CommunityPostLike[]
   comments CommunityPostComment[]
 
@@ -434,9 +471,9 @@ model CommunityPost {
 }
 
 model CommunityPostLike {
-  id     Int  @id @default(autoincrement())
-  postId Int
-  userId Int
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
   createdAt DateTime @default(now())
 
   post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
@@ -446,16 +483,16 @@ model CommunityPostLike {
 }
 
 model CommunityPostComment {
-  id       Int    @id @default(autoincrement())
-  postId   Int
-  userId   Int
-  parentId Int?
-  content  String
+  id        Int      @id @default(autoincrement())
+  postId    Int
+  userId    Int
+  parentId  Int?
+  content   String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  post    CommunityPost         @relation(fields: [postId], references: [id], onDelete: Cascade)
-  user    User                  @relation(fields: [userId], references: [id], onDelete: Cascade)
-  parent  CommunityPostComment? @relation("CommentReplies", fields: [parentId], references: [id])
+  post    CommunityPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
+  parent  CommunityPostComment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies CommunityPostComment[] @relation("CommentReplies")
 }
