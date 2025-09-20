@@ -53,7 +53,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy,
+      orderBy: orderBy as any,
       skip: offset,
       take: limit,
     });
