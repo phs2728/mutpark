@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { BADGE_DEFINITIONS, BadgeDefinition } from '@/lib/badge-service';
 import { BadgeType } from '@prisma/client';
 
@@ -139,11 +139,7 @@ export default function BadgeSystem({ userId }: BadgeSystemProps) {
   const [loading, setLoading] = useState(true);
   const [checking, setChecking] = useState(false);
 
-  useEffect(() => {
-    fetchBadges();
-  }, [userId]);
-
-  const fetchBadges = async () => {
+  const fetchBadges = useCallback(async () => {
     try {
       const response = await fetch(`/api/users/${userId}/badges`);
       if (response.ok) {
@@ -155,7 +151,11 @@ export default function BadgeSystem({ userId }: BadgeSystemProps) {
     } finally {
       setLoading(false);
     }
-  };
+  }, [userId]);
+
+  useEffect(() => {
+    fetchBadges();
+  }, [fetchBadges]);
 
   const checkForNewBadges = async () => {
     setChecking(true);

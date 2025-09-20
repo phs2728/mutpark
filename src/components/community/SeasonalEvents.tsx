@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import { Calendar, Trophy, Clock, Users } from 'lucide-react';
 
 interface SeasonalEvent {
@@ -187,7 +187,7 @@ function EventCard({ event }: { event: SeasonalEvent }) {
 }
 
 export default function SeasonalEvents() {
-  const [events, setEvents] = useState<SeasonalEvent[]>(SEASONAL_EVENTS);
+  const [events] = useState<SeasonalEvent[]>(SEASONAL_EVENTS);
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming' | 'ended'>('all');
 
   const filteredEvents = events.filter(event =>

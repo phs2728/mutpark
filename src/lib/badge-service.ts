@@ -135,7 +135,7 @@ export class BadgeService {
         }
       });
       return true;
-    } catch (error) {
+    } catch {
       // 이미 존재하는 배지인 경우 무시
       console.log(`Badge ${badgeType} already exists for user ${userId}`);
       return false;

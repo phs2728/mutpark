@@ -281,7 +281,7 @@ export default function ReviewForm({ isOpen, onClose, onSubmit }: ReviewFormProp
               {/* 이미지 업로드 (선택사항) */}
               <div>
                 <label className="block text-sm font-medium text-gray-700 mb-2">
-                  <Image className="w-4 h-4 inline mr-1" />
+                  <Image className="w-4 h-4 inline mr-1" aria-label="Upload image icon" />
                   사진 첨부 (선택사항)
                 </label>
                 <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">

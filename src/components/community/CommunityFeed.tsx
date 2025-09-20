@@ -4,7 +4,6 @@ import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { resolveImageUrl } from "@/lib/imagekit";
 import CommentSection from './CommentSection';
-import { BadgeDisplay } from './BadgeSystem';
 
 interface CommunityPost {
   id: number;
@@ -162,13 +161,14 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
       }
     );
 
-    if (loadMoreRef.current) {
-      observer.observe(loadMoreRef.current);
+    const currentRef = loadMoreRef.current;
+    if (currentRef) {
+      observer.observe(currentRef);
     }
 
     return () => {
-      if (loadMoreRef.current) {
-        observer.unobserve(loadMoreRef.current);
+      if (currentRef) {
+        observer.unobserve(currentRef);
       }
     };
   }, [hasMore, loading, page, fetchPosts]);

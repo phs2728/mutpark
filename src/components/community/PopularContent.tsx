@@ -1,7 +1,7 @@
 'use client';
 
-import { useState, useEffect } from 'react';
-import { TrendingUp, Clock, Users, Heart, MessageCircle, Bookmark } from 'lucide-react';
+import { useState, useEffect, useCallback } from 'react';
+import { TrendingUp, Heart, MessageCircle, Bookmark } from 'lucide-react';
 
 interface PopularPost {
   id: number;
@@ -50,15 +50,7 @@ export default function PopularContent() {
   const [trendingData, setTrendingData] = useState<TrendingData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
-    if (activeTab === 'popular') {
-      fetchPopularPosts();
-    } else {
-      fetchTrendingData();
-    }
-  }, [activeTab, timeRange]);
-
-  const fetchPopularPosts = async () => {
+  const fetchPopularPosts = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch(`/api/community/popular?timeRange=${timeRange}&limit=10`);
@@ -71,9 +63,9 @@ export default function PopularContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [timeRange]);
 
-  const fetchTrendingData = async () => {
+  const fetchTrendingData = useCallback(async () => {
     setLoading(true);
     try {
       const response = await fetch('/api/community/trending?limit=8');
@@ -86,7 +78,15 @@ export default function PopularContent() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    if (activeTab === 'popular') {
+      fetchPopularPosts();
+    } else {
+      fetchTrendingData();
+    }
+  }, [activeTab, timeRange, fetchPopularPosts, fetchTrendingData]);
 
   const getPostTypeIcon = (type: string) => {
     switch (type.toLowerCase()) {

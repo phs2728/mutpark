@@ -26,7 +26,6 @@ export default function MentionTextArea({
   const [suggestions, setSuggestions] = useState<User[]>([]);
   const [selectedIndex, setSelectedIndex] = useState(0);
   const [mentionStart, setMentionStart] = useState(0);
-  const [currentQuery, setCurrentQuery] = useState('');
   const [mentions, setMentions] = useState<number[]>([]);
 
   const textareaRef = useRef<HTMLTextAreaElement>(null);
@@ -65,7 +64,7 @@ export default function MentionTextArea({
       // @와 커서 사이에 공백이 없고, @가 문장 시작이거나 공백 뒤에 있는 경우
       if (!textAfterAt.includes(' ') && (lastAtIndex === 0 || textBeforeCursor[lastAtIndex - 1] === ' ')) {
         setMentionStart(lastAtIndex);
-        setCurrentQuery(textAfterAt);
+        // setCurrentQuery(textAfterAt); // Reserved for future use
         setShowSuggestions(true);
         setSelectedIndex(0);
         searchUsers(textAfterAt);
@@ -76,16 +75,15 @@ export default function MentionTextArea({
       setShowSuggestions(false);
     }
 
-    // 멘션된 사용자 ID 추출
-    const mentionRegex = /@(\w+)/g;
+    // 멘션된 사용자 ID 추출 will be implemented here
     const foundMentions: number[] = [];
-    let match;
 
-    while ((match = mentionRegex.exec(newValue)) !== null) {
-      // 실제로는 사용자 이름을 ID로 변환해야 하지만, 여기서는 간단히 처리
-      // 실제 구현에서는 멘션된 사용자들을 별도로 추적해야 함
-    }
+    // This will be implemented to track mentioned users
+    // while ((match = mentionRegex.exec(newValue)) !== null) {
+    //   // Process mentions here
+    // }
 
+    setMentions(foundMentions);
     onChange(newValue, foundMentions);
   };
 
@@ -124,6 +122,7 @@ export default function MentionTextArea({
     const newValue = beforeMention + `@${user.name} ` + afterCursor;
     const newMentions = [...mentions, user.id];
 
+    setMentions(newMentions);
     onChange(newValue, newMentions);
     setShowSuggestions(false);
 

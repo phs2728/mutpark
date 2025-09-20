@@ -175,6 +175,9 @@ export class PopularPostsService {
         break;
     }
 
+    // startDate will be used when actual tag filtering is implemented
+    console.log('Using date range from', startDate, 'for future implementation');
+
     // 현재는 태그 테이블이 없으므로 임시로 인기 키워드 반환
     const popularKeywords = [
       { tag: '김치', count: 45, trend: 'up' },
