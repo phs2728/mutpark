@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Send, Reply, Heart, MoreVertical } from 'lucide-react';
 
 interface Comment {
@@ -30,13 +30,7 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
   const [replyText, setReplyText] = useState('');
   const [submitting, setSubmitting] = useState(false);
 
-  useEffect(() => {
-    if (isOpen) {
-      fetchComments();
-    }
-  }, [isOpen, postId, fetchComments]);
-
-  const fetchComments = async () => {
+  const fetchComments = useCallback(async () => {
     if (!postId) return;
 
     setLoading(true);
@@ -76,7 +70,13 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
     } finally {
       setLoading(false);
     }
-  };
+  }, [postId]);
+
+  useEffect(() => {
+    if (isOpen) {
+      fetchComments();
+    }
+  }, [isOpen, fetchComments]);
 
   const handleSubmitComment = async (content: string, parentId?: number) => {
     if (!content.trim()) return;

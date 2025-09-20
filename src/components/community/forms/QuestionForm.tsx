@@ -211,7 +211,7 @@ export default function QuestionForm({ isOpen, onClose, onSubmit }: QuestionForm
           {/* 이미지 업로드 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Image className="w-4 h-4 inline mr-1" alt="이미지 아이콘" />
+              <Image className="w-4 h-4 inline mr-1" />
               사진 첨부 (선택사항)
             </label>
             <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
