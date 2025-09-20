@@ -105,7 +105,7 @@ export class PopularPostsService {
     }
 
     // 게시물 타입 필터
-    const typeFilter = postType === 'all' ? {} : { type: postType.toUpperCase() as any };
+    const typeFilter = postType === 'all' ? {} : { type: postType.toUpperCase() as 'RECIPE' | 'REVIEW' | 'TIP' | 'QUESTION' };
 
     // 기본 게시물 조회
     const posts = await prisma.communityPost.findMany({

@@ -13,7 +13,7 @@ export async function GET(request: NextRequest) {
     const where = type ? { type: type as "RECIPE" | "REVIEW" | "TIP" | "QUESTION" } : {};
 
     // 정렬 설정
-    let orderBy: any;
+    let orderBy: unknown;
     if (sortBy === "popular") {
       // 인기순: 좋아요 수 + 댓글 수 + 조회수 기준으로 정렬
       orderBy = [

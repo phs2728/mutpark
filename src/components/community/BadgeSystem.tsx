@@ -8,7 +8,7 @@ interface UserBadge {
   id: number;
   badgeType: BadgeType;
   earnedAt: string;
-  metadata?: any;
+  metadata?: Record<string, unknown>;
   definition: BadgeDefinition;
 }
 

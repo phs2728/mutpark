@@ -233,7 +233,7 @@ export default function SeasonalEvents() {
         ].map(({ key, label }) => (
           <button
             key={key}
-            onClick={() => setFilter(key as any)}
+            onClick={() => setFilter(key as 'all' | 'active' | 'upcoming' | 'ended')}
             className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
               filter === key
                 ? 'bg-red-500 text-white shadow-lg'

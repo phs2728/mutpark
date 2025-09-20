@@ -121,7 +121,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
           ].map(({ key, label, desc }) => (
             <button
               key={key}
-              onClick={() => setActiveTab(key as any)}
+              onClick={() => setActiveTab(key as 'feed' | 'events' | 'badges' | 'popular')}
               className={`flex-1 p-4 rounded-xl transition-all duration-200 text-left ${
                 activeTab === key
                   ? 'korean-traditional text-white shadow-lg transform scale-105'

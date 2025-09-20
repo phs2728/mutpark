@@ -152,7 +152,7 @@ export default function PopularContent() {
             ].map(({ key, label, desc }) => (
               <button
                 key={key}
-                onClick={() => setActiveTab(key as any)}
+                onClick={() => setActiveTab(key as 'popular' | 'trending')}
                 className={`px-6 py-3 rounded-lg font-medium transition-all duration-200 ${
                   activeTab === key
                     ? 'korean-traditional text-white shadow-lg'
@@ -179,7 +179,7 @@ export default function PopularContent() {
           ].map(({ key, label }) => (
             <button
               key={key}
-              onClick={() => setTimeRange(key as any)}
+              onClick={() => setTimeRange(key as 'day' | 'week' | 'month')}
               className={`px-4 py-2 rounded-full text-sm font-medium transition-all ${
                 timeRange === key
                   ? 'bg-red-500 text-white shadow-lg'
