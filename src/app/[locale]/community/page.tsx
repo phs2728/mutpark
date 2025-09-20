@@ -7,6 +7,9 @@ import RecipeForm from "@/components/community/forms/RecipeForm";
 import ReviewForm from "@/components/community/forms/ReviewForm";
 import TipForm from "@/components/community/forms/TipForm";
 import QuestionForm from "@/components/community/forms/QuestionForm";
+import SeasonalEvents from "@/components/community/SeasonalEvents";
+import BadgeSystem from "@/components/community/BadgeSystem";
+import PopularContent from "@/components/community/PopularContent";
 
 // Union type for all form data types
 type CommunityFormData = {
@@ -24,6 +27,7 @@ interface CommunityPageProps {
 export default function CommunityPage({ params }: CommunityPageProps) {
   const [showTypeSelector, setShowTypeSelector] = useState(false);
   const [currentForm, setCurrentForm] = useState<'RECIPE' | 'REVIEW' | 'TIP' | 'QUESTION' | null>(null);
+  const [activeTab, setActiveTab] = useState<'feed' | 'events' | 'badges' | 'popular'>('feed');
 
   // params is available but not currently used in UI
   void params;
@@ -85,29 +89,80 @@ export default function CommunityPage({ params }: CommunityPageProps) {
   };
 
   return (
-    <div className="max-w-4xl mx-auto space-y-6">
-      {/* Header */}
-      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-6">
+    <div className="max-w-6xl mx-auto space-y-6">
+      {/* Header with Korean Traditional Theme */}
+      <div className="korean-gradient-sunset rounded-2xl p-6 text-white shadow-lg">
         <div className="flex items-center justify-between">
           <div>
-            <h1 className="text-2xl font-bold text-slate-900 dark:text-white mb-2">
-              커뮤니티
+            <h1 className="text-3xl font-bold mb-2 korean-wave">
+              🏮 한국인 커뮤니티
             </h1>
-            <p className="text-slate-600 dark:text-slate-400">
-              터키에서 한국 요리를 즐기는 사람들과 소통해보세요
+            <p className="text-white/90">
+              터키에서 한국 요리와 문화를 함께 나누는 따뜻한 공간
             </p>
           </div>
           <button
             onClick={() => setShowTypeSelector(true)}
-            className="px-6 py-3 bg-gradient-to-r from-red-500 to-blue-500 text-white rounded-lg hover:from-red-600 hover:to-blue-600 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+            className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/30"
           >
             ✍️ 글쓰기
           </button>
         </div>
       </div>
 
-      {/* Community Feed */}
-      <CommunityFeed />
+      {/* Navigation Tabs with Korean Traditional Colors */}
+      <div className="bg-white dark:bg-slate-900 rounded-2xl border border-slate-200 dark:border-slate-800 p-2">
+        <div className="flex space-x-2">
+          {[
+            { key: 'feed', label: '🍽️ 커뮤니티 피드', desc: '레시피와 꿀팁 공유' },
+            { key: 'popular', label: '🔥 인기 콘텐츠', desc: '트렌딩 게시물과 인기 태그' },
+            { key: 'events', label: '🎉 계절 이벤트', desc: '전통 명절과 특별 이벤트' },
+            { key: 'badges', label: '🏆 배지 시스템', desc: '활동 배지와 성취' }
+          ].map(({ key, label, desc }) => (
+            <button
+              key={key}
+              onClick={() => setActiveTab(key as any)}
+              className={`flex-1 p-4 rounded-xl transition-all duration-200 text-left ${
+                activeTab === key
+                  ? 'korean-traditional text-white shadow-lg transform scale-105'
+                  : 'hover:bg-gray-50 dark:hover:bg-slate-800 text-gray-700 dark:text-gray-300'
+              }`}
+            >
+              <div className="font-semibold">{label}</div>
+              <div className={`text-sm ${activeTab === key ? 'text-white/80' : 'text-gray-500'}`}>
+                {desc}
+              </div>
+            </button>
+          ))}
+        </div>
+      </div>
+
+      {/* Tab Content */}
+      <div className="min-h-[600px]">
+        {activeTab === 'feed' && (
+          <div className="community-spring rounded-2xl p-6">
+            <CommunityFeed />
+          </div>
+        )}
+
+        {activeTab === 'popular' && (
+          <div className="community-summer rounded-2xl p-6">
+            <PopularContent />
+          </div>
+        )}
+
+        {activeTab === 'events' && (
+          <div className="community-autumn rounded-2xl p-6">
+            <SeasonalEvents />
+          </div>
+        )}
+
+        {activeTab === 'badges' && (
+          <div className="community-winter rounded-2xl p-6">
+            <BadgeSystem userId={1} />
+          </div>
+        )}
+      </div>
 
       {/* Post Type Selector Modal */}
       <PostTypeSelector

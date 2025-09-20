@@ -1,9 +1,10 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import Image from "next/image";
 import { resolveImageUrl } from "@/lib/imagekit";
 import CommentSection from './CommentSection';
+import { BadgeDisplay } from './BadgeSystem';
 
 interface CommunityPost {
   id: number;
@@ -80,9 +81,12 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState(filter || "all");
   const [searchQuery, setSearchQuery] = useState("");
+  const [selectedTag, setSelectedTag] = useState<string | null>(null);
+  const [sortBy, setSortBy] = useState<"latest" | "popular">("latest");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [page, setPage] = useState(1);
   const [hasMore, setHasMore] = useState(true);
+  const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const fetchPosts = useCallback(async (pageNumber = 1, append = false) => {
     try {
@@ -96,6 +100,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
       }
       params.append("page", pageNumber.toString());
       params.append("limit", "10");
+      params.append("sortBy", sortBy);
 
       const response = await fetch(`/api/community/posts?${params.toString()}`);
       if (!response.ok) {
@@ -114,6 +119,13 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
         );
       }
 
+      // Tag filtering
+      if (selectedTag) {
+        filteredPosts = filteredPosts.filter((post: CommunityPost) =>
+          post.tags.some((tag: string) => tag === selectedTag)
+        );
+      }
+
       if (append) {
         setPosts(prev => [...prev, ...filteredPosts]);
       } else {
@@ -127,11 +139,39 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, searchQuery]);
+  }, [activeFilter, searchQuery, selectedTag, sortBy]);
 
   useEffect(() => {
     fetchPosts();
   }, [fetchPosts]);
+
+  // Infinite scroll with Intersection Observer
+  useEffect(() => {
+    const observer = new IntersectionObserver(
+      (entries) => {
+        const [entry] = entries;
+        if (entry.isIntersecting && hasMore && !loading) {
+          const nextPage = page + 1;
+          setPage(nextPage);
+          fetchPosts(nextPage, true);
+        }
+      },
+      {
+        threshold: 0.1,
+        rootMargin: "20px",
+      }
+    );
+
+    if (loadMoreRef.current) {
+      observer.observe(loadMoreRef.current);
+    }
+
+    return () => {
+      if (loadMoreRef.current) {
+        observer.unobserve(loadMoreRef.current);
+      }
+    };
+  }, [hasMore, loading, page, fetchPosts]);
 
   const handleLike = async (postId: number) => {
     try {
@@ -207,10 +247,13 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
     });
   };
 
-  const handleLoadMore = () => {
-    const nextPage = page + 1;
-    setPage(nextPage);
-    fetchPosts(nextPage, true);
+
+  const handleTagClick = (tag: string) => {
+    if (selectedTag === tag) {
+      setSelectedTag(null);
+    } else {
+      setSelectedTag(tag);
+    }
   };
 
   const formatTimeAgo = (dateString: string) => {
@@ -278,7 +321,15 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
             ))}
           </div>
 
-          <div className="w-full sm:w-auto">
+          <div className="flex gap-3 w-full sm:w-auto">
+            <select
+              value={sortBy}
+              onChange={(e) => setSortBy(e.target.value as "latest" | "popular")}
+              className="px-3 py-2 border border-slate-200 rounded-lg focus:ring-2 focus:ring-emerald-500 focus:border-emerald-500 dark:border-slate-700 dark:bg-slate-800 dark:text-white text-sm"
+            >
+              <option value="latest">최신순</option>
+              <option value="popular">인기순</option>
+            </select>
             <input
               type="text"
               placeholder="커뮤니티 검색..."
@@ -288,6 +339,22 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
             />
           </div>
         </div>
+
+        {/* Selected Tag Filter */}
+        {selectedTag && (
+          <div className="mt-4 flex items-center gap-2">
+            <span className="text-sm text-slate-600 dark:text-slate-400">선택된 태그:</span>
+            <div className="flex items-center gap-2 px-3 py-1 bg-blue-100 dark:bg-blue-900 text-blue-700 dark:text-blue-300 rounded-full text-sm">
+              <span>#{selectedTag}</span>
+              <button
+                onClick={() => setSelectedTag(null)}
+                className="text-blue-600 dark:text-blue-400 hover:text-blue-800 dark:hover:text-blue-200 ml-1"
+              >
+                ✕
+              </button>
+            </div>
+          </div>
+        )}
       </div>
 
       {/* Posts */}
@@ -392,12 +459,17 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
                   {post.tags.map((tag, index) => (
-                    <span
+                    <button
                       key={index}
-                      className="px-3 py-1 bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 text-xs rounded-full"
+                      onClick={() => handleTagClick(tag)}
+                      className={`px-3 py-1 text-xs rounded-full transition-all duration-200 hover:scale-105 ${
+                        selectedTag === tag
+                          ? 'bg-blue-100 text-blue-700 ring-2 ring-blue-400 dark:bg-blue-900 dark:text-blue-300'
+                          : 'bg-slate-100 dark:bg-slate-800 text-slate-600 dark:text-slate-400 hover:bg-slate-200 dark:hover:bg-slate-700'
+                      }`}
                     >
                       #{tag}
-                    </span>
+                    </button>
                   ))}
                 </div>
               </div>
@@ -514,15 +586,23 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
         </div>
       )}
 
-      {/* Load More Button */}
-      {hasMore && !loading && (
-        <div className="text-center">
-          <button
-            onClick={handleLoadMore}
-            className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
-          >
-            더 많은 게시물 보기
-          </button>
+      {/* Infinite Scroll Trigger */}
+      {hasMore && (
+        <div
+          ref={loadMoreRef}
+          className="flex justify-center py-8"
+        >
+          <div className="flex items-center space-x-2">
+            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+            <span className="text-slate-600 dark:text-slate-400">더 많은 게시물을 불러오는 중...</span>
+          </div>
+        </div>
+      )}
+
+      {/* End of Posts Message */}
+      {!hasMore && posts.length > 0 && (
+        <div className="text-center py-8">
+          <div className="text-slate-400 text-sm">모든 게시물을 확인했습니다</div>
         </div>
       )}
     </div>

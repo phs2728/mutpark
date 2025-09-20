@@ -1,0 +1,191 @@
+/* 한국 전통 오방색 (五方色) */
+:root {
+  /* 오방색 - 동서남북중앙의 색상 */
+  --korean-blue: #4A90E2;      /* 동방 청색 - 푸른 용의 색 */
+  --korean-white: #F8F9FA;     /* 서방 백색 - 백호의 색 */
+  --korean-red: #E85D75;       /* 남방 적색 - 주작의 색 */
+  --korean-black: #2C3E50;     /* 북방 흑색 - 현무의 색 */
+  --korean-yellow: #F7DC6F;    /* 중앙 황색 - 황룡의 색 */
+
+  /* 한국 전통 색상 확장 */
+  --dancheong-red: #DC143C;     /* 단청 빨강 */
+  --dancheong-blue: #1E3A8A;   /* 단청 파랑 */
+  --dancheong-green: #059669;  /* 단청 초록 */
+  --dancheong-yellow: #FBBF24; /* 단청 노랑 */
+
+  /* 자연에서 영감받은 한국색 */
+  --hanbok-pink: #FFB3BA;      /* 한복 분홍 */
+  --jade-green: #4ADE80;       /* 옥색 */
+  --bamboo-green: #22C55E;     /* 대나무색 */
+  --cherry-blossom: #FDB7C8;   /* 벚꽃색 */
+  --autumn-persimmon: #FB923C; /* 감색 */
+  --traditional-indigo: #3730A3; /* 쪽빛 */
+
+  /* 한국의 하늘과 대지 */
+  --korean-sky: #87CEEB;       /* 한국 하늘색 */
+  --korean-earth: #8B4513;     /* 한국 흙색 */
+  --korean-mountain: #696969;  /* 산색 */
+
+  /* 계절별 한국 색상 */
+  --spring-green: #98FB98;     /* 봄 연두 */
+  --summer-coral: #FF7F7F;     /* 여름 산호색 */
+  --autumn-maple: #FF6347;     /* 가을 단풍색 */
+  --winter-snow: #FFFAFA;      /* 겨울 눈색 */
+}
+
+/* 한국 전통 테마 클래스 */
+.korean-traditional {
+  --primary: var(--korean-red);
+  --secondary: var(--korean-blue);
+  --accent: var(--korean-yellow);
+  --neutral: var(--korean-white);
+  --base: var(--korean-black);
+}
+
+.korean-spring {
+  --primary: var(--cherry-blossom);
+  --secondary: var(--spring-green);
+  --accent: var(--hanbok-pink);
+  --background: var(--winter-snow);
+}
+
+.korean-summer {
+  --primary: var(--jade-green);
+  --secondary: var(--bamboo-green);
+  --accent: var(--summer-coral);
+  --background: var(--korean-sky);
+}
+
+.korean-autumn {
+  --primary: var(--autumn-persimmon);
+  --secondary: var(--autumn-maple);
+  --accent: var(--dancheong-yellow);
+  --background: var(--korean-earth);
+}
+
+.korean-winter {
+  --primary: var(--traditional-indigo);
+  --secondary: var(--korean-mountain);
+  --accent: var(--korean-white);
+  --background: var(--winter-snow);
+}
+
+/* 단청 스타일 */
+.dancheong-style {
+  background: linear-gradient(45deg,
+    var(--dancheong-red) 0%,
+    var(--dancheong-blue) 25%,
+    var(--dancheong-green) 50%,
+    var(--dancheong-yellow) 75%,
+    var(--dancheong-red) 100%);
+  background-size: 400% 400%;
+  animation: dancheong-flow 8s ease-in-out infinite;
+}
+
+@keyframes dancheong-flow {
+  0%, 100% {
+    background-position: 0% 50%;
+  }
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+/* 한국 전통 그라데이션 */
+.korean-gradient-sunset {
+  background: linear-gradient(135deg, var(--korean-red) 0%, var(--korean-yellow) 100%);
+}
+
+.korean-gradient-mountain {
+  background: linear-gradient(135deg, var(--korean-blue) 0%, var(--korean-mountain) 100%);
+}
+
+.korean-gradient-spring {
+  background: linear-gradient(135deg, var(--cherry-blossom) 0%, var(--spring-green) 100%);
+}
+
+.korean-gradient-autumn {
+  background: linear-gradient(135deg, var(--autumn-persimmon) 0%, var(--autumn-maple) 100%);
+}
+
+/* 한국 전통 테두리 스타일 */
+.korean-border {
+  border: 2px solid var(--korean-red);
+  border-image: linear-gradient(45deg,
+    var(--dancheong-red),
+    var(--dancheong-blue),
+    var(--dancheong-green),
+    var(--dancheong-yellow)) 1;
+}
+
+/* 한국 전통 그림자 */
+.korean-shadow {
+  box-shadow:
+    0 4px 6px rgba(220, 20, 60, 0.1),
+    0 1px 3px rgba(75, 144, 226, 0.1);
+}
+
+/* 한국 전통 패턴 배경 */
+.korean-pattern {
+  background-image:
+    radial-gradient(circle at 20% 50%, transparent 20%, var(--korean-yellow) 21%, var(--korean-yellow) 34%, transparent 35%, transparent),
+    linear-gradient(0deg, transparent 24%, var(--korean-red) 25%, var(--korean-red) 26%, transparent 27%, transparent 74%, var(--korean-red) 75%, var(--korean-red) 76%, transparent 77%, transparent);
+  background-size: 40px 40px;
+  opacity: 0.1;
+}
+
+/* 계절별 커뮤니티 테마 */
+.community-spring {
+  background: linear-gradient(135deg,
+    rgba(255, 183, 200, 0.1) 0%,
+    rgba(152, 251, 152, 0.1) 100%);
+}
+
+.community-summer {
+  background: linear-gradient(135deg,
+    rgba(74, 222, 128, 0.1) 0%,
+    rgba(135, 206, 235, 0.1) 100%);
+}
+
+.community-autumn {
+  background: linear-gradient(135deg,
+    rgba(251, 146, 60, 0.1) 0%,
+    rgba(255, 99, 71, 0.1) 100%);
+}
+
+.community-winter {
+  background: linear-gradient(135deg,
+    rgba(55, 48, 163, 0.1) 0%,
+    rgba(255, 250, 250, 0.1) 100%);
+}
+
+/* 한국 전통 애니메이션 */
+@keyframes korean-wave {
+  0%, 100% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  25% {
+    transform: translateY(-10px) rotate(1deg);
+  }
+  50% {
+    transform: translateY(0px) rotate(0deg);
+  }
+  75% {
+    transform: translateY(-5px) rotate(-1deg);
+  }
+}
+
+.korean-wave {
+  animation: korean-wave 4s ease-in-out infinite;
+}
+
+/* 반응형 한국 전통 스타일 */
+@media (max-width: 768px) {
+  .korean-pattern {
+    background-size: 20px 20px;
+  }
+
+  .dancheong-style {
+    background-size: 200% 200%;
+  }
+}

@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { Send, Reply, Heart, MoreVertical } from 'lucide-react';
+import MentionTextArea from './MentionTextArea';
 
 interface Comment {
   id: number;
@@ -26,8 +27,10 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
   const [comments, setComments] = useState<Comment[]>([]);
   const [loading, setLoading] = useState(false);
   const [newComment, setNewComment] = useState('');
+  const [newCommentMentions, setNewCommentMentions] = useState<number[]>([]);
   const [replyingTo, setReplyingTo] = useState<number | null>(null);
   const [replyText, setReplyText] = useState('');
+  const [replyMentions, setReplyMentions] = useState<number[]>([]);
   const [submitting, setSubmitting] = useState(false);
 
   const fetchComments = useCallback(async () => {
@@ -78,7 +81,7 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
     }
   }, [isOpen, fetchComments]);
 
-  const handleSubmitComment = async (content: string, parentId?: number) => {
+  const handleSubmitComment = async (content: string, mentions: number[], parentId?: number) => {
     if (!content.trim()) return;
 
     setSubmitting(true);
@@ -89,9 +92,9 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({
-          userId: 1, // TODO: Get from auth context
           content: content.trim(),
           parentId,
+          mentions,
         }),
       });
 
@@ -105,9 +108,11 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
       // Clear forms
       if (parentId) {
         setReplyText('');
+        setReplyMentions([]);
         setReplyingTo(null);
       } else {
         setNewComment('');
+        setNewCommentMentions([]);
       }
     } catch (error) {
       console.error('Error posting comment:', error);
@@ -123,7 +128,6 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
         headers: {
           'Content-Type': 'application/json',
         },
-        body: JSON.stringify({ userId: 1 }), // TODO: Get from auth context
       });
 
       if (!response.ok) {
@@ -192,20 +196,20 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
           {replyingTo === comment.id && (
             <div className="mt-3 ml-4">
               <div className="flex space-x-2">
-                <input
-                  type="text"
-                  value={replyText}
-                  onChange={(e) => setReplyText(e.target.value)}
-                  placeholder={`${comment.user.name}님에게 답글...`}
-                  className="flex-1 px-3 py-2 border border-gray-200 rounded-full text-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  onKeyPress={(e) => {
-                    if (e.key === 'Enter' && !submitting) {
-                      handleSubmitComment(replyText, comment.id);
-                    }
-                  }}
-                />
+                <div className="flex-1">
+                  <MentionTextArea
+                    value={replyText}
+                    onChange={(value, mentions) => {
+                      setReplyText(value);
+                      setReplyMentions(mentions);
+                    }}
+                    placeholder={`${comment.user.name}님에게 답글... (@를 입력하여 사용자 멘션)`}
+                    rows={2}
+                    className="rounded-full text-sm"
+                  />
+                </div>
                 <button
-                  onClick={() => handleSubmitComment(replyText, comment.id)}
+                  onClick={() => handleSubmitComment(replyText, replyMentions, comment.id)}
                   disabled={!replyText.trim() || submitting}
                   className="px-4 py-2 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-1"
                 >
@@ -251,16 +255,19 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
               나
             </div>
             <div className="flex-1">
-              <textarea
+              <MentionTextArea
                 value={newComment}
-                onChange={(e) => setNewComment(e.target.value)}
-                placeholder="댓글을 작성해주세요..."
-                className="w-full px-4 py-3 border border-gray-200 rounded-2xl resize-none focus:outline-none focus:ring-2 focus:ring-blue-500"
+                onChange={(value, mentions) => {
+                  setNewComment(value);
+                  setNewCommentMentions(mentions);
+                }}
+                placeholder="댓글을 작성해주세요... (@를 입력하여 사용자 멘션)"
                 rows={3}
+                className="rounded-2xl"
               />
               <div className="flex justify-end mt-2">
                 <button
-                  onClick={() => handleSubmitComment(newComment)}
+                  onClick={() => handleSubmitComment(newComment, newCommentMentions)}
                   disabled={!newComment.trim() || submitting}
                   className="px-6 py-2 bg-blue-500 text-white rounded-full text-sm hover:bg-blue-600 disabled:opacity-50 disabled:cursor-not-allowed transition-colors flex items-center space-x-2"
                 >

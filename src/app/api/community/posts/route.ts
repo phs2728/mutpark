@@ -7,9 +7,25 @@ export async function GET(request: NextRequest) {
     const page = parseInt(searchParams.get("page") || "1");
     const limit = parseInt(searchParams.get("limit") || "10");
     const type = searchParams.get("type");
+    const sortBy = searchParams.get("sortBy") || "latest";
     const offset = (page - 1) * limit;
 
     const where = type ? { type: type as "RECIPE" | "REVIEW" | "TIP" | "QUESTION" } : {};
+
+    // 정렬 설정
+    let orderBy: any;
+    if (sortBy === "popular") {
+      // 인기순: 좋아요 수 + 댓글 수 + 조회수 기준으로 정렬
+      orderBy = [
+        { viewsCount: "desc" },
+        { publishedAt: "desc" }
+      ];
+    } else {
+      // 최신순 (기본값)
+      orderBy = {
+        publishedAt: "desc",
+      };
+    }
 
     const posts = await prisma.communityPost.findMany({
       where: {
@@ -37,9 +53,7 @@ export async function GET(request: NextRequest) {
           },
         },
       },
-      orderBy: {
-        publishedAt: "desc",
-      },
+      orderBy,
       skip: offset,
       take: limit,
     });

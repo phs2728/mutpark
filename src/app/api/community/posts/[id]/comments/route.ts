@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/session";
 
 export async function GET(
   request: NextRequest,
@@ -20,6 +21,11 @@ export async function GET(
           select: {
             id: true,
             name: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
           },
         },
       },
@@ -43,13 +49,18 @@ export async function POST(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const user = await getAuthenticatedUser();
+    if (!user?.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
+
     const { id } = await context.params;
     const postId = parseInt(id);
-    const { userId, content, parentId } = await request.json();
+    const { content, parentId, mentions } = await request.json();
 
-    if (isNaN(postId) || !userId || !content) {
+    if (isNaN(postId) || !content?.trim()) {
       return NextResponse.json(
-        { error: "Invalid post ID, user ID, or content" },
+        { error: "Invalid post ID or content" },
         { status: 400 }
       );
     }
@@ -57,15 +68,21 @@ export async function POST(
     const comment = await prisma.communityPostComment.create({
       data: {
         postId,
-        userId,
-        content,
+        userId: user.userId,
+        content: content.trim(),
         parentId,
+        mentions: mentions || [],
       },
       include: {
         user: {
           select: {
             id: true,
             name: true,
+          },
+        },
+        _count: {
+          select: {
+            likes: true,
           },
         },
       },
