@@ -61,6 +61,11 @@ model User {
   communityPosts        CommunityPost[]
   communityPostLikes    CommunityPostLike[]
   communityPostComments CommunityPostComment[]
+  communityPostBookmarks CommunityPostBookmark[]
+  communityCommentLikes CommunityCommentLike[]
+  following             UserFollow[]       @relation("UserFollowing")
+  followers             UserFollow[]       @relation("UserFollower")
+  badges                UserBadge[]
 }
 
 model SocialAccount {
@@ -438,9 +443,10 @@ model UserPreference {
 }
 
 enum PostType {
-  REVIEW
-  TIP
-  QUESTION
+  RECIPE    // 사용자 레시피 공유
+  REVIEW    // 상품/장소/이벤트/미디어 리뷰
+  TIP       // 문화 꿀팁 및 생활 지혜
+  QUESTION  // Q&A 및 문화 질문
 }
 
 model CommunityPost {
@@ -449,25 +455,53 @@ model CommunityPost {
   type          PostType
   title         String
   content       String     @db.Text
-  imageUrl      String?
-  tags          Json?
-  likesCount    Int        @default(0)
-  commentsCount Int        @default(0)
-  productId     Int?
-  publishedAt   DateTime?
-  status        PostStatus @default(PUBLISHED)
-  metadata      Json?
-  createdAt     DateTime   @default(now())
-  updatedAt     DateTime   @updatedAt
 
-  author   User                   @relation(fields: [authorId], references: [id], onDelete: Cascade)
-  product  Product?               @relation(fields: [productId], references: [id])
-  likes    CommunityPostLike[]
-  comments CommunityPostComment[]
+  // 레시피 전용 필드
+  difficulty    Difficulty?  // EASY, MEDIUM, HARD
+  cookingTime   Int?        // 분 단위
+  servings      Int?        // 인분수
+  ingredients   Json?       // 재료 정보
+  instructions  Json?       // 조리 과정
+
+  // 리뷰 전용 필드
+  rating        Int?        // 1-5점
+  reviewType    String?     // PRODUCT, PLACE, EVENT, MEDIA
+
+  // 공통 필드
+  imageUrl      String?
+  images        Json?       // 다중 이미지
+  tags          Json?       // 태그 배열
+  mentions      Json?       // 멘션된 사용자들
+
+  // 연결 관계
+  productId     Int?        // 상품 연결 (리뷰용)
+
+  // 상호작용
+  likesCount    Int         @default(0)
+  commentsCount Int         @default(0)
+  bookmarksCount Int        @default(0)
+  viewsCount    Int         @default(0)
+
+  // 메타데이터
+  publishedAt   DateTime?
+  status        PostStatus  @default(PUBLISHED)
+  featured      Boolean     @default(false)
+  metadata      Json?
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // 관계
+  author        User                   @relation(fields: [authorId], references: [id], onDelete: Cascade)
+  product       Product?               @relation(fields: [productId], references: [id])
+  likes         CommunityPostLike[]
+  comments      CommunityPostComment[]
+  bookmarks     CommunityPostBookmark[]
 
   @@index([type])
   @@index([createdAt])
   @@index([authorId])
+  @@index([likesCount])
 }
 
 model CommunityPostLike {
@@ -483,16 +517,83 @@ model CommunityPostLike {
 }
 
 model CommunityPostComment {
-  id        Int      @id @default(autoincrement())
-  postId    Int
-  userId    Int
-  parentId  Int?
-  content   String
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
+  id           Int               @id @default(autoincrement())
+  postId       Int
+  userId       Int
+  parentId     Int?
+  content      String
+  likesCount   Int               @default(0)
+  mentions     Json?
+  status       CommentStatus     @default(PUBLISHED)
+  createdAt    DateTime          @default(now())
+  updatedAt    DateTime          @updatedAt
 
   post    CommunityPost          @relation(fields: [postId], references: [id], onDelete: Cascade)
   user    User                   @relation(fields: [userId], references: [id], onDelete: Cascade)
   parent  CommunityPostComment?  @relation("CommentReplies", fields: [parentId], references: [id])
   replies CommunityPostComment[] @relation("CommentReplies")
+  likes   CommunityCommentLike[]
+}
+
+// 북마크 시스템
+model CommunityPostBookmark {
+  id     Int  @id @default(autoincrement())
+  postId Int
+  userId Int
+  collectionName String? // 사용자 정의 컬렉션
+  createdAt DateTime @default(now())
+
+  post CommunityPost @relation(fields: [postId], references: [id], onDelete: Cascade)
+  user User          @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([postId, userId])
+}
+
+// 댓글 좋아요
+model CommunityCommentLike {
+  id        Int      @id @default(autoincrement())
+  commentId Int
+  userId    Int
+  createdAt DateTime @default(now())
+
+  comment CommunityPostComment @relation(fields: [commentId], references: [id], onDelete: Cascade)
+  user    User                 @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([commentId, userId])
+}
+
+// 사용자 팔로우 (커뮤니티 활성화용)
+model UserFollow {
+  id          Int      @id @default(autoincrement())
+  followerId  Int      // 팔로우하는 사람
+  followingId Int      // 팔로우받는 사람
+  createdAt   DateTime @default(now())
+
+  follower  User @relation("UserFollower", fields: [followerId], references: [id], onDelete: Cascade)
+  following User @relation("UserFollowing", fields: [followingId], references: [id], onDelete: Cascade)
+
+  @@unique([followerId, followingId])
+}
+
+// 배지 시스템
+model UserBadge {
+  id          Int       @id @default(autoincrement())
+  userId      Int
+  badgeType   BadgeType
+  earnedAt    DateTime  @default(now())
+  metadata    Json?     // 배지 획득 관련 추가 정보
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, badgeType])
+}
+
+enum BadgeType {
+  COOKING_MASTER    // 요리 마스터
+  CULTURE_GUIDE     // 문화 가이드
+  FRIENDLY_AMBASSADOR // 친화 대사
+  LOCAL_EXPERT      // 현지 전문가
+  FIRST_POST        // 첫 게시물
+  HELPFUL_REVIEWER  // 도움되는 리뷰어
+  COMMUNITY_VETERAN // 커뮤니티 베테랑
 }

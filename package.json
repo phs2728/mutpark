@@ -21,6 +21,7 @@
     "bcryptjs": "^2.4.3",
     "date-fns": "^4.1.0",
     "jsonwebtoken": "^9.0.2",
+    "lucide-react": "^0.544.0",
     "mysql2": "^3.11.3",
     "next": "15.5.3",
     "react": "19.1.0",

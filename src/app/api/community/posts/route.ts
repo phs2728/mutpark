@@ -9,7 +9,7 @@ export async function GET(request: NextRequest) {
     const type = searchParams.get("type");
     const offset = (page - 1) * limit;
 
-    const where = type ? { type: type as "REVIEW" | "TIP" | "QUESTION" } : {};
+    const where = type ? { type: type as "RECIPE" | "REVIEW" | "TIP" | "QUESTION" } : {};
 
     const posts = await prisma.communityPost.findMany({
       where: {
@@ -57,13 +57,26 @@ export async function GET(request: NextRequest) {
       title: post.title,
       content: post.content,
       imageUrl: post.imageUrl,
-      tags: post.tags as string[],
+      images: post.images as string[] || [],
+      tags: post.tags as string[] || [],
+      mentions: post.mentions as number[] || [],
+      // 레시피 필드
+      difficulty: post.difficulty,
+      cookingTime: post.cookingTime,
+      servings: post.servings,
+      ingredients: post.ingredients,
+      instructions: post.instructions,
+      // 리뷰 필드
+      rating: post.rating,
+      reviewType: post.reviewType,
       author: {
         name: post.author.name,
       },
       product: post.product,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
+      bookmarksCount: post.bookmarksCount,
+      viewsCount: post.viewsCount,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
     }));
@@ -89,11 +102,45 @@ export async function GET(request: NextRequest) {
 export async function POST(request: NextRequest) {
   try {
     const body = await request.json();
-    const { authorId, type, title, content, imageUrl, tags, productId } = body;
+    const {
+      authorId,
+      type,
+      title,
+      content,
+      imageUrl,
+      images,
+      tags,
+      mentions,
+      productId,
+      // 레시피 전용 필드
+      difficulty,
+      cookingTime,
+      servings,
+      ingredients,
+      instructions,
+      // 리뷰 전용 필드
+      rating,
+      reviewType
+    } = body;
 
     if (!authorId || !type || !title || !content) {
       return NextResponse.json(
         { error: "Missing required fields" },
+        { status: 400 }
+      );
+    }
+
+    // 타입별 유효성 검사
+    if (type === "RECIPE" && (!difficulty || !cookingTime || !servings)) {
+      return NextResponse.json(
+        { error: "Recipe posts require difficulty, cookingTime, and servings" },
+        { status: 400 }
+      );
+    }
+
+    if (type === "REVIEW" && (!rating || rating < 1 || rating > 5)) {
+      return NextResponse.json(
+        { error: "Review posts require a valid rating (1-5)" },
         { status: 400 }
       );
     }
@@ -105,8 +152,19 @@ export async function POST(request: NextRequest) {
         title,
         content,
         imageUrl,
+        images,
         tags,
+        mentions,
         productId,
+        // 레시피 필드
+        difficulty,
+        cookingTime,
+        servings,
+        ingredients,
+        instructions,
+        // 리뷰 필드
+        rating,
+        reviewType,
         publishedAt: new Date(),
         status: "PUBLISHED",
       },
@@ -139,7 +197,18 @@ export async function POST(request: NextRequest) {
       title: post.title,
       content: post.content,
       imageUrl: post.imageUrl,
-      tags: post.tags as string[],
+      images: post.images as string[] || [],
+      tags: post.tags as string[] || [],
+      mentions: post.mentions as number[] || [],
+      // 레시피 필드
+      difficulty: post.difficulty,
+      cookingTime: post.cookingTime,
+      servings: post.servings,
+      ingredients: post.ingredients,
+      instructions: post.instructions,
+      // 리뷰 필드
+      rating: post.rating,
+      reviewType: post.reviewType,
       author: {
         name: post.author.name,
       },
