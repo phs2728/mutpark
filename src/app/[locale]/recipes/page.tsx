@@ -1,4 +1,5 @@
 import { Metadata } from "next";
+import Link from "next/link";
 
 export const metadata: Metadata = {
   title: "레시피 | MutPark",
@@ -45,18 +46,18 @@ export default function RecipesPage() {
           </p>
 
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <a
+            <Link
               href="/ko/community"
               className="px-6 py-3 bg-emerald-500 text-white rounded-lg hover:bg-emerald-600 transition-colors font-medium"
             >
               커뮤니티에서 레시피 보기
-            </a>
-            <a
+            </Link>
+            <Link
               href="/ko"
               className="px-6 py-3 border border-slate-300 dark:border-slate-600 text-slate-700 dark:text-slate-300 rounded-lg hover:bg-slate-50 dark:hover:bg-slate-800 transition-colors font-medium"
             >
               홈으로 돌아가기
-            </a>
+            </Link>
           </div>
         </div>
       </div>

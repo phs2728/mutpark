@@ -1,7 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import { defaultLocale, isLocale } from "@/i18n/config";
+import { useState } from "react";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
 import { RecipeShareForm } from "@/components/community/RecipeShareForm";
 
@@ -11,14 +10,9 @@ interface CommunityPageProps {
 
 export default function CommunityPage({ params }: CommunityPageProps) {
   const [showShareForm, setShowShareForm] = useState(false);
-  const [locale, setLocale] = useState(defaultLocale);
 
-  // Initialize locale from params
-  useEffect(() => {
-    params.then(({ locale: paramLocale }) => {
-      setLocale(isLocale(paramLocale) ? paramLocale : defaultLocale);
-    });
-  }, [params]);
+  // params is available but not currently used in UI
+  void params;
 
   const handleShareRecipe = async (data: unknown) => {
     try {
@@ -59,7 +53,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
       </div>
 
       {/* Community Feed */}
-      <CommunityFeed locale={locale} />
+      <CommunityFeed />
 
       {/* Recipe Share Form Modal */}
       {showShareForm && (

@@ -1,9 +1,7 @@
 "use client";
 
 import { useState, useEffect, useCallback } from "react";
-import Link from "next/link";
 import Image from "next/image";
-import { useI18n } from "@/providers/I18nProvider";
 import { resolveImageUrl } from "@/lib/imagekit";
 
 interface CommunityPost {
@@ -33,7 +31,6 @@ interface CommunityPost {
 }
 
 interface CommunityFeedProps {
-  locale: string;
   filter?: string;
 }
 
@@ -45,8 +42,7 @@ const postTypeColors = {
 
 
 
-export function CommunityFeed({ locale, filter }: CommunityFeedProps) {
-  const { locale: activeLocale } = useI18n();
+export function CommunityFeed({ filter }: CommunityFeedProps) {
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(true);
   const [activeFilter, setActiveFilter] = useState(filter || "all");
