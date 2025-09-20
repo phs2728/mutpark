@@ -35,6 +35,7 @@ export default function TipForm({ isOpen, onClose, onSubmit }: TipFormProps) {
     images: [],
     tags: []
   });
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const [newTag, setNewTag] = useState('');
 
@@ -69,13 +70,21 @@ export default function TipForm({ isOpen, onClose, onSubmit }: TipFormProps) {
     }));
   };
 
-  const addCategoryTag = (category: string) => {
-    if (!formData.tags.includes(category)) {
+  const selectCategory = (category: string) => {
+    // 기존 카테고리가 선택되어 있다면 제거
+    if (selectedCategory) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, category]
+        tags: prev.tags.filter(tag => !tipCategories.some(cat => cat.name === tag))
       }));
     }
+
+    // 새 카테고리 선택
+    setSelectedCategory(category);
+    setFormData(prev => ({
+      ...prev,
+      tags: [...prev.tags.filter(tag => !tipCategories.some(cat => cat.name === tag)), category]
+    }));
   };
 
   return (
@@ -105,18 +114,17 @@ export default function TipForm({ isOpen, onClose, onSubmit }: TipFormProps) {
           {/* 카테고리 선택 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              카테고리 선택 (선택사항)
+              카테고리 선택 (하나만 선택 가능)
             </label>
             <div className="grid grid-cols-3 gap-2">
               {tipCategories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => addCategoryTag(category.name)}
-                  disabled={formData.tags.includes(category.name)}
+                  onClick={() => selectCategory(category.name)}
                   className={`
                     p-3 rounded-lg border text-sm font-medium transition-colors
-                    ${formData.tags.includes(category.name)
-                      ? 'bg-green-100 border-green-300 text-green-700'
+                    ${selectedCategory === category.name
+                      ? 'bg-green-100 border-green-300 text-green-700 ring-2 ring-green-400'
                       : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-green-50 hover:border-green-200'
                     }
                   `}

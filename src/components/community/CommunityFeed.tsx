@@ -3,10 +3,11 @@
 import { useState, useEffect, useCallback } from "react";
 import Image from "next/image";
 import { resolveImageUrl } from "@/lib/imagekit";
+import CommentSection from './CommentSection';
 
 interface CommunityPost {
   id: number;
-  type: "review" | "tip" | "question";
+  type: "review" | "tip" | "question" | "recipe";
   title: string;
   content: string;
   imageUrl?: string | null;
@@ -17,7 +18,30 @@ interface CommunityPost {
   };
   likesCount: number;
   commentsCount: number;
+  bookmarksCount: number;
   isLiked?: boolean;
+  isBookmarked?: boolean;
+
+  // 레시피 전용 필드
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
+  cookingTime?: number;
+  servings?: number;
+  ingredients?: Array<{
+    id: string;
+    name: string;
+    quantity: string;
+    unit: string;
+    isEssential: boolean;
+  }>;
+  instructions?: Array<{
+    id: string;
+    step: number;
+    description: string;
+  }>;
+
+  // 리뷰 전용 필드
+  rating?: number;
+
   product?: {
     id: number;
     baseName: string;
@@ -34,6 +58,19 @@ const postTypeColors = {
   review: "bg-blue-100 text-blue-700 dark:bg-blue-900/30 dark:text-blue-300",
   tip: "bg-purple-100 text-purple-700 dark:bg-purple-900/30 dark:text-purple-300",
   question: "bg-orange-100 text-orange-700 dark:bg-orange-900/30 dark:text-orange-300",
+  recipe: "bg-green-100 text-green-700 dark:bg-green-900/30 dark:text-green-300",
+};
+
+const difficultyLabels = {
+  EASY: "쉬움",
+  MEDIUM: "보통",
+  HARD: "어려움"
+};
+
+const difficultyColors = {
+  EASY: "bg-green-100 text-green-700",
+  MEDIUM: "bg-yellow-100 text-yellow-700",
+  HARD: "bg-red-100 text-red-700"
 };
 
 
@@ -126,6 +163,38 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
     }
   };
 
+  const handleBookmark = async (postId: number) => {
+    try {
+      const post = posts.find(p => p.id === postId);
+      if (!post) return;
+
+      const method = post.isBookmarked ? "DELETE" : "POST";
+      const response = await fetch(`/api/community/posts/${postId}/bookmark`, {
+        method,
+        headers: {
+          "Content-Type": "application/json",
+        },
+        body: method === "POST" ? JSON.stringify({ collectionName: "기본" }) : undefined,
+      });
+
+      if (!response.ok) {
+        throw new Error("Failed to toggle bookmark");
+      }
+
+      setPosts(prev => prev.map(p =>
+        p.id === postId
+          ? {
+              ...p,
+              isBookmarked: !p.isBookmarked,
+              bookmarksCount: p.isBookmarked ? p.bookmarksCount - 1 : p.bookmarksCount + 1
+            }
+          : p
+      ));
+    } catch (error) {
+      console.error("Error toggling bookmark:", error);
+    }
+  };
+
   const handleCommentToggle = (postId: number) => {
     setExpandedComments(prev => {
       const newSet = new Set(prev);
@@ -190,6 +259,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
           <div className="flex flex-wrap gap-2">
             {[
               { key: "all", label: "전체" },
+              { key: "recipe", label: "레시피" },
               { key: "review", label: "후기" },
               { key: "tip", label: "꿀팁" },
               { key: "question", label: "질문" },
@@ -250,7 +320,9 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                         {post.author.name}
                       </h4>
                       <span className={`px-2 py-1 rounded-full text-xs font-medium ${postTypeColors[post.type]}`}>
-                        {post.type === "review" ? "후기" : post.type === "tip" ? "꿀팁" : "질문"}
+                        {post.type === "recipe" ? "레시피" :
+                         post.type === "review" ? "후기" :
+                         post.type === "tip" ? "꿀팁" : "질문"}
                       </span>
                     </div>
                     <div className="text-sm text-slate-500 dark:text-slate-400">
@@ -266,6 +338,56 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                 <p className="text-slate-700 dark:text-slate-300 leading-relaxed mb-4">
                   {post.content}
                 </p>
+
+                {/* Recipe Info */}
+                {post.type === "recipe" && (
+                  <div className="flex flex-wrap gap-3 mb-4 p-3 bg-green-50 dark:bg-green-900/20 rounded-xl border border-green-200 dark:border-green-800">
+                    {post.difficulty && (
+                      <div className="flex items-center gap-2">
+                        <span className="text-xs text-green-600 dark:text-green-400">난이도:</span>
+                        <span className={`px-2 py-1 rounded-full text-xs font-medium ${difficultyColors[post.difficulty]}`}>
+                          {difficultyLabels[post.difficulty]}
+                        </span>
+                      </div>
+                    )}
+                    {post.cookingTime && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4l3 3m6-3a9 9 0 11-18 0 9 9 0 0118 0z" />
+                        </svg>
+                        <span className="text-sm text-green-700 dark:text-green-300">{post.cookingTime}분</span>
+                      </div>
+                    )}
+                    {post.servings && (
+                      <div className="flex items-center gap-2">
+                        <svg className="w-4 h-4 text-green-600 dark:text-green-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                          <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M17 20h5v-2a3 3 0 00-5.356-1.857M17 20H7m10 0v-2c0-.656-.126-1.283-.356-1.857M7 20H2v-2a3 3 0 015.356-1.857M7 20v-2c0-.656.126-1.283.356-1.857m0 0a5.002 5.002 0 019.288 0M15 7a3 3 0 11-6 0 3 3 0 016 0zm6 3a2 2 0 11-4 0 2 2 0 014 0zM7 10a2 2 0 11-4 0 2 2 0 014 0z" />
+                        </svg>
+                        <span className="text-sm text-green-700 dark:text-green-300">{post.servings}인분</span>
+                      </div>
+                    )}
+                  </div>
+                )}
+
+                {/* Review Rating */}
+                {post.type === "review" && post.rating && (
+                  <div className="flex items-center gap-2 mb-4">
+                    <span className="text-sm text-gray-600 dark:text-gray-400">평점:</span>
+                    <div className="flex items-center">
+                      {Array.from({ length: 5 }).map((_, i) => (
+                        <svg
+                          key={i}
+                          className={`w-4 h-4 ${i < post.rating! ? 'text-yellow-400' : 'text-gray-300'}`}
+                          fill="currentColor"
+                          viewBox="0 0 20 20"
+                        >
+                          <path d="M9.049 2.927c.3-.921 1.603-.921 1.902 0l1.07 3.292a1 1 0 00.95.69h3.462c.969 0 1.371 1.24.588 1.81l-2.8 2.034a1 1 0 00-.364 1.118l1.07 3.292c.3.921-.755 1.688-1.54 1.118l-2.8-2.034a1 1 0 00-1.175 0l-2.8 2.034c-.784.57-1.838-.197-1.539-1.118l1.07-3.292a1 1 0 00-.364-1.118L2.98 8.72c-.783-.57-.38-1.81.588-1.81h3.461a1 1 0 00.951-.69l1.07-3.292z" />
+                        </svg>
+                      ))}
+                      <span className="ml-2 text-sm text-gray-600 dark:text-gray-400">({post.rating}/5)</span>
+                    </div>
+                  </div>
+                )}
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
@@ -360,24 +482,33 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
                     </button>
                   </div>
 
-                  <button className="text-slate-500 hover:text-slate-700 dark:text-slate-400 dark:hover:text-slate-300 transition-colors">
-                    <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M8.684 13.342C8.886 12.938 9 12.482 9 12c0-.482-.114-.938-.316-1.342m0 2.684a3 3 0 110-2.684m0 2.684l6.632 3.316m-6.632-6l6.632-3.316m0 0a3 3 0 105.367-2.684 3 3 0 00-5.367 2.684zm0 9.316a3 3 0 105.367 2.684 3 3 0 00-5.367-2.684z" />
+                  <button
+                    onClick={() => handleBookmark(post.id)}
+                    className={`flex items-center gap-2 text-sm transition-colors ${
+                      post.isBookmarked
+                        ? "text-blue-500"
+                        : "text-slate-500 hover:text-blue-500 dark:text-slate-400 dark:hover:text-blue-400"
+                    }`}
+                  >
+                    <svg
+                      className={`h-5 w-5 ${post.isBookmarked ? "fill-current" : ""}`}
+                      fill={post.isBookmarked ? "currentColor" : "none"}
+                      stroke="currentColor"
+                      viewBox="0 0 24 24"
+                    >
+                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 5a2 2 0 012-2h10a2 2 0 012 2v16l-7-3.5L5 21V5z" />
                     </svg>
+                    {post.bookmarksCount > 0 && <span>{post.bookmarksCount}</span>}
                   </button>
                 </div>
               </div>
 
               {/* Comments Section */}
-              {expandedComments.has(post.id) && (
-                <div className="border-t border-slate-200 dark:border-slate-800 bg-slate-50 dark:bg-slate-800/30">
-                  <div className="p-6">
-                    <div className="text-center text-slate-500 dark:text-slate-400 text-sm">
-                      댓글 기능은 개발 중입니다.
-                    </div>
-                  </div>
-                </div>
-              )}
+              <CommentSection
+                postId={post.id}
+                isOpen={expandedComments.has(post.id)}
+                onClose={() => handleCommentToggle(post.id)}
+              />
             </article>
           ))}
         </div>

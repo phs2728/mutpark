@@ -42,6 +42,7 @@ export default function QuestionForm({ isOpen, onClose, onSubmit }: QuestionForm
     images: [],
     tags: []
   });
+  const [selectedCategory, setSelectedCategory] = useState<string | null>(null);
 
   const [newTag, setNewTag] = useState('');
 
@@ -82,13 +83,21 @@ export default function QuestionForm({ isOpen, onClose, onSubmit }: QuestionForm
     }));
   };
 
-  const addCategoryTag = (category: string) => {
-    if (!formData.tags.includes(category)) {
+  const selectCategory = (category: string) => {
+    // 기존 카테고리가 선택되어 있다면 제거
+    if (selectedCategory) {
       setFormData(prev => ({
         ...prev,
-        tags: [...prev.tags, category]
+        tags: prev.tags.filter(tag => !questionCategories.some(cat => cat.name === tag))
       }));
     }
+
+    // 새 카테고리 선택
+    setSelectedCategory(category);
+    setFormData(prev => ({
+      ...prev,
+      tags: [...prev.tags.filter(tag => !questionCategories.some(cat => cat.name === tag)), category]
+    }));
   };
 
   return (
@@ -143,18 +152,17 @@ export default function QuestionForm({ isOpen, onClose, onSubmit }: QuestionForm
           {/* 카테고리 선택 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-3">
-              질문 카테고리 (선택사항)
+              질문 카테고리 (하나만 선택 가능)
             </label>
             <div className="grid grid-cols-3 gap-2">
               {questionCategories.map((category) => (
                 <button
                   key={category.id}
-                  onClick={() => addCategoryTag(category.name)}
-                  disabled={formData.tags.includes(category.name)}
+                  onClick={() => selectCategory(category.name)}
                   className={`
                     p-3 rounded-lg border text-sm font-medium transition-colors
-                    ${formData.tags.includes(category.name)
-                      ? 'bg-blue-100 border-blue-300 text-blue-700'
+                    ${selectedCategory === category.name
+                      ? 'bg-blue-100 border-blue-300 text-blue-700 ring-2 ring-blue-400'
                       : 'bg-gray-50 border-gray-200 text-gray-700 hover:bg-blue-50 hover:border-blue-200'
                     }
                   `}
@@ -203,7 +211,7 @@ export default function QuestionForm({ isOpen, onClose, onSubmit }: QuestionForm
           {/* 이미지 업로드 */}
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">
-              <Image className="w-4 h-4 inline mr-1" />
+              <Image className="w-4 h-4 inline mr-1" alt="이미지 아이콘" />
               사진 첨부 (선택사항)
             </label>
             <div className="border-2 border-dashed border-gray-200 rounded-lg p-6 text-center">
