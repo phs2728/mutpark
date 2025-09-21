@@ -3,10 +3,11 @@ import { prisma } from "@/lib/prisma";
 
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const eventId = parseInt(params.id);
+    const resolvedParams = await params;
+    const eventId = parseInt(resolvedParams.id);
 
     if (isNaN(eventId)) {
       return NextResponse.json(
@@ -92,10 +93,11 @@ export async function GET(
 
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const eventId = parseInt(params.id);
+    const resolvedParams = await params;
+    const eventId = parseInt(resolvedParams.id);
 
     if (isNaN(eventId)) {
       return NextResponse.json(
@@ -133,7 +135,7 @@ export async function PUT(
       );
     }
 
-    const updateData: any = {};
+    const updateData: Record<string, unknown> = {};
 
     if (name !== undefined) updateData.name = name;
     if (description !== undefined) updateData.description = description;
@@ -209,10 +211,11 @@ export async function PUT(
 
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
-    const eventId = parseInt(params.id);
+    const resolvedParams = await params;
+    const eventId = parseInt(resolvedParams.id);
 
     if (isNaN(eventId)) {
       return NextResponse.json(

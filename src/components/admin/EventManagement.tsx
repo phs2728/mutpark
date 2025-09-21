@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect, useCallback } from 'react';
-import { Calendar, Clock, Users, Trophy, Plus, Edit, Trash2, Save, X } from 'lucide-react';
+import { Calendar, Users, Trophy, Plus, Edit, Trash2, Save, X } from 'lucide-react';
 
 interface Event {
   id: number;
@@ -131,7 +131,7 @@ function EventForm({
               <label className="block text-sm font-medium text-gray-700 mb-1">타입</label>
               <select
                 value={formData.type}
-                onChange={(e) => setFormData({ ...formData, type: e.target.value as any })}
+                onChange={(e) => setFormData({ ...formData, type: e.target.value as 'challenge' | 'contest' | 'celebration' | 'promotion' })}
                 className="w-full px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-red-500 focus:border-transparent"
               >
                 {EVENT_TYPES.map(type => (
