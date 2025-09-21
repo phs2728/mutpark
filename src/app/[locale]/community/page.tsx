@@ -1,7 +1,6 @@
 "use client";
 
 import { useState } from "react";
-import { CommunityFeed } from "@/components/community/CommunityFeed";
 import InteractiveFeed from "@/components/community/InteractiveFeed";
 import KoreanCulturalHeader from "@/components/community/KoreanCulturalHeader";
 import PostTypeSelector from "@/components/community/forms/PostTypeSelector";

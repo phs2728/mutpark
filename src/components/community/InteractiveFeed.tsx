@@ -1,8 +1,48 @@
 'use client';
 
 import { useState, useEffect, useCallback, useRef } from 'react';
-import { Filter, Search, TrendingUp, Clock, Heart, MessageCircle, ChevronDown } from 'lucide-react';
+import { Filter, Search, TrendingUp, Clock, Heart, ChevronDown } from 'lucide-react';
 import { CommunityFeed } from './CommunityFeed';
+
+interface CommunityPost {
+  id: number;
+  type: "review" | "tip" | "question" | "recipe";
+  title: string;
+  content: string;
+  imageUrl?: string | null;
+  createdAt: string;
+  publishedAt?: string | null;
+  author: {
+    name: string;
+  };
+  likesCount: number;
+  commentsCount: number;
+  bookmarksCount: number;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
+  difficulty?: "EASY" | "MEDIUM" | "HARD";
+  cookingTime?: number;
+  servings?: number;
+  ingredients?: Array<{
+    id: string;
+    name: string;
+    quantity: string;
+    unit: string;
+    isEssential: boolean;
+  }>;
+  instructions?: Array<{
+    id: string;
+    step: number;
+    description: string;
+  }>;
+  rating?: number;
+  product?: {
+    id: number;
+    baseName: string;
+    imageUrl?: string | null;
+  } | null;
+  tags: string[];
+}
 
 interface FilterOptions {
   type: 'all' | 'recipe' | 'review' | 'tip' | 'question';
@@ -16,7 +56,7 @@ interface InteractiveFeedProps {
 }
 
 export default function InteractiveFeed({ userId, showPersonalized = false }: InteractiveFeedProps) {
-  const [posts, setPosts] = useState<any[]>([]);
+  const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
   const [page, setPage] = useState(1);
@@ -83,7 +123,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
   useEffect(() => {
     setPage(1);
     loadPosts(true);
-  }, [filters, searchQuery]);
+  }, [filters, searchQuery, loadPosts]);
 
   // 검색 디바운스
   const handleSearchChange = (value: string) => {
@@ -275,7 +315,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
           )}
           {searchQuery && (
             <span className="px-2 py-1 bg-green-100 text-green-700 rounded">
-              "{searchQuery}"
+              &quot;{searchQuery}&quot;
             </span>
           )}
           <button

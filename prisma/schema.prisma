@@ -10,6 +10,9 @@ datasource db {
 enum UserRole {
   CUSTOMER
   ADMIN
+  SUPER_ADMIN
+  MODERATOR
+  OPERATOR
 }
 
 enum SocialProvider {
@@ -68,6 +71,13 @@ model User {
   badges                UserBadge[]
   createdEvents         Event[]            @relation("EventCreator")
   eventParticipations   EventParticipant[]
+  auditLogs             AuditLog[]
+  createdSettings       SystemSettings[]   @relation("SettingCreator")
+  updatedSettings       SystemSettings[]   @relation("SettingUpdater")
+  createdBanners        Banner[]           @relation("BannerCreator")
+  updatedBanners        Banner[]           @relation("BannerUpdater")
+  createdShippingProviders ShippingProvider[] @relation("ShippingProviderCreator")
+  updatedShippingProviders ShippingProvider[] @relation("ShippingProviderUpdater")
 }
 
 model SocialAccount {
@@ -175,6 +185,8 @@ model Order {
   address           Address     @relation(fields: [addressId], references: [id])
   items             OrderItem[]
   payment           Payment?
+  taxInvoice        TaxInvoice?
+  shippingTracking  ShippingTracking?
 }
 
 model OrderItem {
@@ -671,4 +683,290 @@ model EventParticipant {
   user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
 
   @@unique([eventId, userId])
+}
+
+// ============= ADMIN CONSOLE MODELS =============
+
+// 관리자 감사 로그
+enum AuditAction {
+  CREATE
+  UPDATE
+  DELETE
+  LOGIN
+  LOGOUT
+  EXPORT
+  IMPORT
+  APPROVE
+  REJECT
+  REFUND
+  CANCEL
+}
+
+model AuditLog {
+  id          Int         @id @default(autoincrement())
+  userId      Int
+  action      AuditAction
+  entityType  String      // 대상 엔티티 타입 (예: User, Order, Product)
+  entityId    String?     // 대상 엔티티 ID
+  oldValues   Json?       // 변경 전 값들
+  newValues   Json?       // 변경 후 값들
+  ipAddress   String?
+  userAgent   String?
+  description String?     // 추가 설명
+  createdAt   DateTime    @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([userId])
+  @@index([action])
+  @@index([entityType])
+  @@index([createdAt])
+}
+
+// 시스템 설정
+enum SettingType {
+  SHIPPING
+  TAX
+  PAYMENT
+  BANNER
+  NOTIFICATION
+  SECURITY
+  GENERAL
+}
+
+model SystemSettings {
+  id          Int         @id @default(autoincrement())
+  key         String      @unique
+  value       Json
+  type        SettingType
+  description String?
+  isActive    Boolean     @default(true)
+  createdBy   Int
+  updatedBy   Int?
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+
+  creator User @relation("SettingCreator", fields: [createdBy], references: [id])
+  updater User? @relation("SettingUpdater", fields: [updatedBy], references: [id])
+
+  @@index([type])
+  @@index([isActive])
+}
+
+// 터키 세금계산서 관리
+enum InvoiceStatus {
+  PENDING
+  ISSUED
+  CANCELLED
+  FAILED
+}
+
+model TaxInvoice {
+  id                Int           @id @default(autoincrement())
+  orderId           Int           @unique
+  invoiceNumber     String        @unique
+  status            InvoiceStatus @default(PENDING)
+
+  // 터키 세법 관련 필수 정보
+  tckn              String?       // 터키 개인 세번호
+  vkn               String?       // 터키 법인 세번호
+  taxOffice         String?       // 세무서
+
+  // 송장 정보
+  companyName       String?
+  companyAddress    String
+  customerName      String
+  customerAddress   String
+
+  // 금액 정보
+  subtotalAmount    Decimal       @db.Decimal(10, 2)
+  taxAmount         Decimal       @db.Decimal(10, 2)
+  totalAmount       Decimal       @db.Decimal(10, 2)
+
+  // 파일 및 API 정보
+  pdfUrl            String?
+  apiResponse       Json?
+  errorMessage      String?
+
+  issuedAt          DateTime?
+  createdAt         DateTime      @default(now())
+  updatedAt         DateTime      @updatedAt
+
+  order Order @relation(fields: [orderId], references: [id], onDelete: Cascade)
+
+  @@index([status])
+  @@index([tckn])
+  @@index([vkn])
+  @@index([issuedAt])
+}
+
+// 배너 관리
+enum BannerPosition {
+  HEADER
+  HERO
+  SIDEBAR
+  FOOTER
+  MODAL
+  FLOATING
+}
+
+enum BannerStatus {
+  DRAFT
+  ACTIVE
+  PAUSED
+  EXPIRED
+}
+
+model Banner {
+  id            Int           @id @default(autoincrement())
+  title         String
+  description   String?
+  imageUrl      String
+  linkUrl       String?
+  position      BannerPosition
+  status        BannerStatus  @default(DRAFT)
+
+  // 노출 설정
+  startDate     DateTime
+  endDate       DateTime
+  priority      Int           @default(0)
+
+  // 타겟팅
+  targetAudience Json?        // 대상 고객 설정
+  deviceType    String?       // mobile, desktop, all
+
+  // 통계
+  viewCount     Int           @default(0)
+  clickCount    Int           @default(0)
+
+  // 다국어 지원
+  locale        String        @default("tr")
+
+  createdBy     Int
+  updatedBy     Int?
+  createdAt     DateTime      @default(now())
+  updatedAt     DateTime      @updatedAt
+
+  creator User @relation("BannerCreator", fields: [createdBy], references: [id])
+  updater User? @relation("BannerUpdater", fields: [updatedBy], references: [id])
+
+  @@index([position])
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([priority])
+}
+
+// 배송업체 관리
+enum ShippingProviderStatus {
+  ACTIVE
+  INACTIVE
+  MAINTENANCE
+}
+
+model ShippingProvider {
+  id            Int                   @id @default(autoincrement())
+  name          String
+  code          String                @unique
+  logo          String?
+  website       String?
+  status        ShippingProviderStatus @default(ACTIVE)
+
+  // API 설정
+  apiEndpoint   String?
+  apiKey        String?
+  apiSecret     String?
+  testMode      Boolean               @default(true)
+
+  // 서비스 설정
+  supportsCOD   Boolean               @default(false) // 착불 지원
+  supportsTracking Boolean            @default(true)
+
+  // 배송비 설정
+  baseRate      Decimal               @db.Decimal(10, 2)
+  weightRate    Decimal?              @db.Decimal(10, 2) // 무게당 요금
+  distanceRate  Decimal?              @db.Decimal(10, 2) // 거리당 요금
+  freeShippingThreshold Decimal?      @db.Decimal(10, 2) // 무료배송 최소금액
+
+  // 지원 지역
+  supportedRegions Json?              // 지원 지역 배열
+  deliveryTimeMin  Int?               // 최소 배송일
+  deliveryTimeMax  Int?               // 최대 배송일
+
+  // 메타데이터
+  metadata      Json?
+
+  createdBy     Int
+  updatedBy     Int?
+  createdAt     DateTime              @default(now())
+  updatedAt     DateTime              @updatedAt
+
+  creator   User                    @relation("ShippingProviderCreator", fields: [createdBy], references: [id])
+  updater   User?                   @relation("ShippingProviderUpdater", fields: [updatedBy], references: [id])
+  shipments ShippingTracking[]
+
+  @@index([status])
+  @@index([code])
+}
+
+// 배송 추적
+enum ShippingStatus {
+  PENDING
+  PICKED_UP
+  IN_TRANSIT
+  OUT_FOR_DELIVERY
+  DELIVERED
+  FAILED
+  RETURNED
+}
+
+model ShippingTracking {
+  id                Int             @id @default(autoincrement())
+  orderId           Int             @unique
+  providerId        Int
+  trackingNumber    String
+  status            ShippingStatus  @default(PENDING)
+
+  // 추적 정보
+  currentLocation   String?
+  estimatedDelivery DateTime?
+  actualDelivery    DateTime?
+
+  // API 응답 데이터
+  providerResponse  Json?
+  lastSyncAt        DateTime?
+
+  // 추적 이벤트들
+  events            Json?           // 배송 이벤트 배열
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+
+  order    Order            @relation(fields: [orderId], references: [id], onDelete: Cascade)
+  provider ShippingProvider @relation(fields: [providerId], references: [id])
+
+  @@index([trackingNumber])
+  @@index([status])
+  @@index([providerId])
+}
+
+// 회사 정보 (세금계산서용)
+model CompanyInfo {
+  id            Int      @id @default(autoincrement())
+  name          String
+  taxNumber     String   // VKN
+  taxOffice     String
+  address       String
+  phone         String
+  email         String
+  website       String?
+  logo          String?
+
+  // 터키 법인 필수 정보
+  mersisNumber  String?  // MERSIS 번호
+  tradeNumber   String?  // Ticaret Sicil 번호
+
+  isActive      Boolean  @default(true)
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
 }

@@ -290,10 +290,10 @@ export class PopularPostsService {
 
   // 베스트 댓글 선별
   static async getBestComments(postId: number, limit: number = 3) {
-    const comments = await prisma.communityComment.findMany({
+    const comments = await prisma.communityPostComment.findMany({
       where: { postId },
       include: {
-        author: {
+        user: {
           select: {
             id: true,
             name: true
@@ -309,7 +309,7 @@ export class PopularPostsService {
     });
 
     // 댓글 점수 계산 (좋아요 + 답글 수 + 길이 + 작성자 신뢰도)
-    const commentsWithScores = comments.map(comment => {
+    const commentsWithScores = comments.map((comment: typeof comments[0]) => {
       const likesScore = comment._count.likes * 10;
       const repliesScore = comment._count.replies * 5;
 
@@ -371,7 +371,7 @@ export class PopularPostsService {
     });
 
     return posts
-      .sort((a, b) => (b as any).personalizedScore - (a as any).personalizedScore)
+      .sort((a, b) => ((a as unknown) as { personalizedScore: number }).personalizedScore < ((b as unknown) as { personalizedScore: number }).personalizedScore ? 1 : -1)
       .slice(offset, offset + limit);
   }
 
