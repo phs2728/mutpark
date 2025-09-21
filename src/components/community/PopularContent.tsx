@@ -53,9 +53,23 @@ export default function PopularContent() {
   const [trendingData, setTrendingData] = useState<TrendingData | null>(null);
   const [loading, setLoading] = useState(true);
   const [isClient, setIsClient] = useState(false);
+  const [isAuthed, setIsAuthed] = useState(false);
 
   useEffect(() => {
     setIsClient(true);
+  }, []);
+
+  // Lightweight auth probe to guard actions in guest mode
+  useEffect(() => {
+    const probe = async () => {
+      try {
+        const res = await fetch('/api/profile', { credentials: 'include' });
+        setIsAuthed(res.ok);
+      } catch {
+        setIsAuthed(false);
+      }
+    };
+    probe();
   }, []);
 
   const fetchPopularPosts = useCallback(async () => {
@@ -126,54 +140,70 @@ export default function PopularContent() {
   };
 
   const handleLike = async (postId: number) => {
-    try {
-      const response = await fetch(`/api/community/posts/${postId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ userId: 1 }), // 임시로 userId 1 사용
-        credentials: 'include', // Include cookies for authentication
-      });
+    if (!isAuthed) {
+      alert('로그인이 필요합니다.');
+      return;
+    }
+    // Locate current post from either list
+    const current = popularPosts.find(p => p.id === postId) || trendingData?.posts.find(p => p.id === postId);
+    if (!current) return;
 
-      if (!response.ok) {
-        throw new Error('Failed to toggle like');
-      }
+    // Optimistic update using snapshot
+    const snapshot = { isLiked: !!current.isLiked, likesCount: current.likesCount };
+    const optimisticLiked = !snapshot.isLiked;
+    const optimisticCount = optimisticLiked ? snapshot.likesCount + 1 : snapshot.likesCount - 1;
 
-      const data = await response.json();
-
-      setPopularPosts(prev => prev.map(post =>
-        post.id === postId
-          ? {
-              ...post,
-              isLiked: data.liked,
-              likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
-            }
-          : post
-      ));
-
+    const applyToAll = (updater: (p: PopularPost) => PopularPost) => {
+      setPopularPosts(prev => prev.map(p => (p.id === postId ? updater(p) : p)));
       if (trendingData?.posts) {
         setTrendingData(prev => prev ? {
           ...prev,
-          posts: prev.posts.map(post =>
-            post.id === postId
-              ? {
-                  ...post,
-                  isLiked: data.liked,
-                  likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
-                }
-              : post
-          )
+          posts: prev.posts.map(p => (p.id === postId ? updater(p) : p))
         } : null);
       }
+    };
+
+    // Apply optimistic change
+    applyToAll(p => ({ ...p, isLiked: optimisticLiked, likesCount: optimisticCount }));
+
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/like`, {
+        method: 'POST',
+        credentials: 'include',
+      });
+
+      if (!response.ok) {
+        // Rollback on 401 with login prompt
+        if (response.status === 401) {
+          applyToAll(p => ({ ...p, isLiked: snapshot.isLiked, likesCount: snapshot.likesCount }));
+          alert('로그인이 필요합니다.');
+          return;
+        }
+        // Rollback on other errors
+        applyToAll(p => ({ ...p, isLiked: snapshot.isLiked, likesCount: snapshot.likesCount }));
+        console.warn('Like toggle failed:', response.status, response.statusText);
+        alert('좋아요 처리 중 오류가 발생했습니다.');
+        return;
+      }
+
+      const data = await response.json(); // { liked, likesCount }
+
+      // Trust server state
+      applyToAll(p => ({ ...p, isLiked: data.liked, likesCount: data.likesCount }));
     } catch (error) {
-      console.error('Error toggling like:', error);
+      // Network error: rollback
+      applyToAll(p => ({ ...p, isLiked: snapshot.isLiked, likesCount: snapshot.likesCount }));
+      console.warn('Error toggling like:', error);
       alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
 
   const handleBookmark = async (postId: number) => {
     try {
+      if (!isAuthed) {
+        alert('로그인이 필요합니다.');
+        return;
+      }
       const post = [...popularPosts, ...(trendingData?.posts || [])].find(p => p.id === postId);
       if (!post) return;
 

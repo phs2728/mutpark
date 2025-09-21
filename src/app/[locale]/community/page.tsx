@@ -135,7 +135,7 @@ export default function CommunityPage({ params }: CommunityPageProps) {
       <div className="min-h-[600px]">
         {activeTab === 'feed' && (
           <div className="rounded-2xl">
-            <InteractiveFeed userId={1} showPersonalized={true} />
+            <InteractiveFeed showPersonalized={false} />
           </div>
         )}
 
@@ -153,7 +153,8 @@ export default function CommunityPage({ params }: CommunityPageProps) {
 
         {activeTab === 'badges' && (
           <div className="community-winter rounded-2xl p-6">
-            <BadgeSystem userId={1} />
+            {/* TODO: Pass real authenticated userId when auth is wired to client */}
+            <p className="text-gray-600">로그인 후 배지를 확인할 수 있습니다.</p>
           </div>
         )}
       </div>

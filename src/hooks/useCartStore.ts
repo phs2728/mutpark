@@ -95,6 +95,11 @@ export const useCartStore = create<CartState>((set, get) => ({
     set({ loading: true, error: undefined });
     try {
       const response = await fetch("/api/cart", { credentials: "include" });
+      // Treat 401 as unauthenticated: clear cart silently
+      if (response.status === 401) {
+        set({ items: [], subtotal: 0, loading: false });
+        return;
+      }
       const json = await handleResponse<CartApiResponse>(response);
       const items = parseCartItems(json.data.items ?? []);
       const subtotal = items.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
@@ -114,6 +119,11 @@ export const useCartStore = create<CartState>((set, get) => ({
         },
         body: JSON.stringify({ productId, quantity }),
       });
+      if (response.status === 401) {
+        // Not logged in
+        set({ loading: false });
+        return;
+      }
       await handleResponse(response);
       await get().fetchCart();
     } catch (error) {
@@ -131,6 +141,10 @@ export const useCartStore = create<CartState>((set, get) => ({
         },
         body: JSON.stringify({ productId, quantity }),
       });
+      if (response.status === 401) {
+        set({ loading: false });
+        return;
+      }
       await handleResponse(response);
       await get().fetchCart();
     } catch (error) {
@@ -148,6 +162,10 @@ export const useCartStore = create<CartState>((set, get) => ({
         },
         body: JSON.stringify({ productId }),
       });
+      if (response.status === 401) {
+        set({ loading: false });
+        return;
+      }
       await handleResponse(response);
       await get().fetchCart();
     } catch (error) {

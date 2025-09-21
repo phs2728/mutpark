@@ -50,7 +50,7 @@ export async function POST(
     }
 
     // 좋아요 생성 및 카운트 업데이트
-    await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       await tx.communityCommentLike.create({
         data: {
           commentId,
@@ -58,17 +58,19 @@ export async function POST(
         },
       });
 
-      await tx.communityPostComment.update({
+      const comment = await tx.communityPostComment.update({
         where: { id: commentId },
         data: {
           likesCount: {
             increment: 1,
           },
         },
+        select: { likesCount: true },
       });
+      return comment;
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, liked: true, likesCount: updated.likesCount });
   } catch (error) {
     console.error("Error liking comment:", error);
     return NextResponse.json(
@@ -109,24 +111,26 @@ export async function DELETE(
     }
 
     // 좋아요 삭제 및 카운트 업데이트
-    await prisma.$transaction(async (tx) => {
+    const updated = await prisma.$transaction(async (tx) => {
       await tx.communityCommentLike.delete({
         where: {
           id: existingLike.id,
         },
       });
 
-      await tx.communityPostComment.update({
+      const comment = await tx.communityPostComment.update({
         where: { id: commentId },
         data: {
           likesCount: {
             decrement: 1,
           },
         },
+        select: { likesCount: true },
       });
+      return comment;
     });
 
-    return NextResponse.json({ success: true });
+    return NextResponse.json({ success: true, liked: false, likesCount: updated.likesCount });
   } catch (error) {
     console.error("Error unliking comment:", error);
     return NextResponse.json(

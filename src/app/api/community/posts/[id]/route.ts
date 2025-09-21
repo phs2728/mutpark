@@ -87,7 +87,7 @@ export async function GET(
         user: comment.user,
         createdAt: comment.createdAt,
       })),
-      likesCount: post._count.likes,
+      likesCount: post.likesCount,
       commentsCount: post._count.comments,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,

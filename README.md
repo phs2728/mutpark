@@ -94,6 +94,32 @@ Visit `http://localhost:3000/ko` (Korean) or `http://localhost:3000/tr` (Turkish
 
 Progress is mirrored back into the PRD checklist (`.github/prompt/PRD.md`).
 
+## MCP (Playwright) – Optional Browser Automation
+
+We include a minimal MCP server under `mcp/playwright` that exposes Playwright-based tools over stdio.
+
+Setup and run from project root:
+
+```bash
+cd mcp/playwright
+npm install
+npm run playwright:install
+npm run dev
+```
+
+Or build and run:
+
+```bash
+cd mcp/playwright
+npm run build
+npm start
+```
+
+Tools:
+- `goto({ url })` – navigate to a URL
+- `screenshot({ path, fullPage? })` – save a screenshot
+- `close()` – close the browser
+
 ## API Overview
 
 | Endpoint | Method | Purpose |

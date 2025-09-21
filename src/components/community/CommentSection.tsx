@@ -15,6 +15,7 @@ interface Comment {
     name: string;
   };
   replies?: Comment[];
+  isLiked?: boolean;
 }
 
 interface CommentSectionProps {
@@ -127,26 +128,60 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
   };
 
   const handleLikeComment = async (commentId: number) => {
-    try {
-      const response = await fetch(`/api/community/comments/${commentId}/like`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-      });
-
-      if (!response.ok) {
-        if (response.status === 401) {
-          alert('로그인이 필요합니다.');
-          return;
-        }
-        throw new Error('Failed to like comment');
+    // find target and optimistic toggle
+    const target = comments.flatMap(c => [c, ...(c.replies || [])]).find(c => c.id === commentId);
+    const currentlyLiked = target?.isLiked ?? false;
+    const optimisticDelta = currentlyLiked ? -1 : 1;
+    setComments(prev => prev.map(c => {
+      if (c.id === commentId) {
+        return { ...c, isLiked: !currentlyLiked, likesCount: Math.max(0, c.likesCount + optimisticDelta) };
       }
+      if (c.replies && c.replies.length) {
+        return {
+          ...c,
+          replies: c.replies.map(r => r.id === commentId ? { ...r, isLiked: !currentlyLiked, likesCount: Math.max(0, r.likesCount + optimisticDelta) } : r)
+        };
+      }
+      return c;
+    }));
 
-      // Refresh comments to update like counts
-      await fetchComments();
+    try {
+      const method = currentlyLiked ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/community/comments/${commentId}/like`, {
+        method,
+        headers: { 'Content-Type': 'application/json' },
+      });
+      if (!response.ok) {
+        throw new Error('Failed to toggle like');
+      }
+      const data = await response.json();
+      setComments(prev => prev.map(c => {
+        if (c.id === commentId) {
+          return { ...c, isLiked: data.liked, likesCount: data.likesCount };
+        }
+        if (c.replies && c.replies.length) {
+          return {
+            ...c,
+            replies: c.replies.map(r => r.id === commentId ? { ...r, isLiked: data.liked, likesCount: data.likesCount } : r)
+          };
+        }
+        return c;
+      }));
     } catch (error) {
-      console.error('Error liking comment:', error);
+      // rollback
+      setComments(prev => prev.map(c => {
+        if (c.id === commentId) {
+          return { ...c, isLiked: currentlyLiked, likesCount: Math.max(0, c.likesCount - optimisticDelta) };
+        }
+        if (c.replies && c.replies.length) {
+          return {
+            ...c,
+            replies: c.replies.map(r => r.id === commentId ? { ...r, isLiked: currentlyLiked, likesCount: Math.max(0, r.likesCount - optimisticDelta) } : r)
+          };
+        }
+        return c;
+      }));
+      console.error('Error toggling comment like:', error);
       alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
@@ -188,7 +223,7 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
               onClick={() => handleLikeComment(comment.id)}
               className="flex items-center space-x-1 text-xs text-gray-500 hover:text-red-500 transition-colors"
             >
-              <Heart className="w-4 h-4" />
+              <Heart className={`w-4 h-4 ${comment.isLiked ? 'fill-red-500 text-red-500' : ''}`} />
               <span>{comment.likesCount > 0 ? comment.likesCount : ''}</span>
             </button>
 

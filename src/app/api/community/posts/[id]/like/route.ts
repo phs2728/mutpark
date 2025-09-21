@@ -1,27 +1,28 @@
 import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getAuthenticatedUser } from "@/lib/session";
 
 export async function POST(
   request: NextRequest,
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authed = await getAuthenticatedUser();
+    if (!authed?.userId) {
+      return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
+    }
     const { id } = await context.params;
     const postId = parseInt(id);
-    const { userId } = await request.json();
 
-    if (isNaN(postId) || !userId) {
-      return NextResponse.json(
-        { error: "Invalid post ID or user ID" },
-        { status: 400 }
-      );
+    if (isNaN(postId)) {
+      return NextResponse.json({ error: "Invalid post ID" }, { status: 400 });
     }
 
     const existingLike = await prisma.communityPostLike.findUnique({
       where: {
         postId_userId: {
           postId,
-          userId,
+          userId: authed.userId,
         },
       },
     });
@@ -48,7 +49,7 @@ export async function POST(
       await prisma.communityPostLike.create({
         data: {
           postId,
-          userId,
+          userId: authed.userId,
         },
       });
 

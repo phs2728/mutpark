@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import { getDirection, isLocale } from "@/i18n/config";
+import { getDirection } from "@/i18n/config";
 import { CurrencyProvider } from "@/providers/CurrencyProvider";
 
 const geistSans = Geist({
@@ -24,16 +24,14 @@ export const metadata: Metadata = {
   metadataBase: new URL("https://mutpark.app"),
 };
 
-export default async function RootLayout({
+export default function RootLayout({
   children,
-  params,
 }: {
   children: React.ReactNode;
-  params: Promise<{ locale?: string }>;
 }) {
-  const resolvedParams = await params;
-  const localeParam = resolvedParams?.locale;
-  const locale = localeParam && isLocale(localeParam) ? localeParam : "ko";
+  // Root layout does not receive params; use a safe default and delegate
+  // locale handling to src/app/[locale]/layout.tsx
+  const locale = "ko" as const;
   const direction = getDirection(locale);
 
   return (

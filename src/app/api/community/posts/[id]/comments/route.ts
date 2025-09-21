@@ -7,6 +7,7 @@ export async function GET(
   context: { params: Promise<{ id: string }> }
 ) {
   try {
+    const authed = await getAuthenticatedUser();
     const { id } = await context.params;
     const postId = parseInt(id);
 
@@ -23,18 +24,42 @@ export async function GET(
             name: true,
           },
         },
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
+        likes: authed?.userId ? { where: { userId: authed.userId }, select: { id: true } } : false,
       },
       orderBy: {
         createdAt: "asc",
       },
     });
 
-    return NextResponse.json(comments);
+    type RawComment = {
+      id: number;
+      postId: number;
+      userId: number;
+      parentId: number | null;
+      content: string;
+      likesCount: number;
+      status: string;
+      createdAt: Date;
+      updatedAt: Date;
+      user: { id: number; name: string };
+      likes?: Array<{ id: number }>;
+    };
+
+    const transformed = (comments as RawComment[]).map((c) => ({
+      id: c.id,
+      postId: c.postId,
+      userId: c.userId,
+      parentId: c.parentId,
+      content: c.content,
+      likesCount: c.likesCount,
+      status: c.status,
+      createdAt: c.createdAt,
+      updatedAt: c.updatedAt,
+      user: c.user,
+      isLiked: authed?.userId ? Boolean(c.likes && c.likes.length > 0) : false,
+    }));
+
+    return NextResponse.json(transformed);
   } catch (error) {
     console.error("Error fetching comments:", error);
     return NextResponse.json(
@@ -80,11 +105,6 @@ export async function POST(
             name: true,
           },
         },
-        _count: {
-          select: {
-            likes: true,
-          },
-        },
       },
     });
 
@@ -97,7 +117,19 @@ export async function POST(
       },
     });
 
-    return NextResponse.json(comment, { status: 201 });
+    return NextResponse.json({
+      id: comment.id,
+      postId: comment.postId,
+      userId: comment.userId,
+      parentId: comment.parentId,
+      content: comment.content,
+      likesCount: comment.likesCount,
+      status: comment.status,
+      createdAt: comment.createdAt,
+      updatedAt: comment.updatedAt,
+      user: comment.user,
+      isLiked: false,
+    }, { status: 201 });
   } catch (error) {
     console.error("Error creating comment:", error);
     return NextResponse.json(

@@ -20,8 +20,10 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
   const fetchCart = useCartStore((state) => state.fetchCart);
 
   useEffect(() => {
-    fetchCart().catch(() => undefined);
-  }, [fetchCart]);
+    if (user) {
+      fetchCart().catch(() => undefined);
+    }
+  }, [fetchCart, user]);
 
   const cartCount = items.reduce((acc, item) => acc + item.quantity, 0);
 

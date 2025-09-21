@@ -111,7 +111,8 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
         url = `/api/community/trending?${params.toString()}`;
         mode = 'trending';
       } else {
-        url = `/api/community/posts?${params.toString()}`;
+        const userParam = userId ? `&userId=${userId}` : '';
+        url = `/api/community/posts?${params.toString()}${userParam}`;
         mode = 'latest';
       }
 
@@ -147,7 +148,8 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
   useEffect(() => {
     setPage(1);
     loadPosts(true);
-  }, [filters, searchQuery, loadPosts]);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [filters, searchQuery]);
 
   // 검색 디바운스
   const handleSearchChange = (value: string) => {
@@ -189,7 +191,8 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
         url = `/api/community/trending?${params.toString()}`;
         mode = 'trending';
       } else {
-        url = `/api/community/posts?${params.toString()}`;
+        const userParam = userId ? `&userId=${userId}` : '';
+        url = `/api/community/posts?${params.toString()}${userParam}`;
         mode = 'latest';
       }
 

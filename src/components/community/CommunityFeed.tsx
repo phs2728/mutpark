@@ -167,7 +167,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, searchQuery, selectedTag, sortBy, isControlled]);
+  }, [activeFilter, searchQuery, selectedTag, sortBy, isControlled, userId]);
 
   useEffect(() => {
     if (!isControlled) {
@@ -207,15 +207,20 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
   }, [hasMore, loading, page, fetchPosts, isControlled]);
 
   const handleLike = async (postId: number) => {
-    // 현재 포스트 찾기
-    const currentPost = posts.find(p => p.id === postId);
-    if (!currentPost) return;
+    // Require authentication for liking
+    if (!userId) {
+      alert("로그인이 필요합니다.");
+      return;
+    }
+    // 현재 포스트 찾기 (스냅샷 유지)
+    const snapshot = posts.find(p => p.id === postId);
+    if (!snapshot) return;
 
     // 낙관적 업데이트 (즉시 UI 반영)
-    const optimisticLiked = !currentPost.isLiked;
+    const optimisticLiked = !snapshot.isLiked;
     const optimisticCount = optimisticLiked
-      ? currentPost.likesCount + 1
-      : currentPost.likesCount - 1;
+      ? snapshot.likesCount + 1
+      : snapshot.likesCount - 1;
 
     setPosts(prev => prev.map(post =>
       post.id === postId
@@ -230,21 +235,33 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
     try {
       const response = await fetch(`/api/community/posts/${postId}/like`, {
         method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-        },
-        body: JSON.stringify({ userId: userId || 1 }),
+        headers: { "Content-Type": "application/json" },
         credentials: 'include',
       });
 
       if (!response.ok) {
-        // 오류 시 원래 상태로 롤백
+        // 401: 인증 필요
+        if (response.status === 401) {
+          // 원래 상태로 롤백하고 안내
+          setPosts(prev => prev.map(post =>
+            post.id === postId
+              ? {
+                  ...post,
+                  isLiked: snapshot.isLiked,
+                  likesCount: snapshot.likesCount
+                }
+              : post
+          ));
+          alert("로그인이 필요합니다.");
+          return;
+        }
+        // 기타 오류: 원래 상태로 롤백 후 에러 처리
         setPosts(prev => prev.map(post =>
           post.id === postId
             ? {
                 ...post,
-                isLiked: currentPost.isLiked,
-                likesCount: currentPost.likesCount
+                isLiked: snapshot.isLiked,
+                likesCount: snapshot.likesCount
               }
             : post
         ));
@@ -616,6 +633,8 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
                 <div className="flex items-center justify-between">
                   <div className="flex items-center gap-6">
                     <button
+                      data-testid={`post-like-button-${post.id}`}
+                      data-post-id={post.id}
                       onClick={() => handleLike(post.id)}
                       className={`flex items-center gap-2 text-sm transition-all duration-200 cursor-pointer p-2 rounded-lg hover:bg-gray-100 dark:hover:bg-gray-700 ${
                         post.isLiked
@@ -631,7 +650,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
                       >
                         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
                       </svg>
-                      <span>{post.likesCount}</span>
+                      <span data-testid={`post-like-count-${post.id}`}>{post.likesCount}</span>
                     </button>
 
                     <button

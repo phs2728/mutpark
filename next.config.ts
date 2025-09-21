@@ -1,6 +1,11 @@
 import type { NextConfig } from "next";
 
-const nextConfig: NextConfig = {
+// Extend NextConfig typing to allow turbopack.root until types catch up
+const nextConfig: NextConfig & { turbopack?: { root?: string } } = {
+  // Force correct workspace root for Turbopack to avoid lockfile mis-detection
+  turbopack: {
+    root: __dirname,
+  },
   // Image optimization
   images: {
     remotePatterns: [

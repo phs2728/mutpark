@@ -148,10 +148,11 @@ export class PopularPostsService {
     });
 
     // 인기도 점수 계산 및 정렬
-    const postsWithScores: PostWithScores[] = posts.map(post => {
+    type WithLikesCount = typeof posts[number] & { likesCount: number };
+    const postsWithScores: PostWithScores[] = (posts as WithLikesCount[]).map(post => {
       const popularityScore = this.calculatePopularityScore({
         id: post.id,
-        likesCount: post._count.likes,
+        likesCount: post.likesCount ?? post._count.likes,
         commentsCount: post._count.comments,
         createdAt: post.createdAt,
         publishedAt: post.publishedAt
@@ -164,9 +165,9 @@ export class PopularPostsService {
         createdAt: post.createdAt,
         publishedAt: post.publishedAt ?? null,
         popularityScore,
-        likesCount: post._count.likes,
-        commentsCount: post._count.comments,
-        bookmarksCount: post._count.bookmarks
+        likesCount: post.likesCount ?? post._count.likes,
+  commentsCount: post._count.comments,
+  bookmarksCount: post._count.bookmarks
       };
     })
     .filter(post => post.popularityScore.score >= minScore)
@@ -293,11 +294,12 @@ export class PopularPostsService {
     });
 
     // 최근 활동 대비 높은 점수의 게시물 필터링
-  const trendingPosts = recentPosts
+  type RecentWithLikes = typeof recentPosts[number] & { likesCount: number };
+  const trendingPosts = (recentPosts as RecentWithLikes[])
       .map(post => {
         const popularityScore = this.calculatePopularityScore({
           id: post.id,
-          likesCount: post._count.likes,
+          likesCount: post.likesCount ?? post._count.likes,
           commentsCount: post._count.comments,
           createdAt: post.createdAt,
           publishedAt: post.publishedAt
@@ -306,7 +308,7 @@ export class PopularPostsService {
         return {
           ...post,
           popularityScore,
-          likesCount: post._count.likes,
+          likesCount: post.likesCount ?? post._count.likes,
           commentsCount: post._count.comments,
           bookmarksCount: post._count.bookmarks
         };
