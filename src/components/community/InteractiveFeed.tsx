@@ -201,7 +201,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
 
         {/* 검색 바 */}
         <div className="relative">
-          <Search className="absolute left-3 top-1/2 transform -y-1/2 w-5 h-5 text-gray-400" />
+          <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 w-5 h-5 text-gray-400" />
           <input
             type="text"
             placeholder="게시물 검색..."

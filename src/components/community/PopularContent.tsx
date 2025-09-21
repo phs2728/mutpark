@@ -2,6 +2,7 @@
 
 import { useState, useEffect, useCallback } from 'react';
 import { TrendingUp, Heart, MessageCircle, Bookmark } from 'lucide-react';
+import CommentSection from './CommentSection';
 
 interface PopularPost {
   id: number;
@@ -14,6 +15,8 @@ interface PopularPost {
   likesCount: number;
   commentsCount: number;
   bookmarksCount: number;
+  isLiked?: boolean;
+  isBookmarked?: boolean;
   popularityScore: {
     score: number;
     breakdown: {
@@ -115,6 +118,112 @@ export default function PopularContent() {
       case 'stable': return '➡️';
       default: return '➡️';
     }
+  };
+
+  const handleLike = async (postId: number) => {
+    try {
+      const response = await fetch(`/api/community/posts/${postId}/like`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ userId: 1 }), // 임시로 userId 1 사용
+      });
+
+      if (!response.ok) {
+        throw new Error('Failed to toggle like');
+      }
+
+      const data = await response.json();
+
+      setPopularPosts(prev => prev.map(post =>
+        post.id === postId
+          ? {
+              ...post,
+              isLiked: data.liked,
+              likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
+            }
+          : post
+      ));
+
+      if (trendingData?.posts) {
+        setTrendingData(prev => prev ? {
+          ...prev,
+          posts: prev.posts.map(post =>
+            post.id === postId
+              ? {
+                  ...post,
+                  isLiked: data.liked,
+                  likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
+                }
+              : post
+          )
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error toggling like:', error);
+      alert('좋아요 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const handleBookmark = async (postId: number) => {
+    try {
+      const post = [...popularPosts, ...(trendingData?.posts || [])].find(p => p.id === postId);
+      if (!post) return;
+
+      const method = post.isBookmarked ? 'DELETE' : 'POST';
+      const response = await fetch(`/api/community/posts/${postId}/bookmark`, {
+        method,
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: method === 'POST' ? JSON.stringify({ collectionName: '기본' }) : undefined,
+      });
+
+      if (!response.ok) {
+        if (response.status === 401) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
+        throw new Error('Failed to toggle bookmark');
+      }
+
+      const updatePosts = (posts: PopularPost[]) => posts.map(p =>
+        p.id === postId
+          ? {
+              ...p,
+              isBookmarked: !p.isBookmarked,
+              bookmarksCount: p.isBookmarked ? p.bookmarksCount - 1 : p.bookmarksCount + 1
+            }
+          : p
+      );
+
+      setPopularPosts(prev => updatePosts(prev));
+
+      if (trendingData?.posts) {
+        setTrendingData(prev => prev ? {
+          ...prev,
+          posts: updatePosts(prev.posts)
+        } : null);
+      }
+    } catch (error) {
+      console.error('Error toggling bookmark:', error);
+      alert('북마크 처리 중 오류가 발생했습니다.');
+    }
+  };
+
+  const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
+
+  const handleCommentToggle = (postId: number) => {
+    setExpandedComments(prev => {
+      const newSet = new Set(prev);
+      if (newSet.has(postId)) {
+        newSet.delete(postId);
+      } else {
+        newSet.add(postId);
+      }
+      return newSet;
+    });
   };
 
   if (loading) {
@@ -230,18 +339,31 @@ export default function PopularContent() {
 
                     <div className="flex items-center justify-between">
                       <div className="flex items-center gap-4 text-sm text-gray-500">
-                        <div className="flex items-center gap-1">
-                          <Heart className="w-4 h-4" />
+                        <button
+                          onClick={() => handleLike(post.id)}
+                          className={`flex items-center gap-1 transition-colors ${
+                            post.isLiked ? 'text-red-500' : 'hover:text-red-500'
+                          }`}
+                        >
+                          <Heart className={`w-4 h-4 ${post.isLiked ? 'fill-current' : ''}`} />
                           <span>{post.likesCount}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
+                        </button>
+                        <button
+                          onClick={() => handleCommentToggle(post.id)}
+                          className="flex items-center gap-1 hover:text-blue-500 transition-colors"
+                        >
                           <MessageCircle className="w-4 h-4" />
                           <span>{post.commentsCount}</span>
-                        </div>
-                        <div className="flex items-center gap-1">
-                          <Bookmark className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => handleBookmark(post.id)}
+                          className={`flex items-center gap-1 transition-colors ${
+                            post.isBookmarked ? 'text-blue-500' : 'hover:text-blue-500'
+                          }`}
+                        >
+                          <Bookmark className={`w-4 h-4 ${post.isBookmarked ? 'fill-current' : ''}`} />
                           <span>{post.bookmarksCount}</span>
-                        </div>
+                        </button>
                       </div>
 
                       <div className="flex items-center gap-2">
@@ -253,6 +375,13 @@ export default function PopularContent() {
                     </div>
                   </div>
                 </div>
+
+                {/* 댓글 섹션 */}
+                <CommentSection
+                  postId={post.id}
+                  isOpen={expandedComments.has(post.id)}
+                  onClose={() => handleCommentToggle(post.id)}
+                />
               </div>
             ))
           ) : (
@@ -297,10 +426,15 @@ export default function PopularContent() {
 
                     <div className="flex items-center gap-3 text-xs text-gray-600">
                       <span>{post.author.name}</span>
-                      <div className="flex items-center gap-1">
-                        <Heart className="w-3 h-3" />
+                      <button
+                        onClick={() => handleLike(post.id)}
+                        className={`flex items-center gap-1 transition-colors ${
+                          post.isLiked ? 'text-red-500' : 'hover:text-red-500'
+                        }`}
+                      >
+                        <Heart className={`w-3 h-3 ${post.isLiked ? 'fill-current' : ''}`} />
                         <span>{post.likesCount}</span>
-                      </div>
+                      </button>
                       <div className="flex items-center gap-1">
                         <TrendingUp className="w-3 h-3 text-green-500" />
                         <span className="text-green-600 font-semibold">{post.popularityScore.score}</span>
