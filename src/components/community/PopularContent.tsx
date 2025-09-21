@@ -128,6 +128,7 @@ export default function PopularContent() {
           'Content-Type': 'application/json',
         },
         body: JSON.stringify({ userId: 1 }), // 임시로 userId 1 사용
+        credentials: 'include', // Include cookies for authentication
       });
 
       if (!response.ok) {
@@ -178,6 +179,7 @@ export default function PopularContent() {
           'Content-Type': 'application/json',
         },
         body: method === 'POST' ? JSON.stringify({ collectionName: '기본' }) : undefined,
+        credentials: 'include', // Include cookies for authentication
       });
 
       if (!response.ok) {
@@ -325,7 +327,10 @@ export default function PopularContent() {
                       <span className="text-sm text-gray-600">{post.author.name}</span>
                       <span className="text-gray-400">•</span>
                       <span className="text-sm text-gray-500">
-                        {new Date(post.createdAt).toLocaleDateString('ko-KR')}
+                        {typeof window !== 'undefined'
+                          ? new Date(post.createdAt).toLocaleDateString('ko-KR')
+                          : new Date(post.createdAt).toISOString().split('T')[0]
+                        }
                       </span>
                     </div>
 
@@ -498,7 +503,10 @@ export default function PopularContent() {
       {/* 업데이트 시간 */}
       {trendingData && activeTab === 'trending' && (
         <div className="text-center text-xs text-gray-500">
-          마지막 업데이트: {new Date(trendingData.meta.updatedAt).toLocaleString('ko-KR')}
+          마지막 업데이트: {typeof window !== 'undefined'
+            ? new Date(trendingData.meta.updatedAt).toLocaleString('ko-KR')
+            : new Date(trendingData.meta.updatedAt).toISOString().replace('T', ' ').split('.')[0]
+          }
         </div>
       )}
     </div>

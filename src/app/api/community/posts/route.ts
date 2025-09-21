@@ -50,6 +50,7 @@ export async function GET(request: NextRequest) {
           select: {
             likes: true,
             comments: true,
+            bookmarks: true,
           },
         },
       },
@@ -89,7 +90,7 @@ export async function GET(request: NextRequest) {
       product: post.product,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
-      bookmarksCount: post.bookmarksCount,
+      bookmarksCount: post._count.bookmarks || 0,
       viewsCount: post.viewsCount,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
@@ -200,6 +201,7 @@ export async function POST(request: NextRequest) {
           select: {
             likes: true,
             comments: true,
+            bookmarks: true,
           },
         },
       },
@@ -229,6 +231,7 @@ export async function POST(request: NextRequest) {
       product: post.product,
       likesCount: post._count.likes,
       commentsCount: post._count.comments,
+      bookmarksCount: post._count.bookmarks || 0,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
     };

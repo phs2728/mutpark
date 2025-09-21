@@ -186,6 +186,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
           "Content-Type": "application/json",
         },
         body: JSON.stringify({ userId: userId || 1 }), // Use provided userId or default to 1
+        credentials: 'include', // Include cookies for authentication
       });
 
       if (!response.ok) {
@@ -226,6 +227,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
           "Content-Type": "application/json",
         },
         body: method === "POST" ? JSON.stringify({ collectionName: "기본" }) : undefined,
+        credentials: 'include', // Include cookies for authentication
       });
 
       if (!response.ok) {
@@ -273,11 +275,18 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
   };
 
   const formatTimeAgo = (dateString: string) => {
+    // Client-side only rendering to prevent hydration mismatch
+    if (typeof window === 'undefined') {
+      return new Date(dateString).toLocaleDateString('ko-KR');
+    }
+
     const date = new Date(dateString);
     const now = new Date();
     const diffInMinutes = Math.floor((now.getTime() - date.getTime()) / (1000 * 60));
 
-    if (diffInMinutes < 60) {
+    if (diffInMinutes < 1) {
+      return '방금 전';
+    } else if (diffInMinutes < 60) {
       return `${diffInMinutes}분 전`;
     } else if (diffInMinutes < 1440) {
       return `${Math.floor(diffInMinutes / 60)}시간 전`;
