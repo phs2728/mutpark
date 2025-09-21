@@ -219,6 +219,8 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
 
   // 무한 스크롤
   useEffect(() => {
+    if (!hasMore) return; // No more data to load
+
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
@@ -229,7 +231,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
     );
 
     const currentRef = loadMoreRef.current;
-    if (currentRef) {
+    if (currentRef && hasMore) {
       observer.observe(currentRef);
     }
 
@@ -415,14 +417,17 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
       <CommunityFeed posts={posts} userId={userId} />
 
       {/* 로딩 및 더보기 */}
-      {loading && (
+      {hasMore && loading && (
         <div className="flex justify-center py-8">
           <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-red-500"></div>
         </div>
       )}
 
-      {/* 무한 스크롤 트리거 */}
-      <div ref={loadMoreRef} className="h-4" />
+      {/* 무한 스크롤 트리거 - hasMore가 true일 때만 */}
+      {hasMore && <div ref={loadMoreRef} className="h-4" />}
+
+      {/* Hidden sentinel for intersection observer when hasMore is false */}
+      {!hasMore && <div ref={loadMoreRef} style={{ height: '1px', visibility: 'hidden' }} />}
 
       {/* 더 이상 게시물이 없는 경우 */}
       {!hasMore && posts.length > 0 && (

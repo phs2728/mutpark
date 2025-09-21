@@ -174,7 +174,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
-    if (isControlled) return; // Parent manages pagination
+    if (isControlled || !hasMore) return; // Parent manages pagination or no more data
 
     const observer = new IntersectionObserver(
       (entries) => {
@@ -192,7 +192,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
     );
 
     const currentRef = loadMoreRef.current;
-    if (currentRef) {
+    if (currentRef && hasMore) {
       observer.observe(currentRef);
     }
 
@@ -642,23 +642,32 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
       )}
 
       {/* Infinite Scroll Trigger (uncontrolled mode only) */}
-      {hasMore && !isControlled && (
-        <div
-          ref={loadMoreRef}
-          className="flex justify-center py-8"
-        >
-          <div className="flex items-center space-x-2">
-            <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
-            <span className="text-slate-600 dark:text-slate-400">더 많은 게시물을 불러오는 중...</span>
-          </div>
-        </div>
-      )}
+      {!isControlled && (
+        <>
+          {hasMore && (
+            <div
+              ref={loadMoreRef}
+              className="flex justify-center py-8"
+            >
+              <div className="flex items-center space-x-2">
+                <div className="animate-spin rounded-full h-6 w-6 border-b-2 border-emerald-500"></div>
+                <span className="text-slate-600 dark:text-slate-400">더 많은 게시물을 불러오는 중...</span>
+              </div>
+            </div>
+          )}
 
-      {/* End of Posts Message (uncontrolled mode only) */}
-      {!isControlled && !hasMore && posts.length > 0 && (
-        <div className="text-center py-8">
-          <div className="text-slate-400 text-sm">모든 게시물을 확인했습니다</div>
-        </div>
+          {/* End of Posts Message */}
+          {!hasMore && posts.length > 0 && (
+            <div className="text-center py-8">
+              <div className="text-slate-400 text-sm">모든 게시물을 확인했어요! 🎉</div>
+            </div>
+          )}
+
+          {/* Hidden sentinel for intersection observer when hasMore is false */}
+          {!hasMore && (
+            <div ref={loadMoreRef} style={{ height: '1px', visibility: 'hidden' }} />
+          )}
+        </>
       )}
     </div>
   );
