@@ -31,7 +31,7 @@ export async function POST(
         where: { id: existingLike.id },
       });
 
-      await prisma.communityPost.update({
+      const updatedPost = await prisma.communityPost.update({
         where: { id: postId },
         data: {
           likesCount: {
@@ -40,7 +40,10 @@ export async function POST(
         },
       });
 
-      return NextResponse.json({ liked: false });
+      return NextResponse.json({
+        liked: false,
+        likesCount: updatedPost.likesCount
+      });
     } else {
       await prisma.communityPostLike.create({
         data: {
@@ -49,7 +52,7 @@ export async function POST(
         },
       });
 
-      await prisma.communityPost.update({
+      const updatedPost = await prisma.communityPost.update({
         where: { id: postId },
         data: {
           likesCount: {
@@ -58,7 +61,10 @@ export async function POST(
         },
       });
 
-      return NextResponse.json({ liked: true });
+      return NextResponse.json({
+        liked: true,
+        likesCount: updatedPost.likesCount
+      });
     }
   } catch (error) {
     console.error("Error toggling post like:", error);

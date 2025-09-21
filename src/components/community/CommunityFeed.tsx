@@ -207,6 +207,26 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
   }, [hasMore, loading, page, fetchPosts, isControlled]);
 
   const handleLike = async (postId: number) => {
+    // 현재 포스트 찾기
+    const currentPost = posts.find(p => p.id === postId);
+    if (!currentPost) return;
+
+    // 낙관적 업데이트 (즉시 UI 반영)
+    const optimisticLiked = !currentPost.isLiked;
+    const optimisticCount = optimisticLiked
+      ? currentPost.likesCount + 1
+      : currentPost.likesCount - 1;
+
+    setPosts(prev => prev.map(post =>
+      post.id === postId
+        ? {
+            ...post,
+            isLiked: optimisticLiked,
+            likesCount: optimisticCount
+          }
+        : post
+    ));
+
     try {
       const response = await fetch(`/api/community/posts/${postId}/like`, {
         method: "POST",
@@ -218,17 +238,28 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
       });
 
       if (!response.ok) {
+        // 오류 시 원래 상태로 롤백
+        setPosts(prev => prev.map(post =>
+          post.id === postId
+            ? {
+                ...post,
+                isLiked: currentPost.isLiked,
+                likesCount: currentPost.likesCount
+              }
+            : post
+        ));
         throw new Error("Failed to toggle like");
       }
 
       const data = await response.json();
 
+      // 서버 응답으로 정확한 상태 업데이트
       setPosts(prev => prev.map(post =>
         post.id === postId
           ? {
               ...post,
               isLiked: data.liked,
-              likesCount: data.liked ? post.likesCount + 1 : post.likesCount - 1
+              likesCount: data.likesCount // 서버에서 받은 정확한 좋아요 수 사용
             }
           : post
       ));
