@@ -2,6 +2,8 @@
 
 import { useState } from "react";
 import { CommunityFeed } from "@/components/community/CommunityFeed";
+import InteractiveFeed from "@/components/community/InteractiveFeed";
+import KoreanCulturalHeader from "@/components/community/KoreanCulturalHeader";
 import PostTypeSelector from "@/components/community/forms/PostTypeSelector";
 import RecipeForm from "@/components/community/forms/RecipeForm";
 import ReviewForm from "@/components/community/forms/ReviewForm";
@@ -90,24 +92,17 @@ export default function CommunityPage({ params }: CommunityPageProps) {
 
   return (
     <div className="max-w-6xl mx-auto space-y-6">
-      {/* Header with Korean Traditional Theme */}
-      <div className="korean-gradient-sunset rounded-2xl p-6 text-white shadow-lg">
-        <div className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl font-bold mb-2 korean-wave">
-              🏮 한국인 커뮤니티
-            </h1>
-            <p className="text-white/90">
-              터키에서 한국 요리와 문화를 함께 나누는 따뜻한 공간
-            </p>
-          </div>
-          <button
-            onClick={() => setShowTypeSelector(true)}
-            className="px-6 py-3 bg-white/20 backdrop-blur-sm text-white rounded-xl hover:bg-white/30 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105 border border-white/30"
-          >
-            ✍️ 글쓰기
-          </button>
-        </div>
+      {/* Korean Cultural Header */}
+      <KoreanCulturalHeader />
+
+      {/* Action Button */}
+      <div className="flex justify-end">
+        <button
+          onClick={() => setShowTypeSelector(true)}
+          className="px-6 py-3 bg-red-500 text-white rounded-xl hover:bg-red-600 transition-all duration-200 font-medium shadow-lg hover:shadow-xl transform hover:scale-105"
+        >
+          ✍️ 글쓰기
+        </button>
       </div>
 
       {/* Navigation Tabs with Korean Traditional Colors */}
@@ -140,8 +135,8 @@ export default function CommunityPage({ params }: CommunityPageProps) {
       {/* Tab Content */}
       <div className="min-h-[600px]">
         {activeTab === 'feed' && (
-          <div className="community-spring rounded-2xl p-6">
-            <CommunityFeed />
+          <div className="rounded-2xl">
+            <InteractiveFeed userId={1} showPersonalized={true} />
           </div>
         )}
 

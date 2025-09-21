@@ -287,4 +287,136 @@ export class PopularPostsService {
 
     return trendingPosts;
   }
+
+  // 베스트 댓글 선별
+  static async getBestComments(postId: number, limit: number = 3) {
+    const comments = await prisma.communityComment.findMany({
+      where: { postId },
+      include: {
+        author: {
+          select: {
+            id: true,
+            name: true
+          }
+        },
+        _count: {
+          select: {
+            likes: true,
+            replies: true
+          }
+        }
+      }
+    });
+
+    // 댓글 점수 계산 (좋아요 + 답글 수 + 길이 + 작성자 신뢰도)
+    const commentsWithScores = comments.map(comment => {
+      const likesScore = comment._count.likes * 10;
+      const repliesScore = comment._count.replies * 5;
+
+      // 댓글 길이 점수 (너무 짧거나 너무 긴 댓글 제외)
+      const contentLength = comment.content.length;
+      const lengthScore = contentLength >= 20 && contentLength <= 500 ?
+        Math.min(contentLength / 10, 20) : 0;
+
+      // 최신성 점수
+      const hoursAge = (Date.now() - comment.createdAt.getTime()) / (1000 * 60 * 60);
+      const recencyScore = Math.max(0, 10 - hoursAge / 24);
+
+      const totalScore = likesScore + repliesScore + lengthScore + recencyScore;
+
+      return {
+        ...comment,
+        score: totalScore,
+        likesCount: comment._count.likes,
+        repliesCount: comment._count.replies
+      };
+    });
+
+    return commentsWithScores
+      .sort((a, b) => b.score - a.score)
+      .slice(0, limit);
+  }
+
+  // 개인화된 피드 추천
+  static async getPersonalizedFeed(userId: number, page: number = 1, limit: number = 20) {
+    const offset = (page - 1) * limit;
+
+    // 사용자의 관심사 분석
+    const userPreferences = await this.analyzeUserPreferences(userId);
+
+    // 기본 인기 게시물
+    let posts = await this.getPopularPosts({
+      timeRange: 'week',
+      limit: limit * 2 // 필터링을 위해 더 많이 가져옴
+    });
+
+    // 사용자 선호도에 따른 점수 조정
+    posts = posts.map(post => {
+      let adjustedScore = post.popularityScore.score;
+
+      // 선호 타입 보너스
+      if (userPreferences.preferredTypes.includes(post.type)) {
+        adjustedScore *= 1.5;
+      }
+
+      // 팔로우한 작성자 보너스 (구현 시)
+      // if (userPreferences.followedAuthors.includes(post.authorId)) {
+      //   adjustedScore *= 1.3;
+      // }
+
+      return {
+        ...post,
+        personalizedScore: adjustedScore
+      };
+    });
+
+    return posts
+      .sort((a, b) => (b as any).personalizedScore - (a as any).personalizedScore)
+      .slice(offset, offset + limit);
+  }
+
+  // 사용자 선호도 분석
+  private static async analyzeUserPreferences(userId: number) {
+    // 최근 좋아요한 게시물 분석
+    const recentLikes = await prisma.communityPostLike.findMany({
+      where: { userId },
+      include: {
+        post: {
+          select: { type: true, authorId: true }
+        }
+      },
+      take: 100,
+      orderBy: { createdAt: 'desc' }
+    });
+
+    // 타입 선호도 분석
+    const typeCount = recentLikes.reduce((acc, like) => {
+      const type = like.post.type;
+      acc[type] = (acc[type] || 0) + 1;
+      return acc;
+    }, {} as Record<string, number>);
+
+    const preferredTypes = Object.entries(typeCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 3)
+      .map(([type]) => type);
+
+    // 선호 작성자 분석
+    const authorCount = recentLikes.reduce((acc, like) => {
+      const authorId = like.post.authorId;
+      acc[authorId] = (acc[authorId] || 0) + 1;
+      return acc;
+    }, {} as Record<number, number>);
+
+    const preferredAuthors = Object.entries(authorCount)
+      .sort(([,a], [,b]) => b - a)
+      .slice(0, 5)
+      .map(([authorId]) => parseInt(authorId));
+
+    return {
+      preferredTypes,
+      preferredAuthors,
+      totalInteractions: recentLikes.length
+    };
+  }
 }
