@@ -52,6 +52,11 @@ export default function PopularContent() {
   const [popularPosts, setPopularPosts] = useState<PopularPost[]>([]);
   const [trendingData, setTrendingData] = useState<TrendingData | null>(null);
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
 
   const fetchPopularPosts = useCallback(async () => {
     setLoading(true);
@@ -327,7 +332,7 @@ export default function PopularContent() {
                       <span className="text-sm text-gray-600">{post.author.name}</span>
                       <span className="text-gray-400">•</span>
                       <span className="text-sm text-gray-500">
-                        {typeof window !== 'undefined'
+                        {isClient
                           ? new Date(post.createdAt).toLocaleDateString('ko-KR')
                           : new Date(post.createdAt).toISOString().split('T')[0]
                         }
@@ -503,7 +508,7 @@ export default function PopularContent() {
       {/* 업데이트 시간 */}
       {trendingData && activeTab === 'trending' && (
         <div className="text-center text-xs text-gray-500">
-          마지막 업데이트: {typeof window !== 'undefined'
+          마지막 업데이트: {isClient
             ? new Date(trendingData.meta.updatedAt).toLocaleString('ko-KR')
             : new Date(trendingData.meta.updatedAt).toISOString().replace('T', ' ').split('.')[0]
           }

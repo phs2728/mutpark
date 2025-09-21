@@ -19,6 +19,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       posts: popularPosts,
+      pagination: {
+        page: 1,
+        limit,
+        total: popularPosts.length,
+        pages: Math.ceil(popularPosts.length / limit)
+      },
       meta: {
         count: popularPosts.length,
         timeRange,

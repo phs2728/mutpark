@@ -20,6 +20,12 @@ export async function GET(request: NextRequest) {
 
     return NextResponse.json({
       posts: personalizedFeed,
+      pagination: {
+        page,
+        limit,
+        total: personalizedFeed.length,
+        pages: Math.ceil(personalizedFeed.length / limit)
+      },
       meta: {
         count: personalizedFeed.length,
         page,

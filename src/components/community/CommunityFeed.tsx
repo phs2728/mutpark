@@ -277,9 +277,14 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
     }
   };
 
+  const [isClient, setIsClient] = useState(false);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const formatTimeAgo = (dateString: string) => {
-    // Client-side only rendering to prevent hydration mismatch
-    if (typeof window === 'undefined') {
+    if (!isClient) {
       return new Date(dateString).toLocaleDateString('ko-KR');
     }
 
