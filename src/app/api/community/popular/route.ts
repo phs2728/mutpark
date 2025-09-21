@@ -10,20 +10,22 @@ export async function GET(request: NextRequest) {
     const minScore = parseInt(searchParams.get('minScore') || '0');
     const limit = parseInt(searchParams.get('limit') || '20');
 
-    const popularPosts = await PopularPostsService.getPopularPosts({
+    const page = parseInt(searchParams.get('page') || '1');
+    const { posts: popularPosts, total } = await PopularPostsService.getPopularPostsPaged({
       timeRange,
       postType,
       minScore,
-      limit
+      limit,
+      page
     });
 
     return NextResponse.json({
       posts: popularPosts,
       pagination: {
-        page: 1,
+        page,
         limit,
-        total: popularPosts.length,
-        pages: Math.ceil(popularPosts.length / limit)
+        total,
+        pages: Math.ceil(total / limit)
       },
       meta: {
         count: popularPosts.length,

@@ -16,15 +16,15 @@ export async function GET(request: NextRequest) {
       );
     }
 
-    const personalizedFeed = await PopularPostsService.getPersonalizedFeed(userId, page, limit);
+  const { posts: personalizedFeed, total } = await PopularPostsService.getPersonalizedFeedPaged(userId, page, limit);
 
     return NextResponse.json({
       posts: personalizedFeed,
       pagination: {
         page,
         limit,
-        total: personalizedFeed.length,
-        pages: Math.ceil(personalizedFeed.length / limit)
+        total,
+        pages: Math.ceil(total / limit)
       },
       meta: {
         count: personalizedFeed.length,

@@ -78,20 +78,30 @@ const difficultyColors = {
 
 
 export function CommunityFeed({ filter, posts: externalPosts, userId }: CommunityFeedProps) {
-  const [posts, setPosts] = useState<CommunityPost[]>(externalPosts || []);
-  const [loading, setLoading] = useState(!externalPosts);
+  // When externalPosts is provided (even an empty array), this component becomes controlled by parent
+  const isControlled = typeof externalPosts !== 'undefined';
+
+  const [posts, setPosts] = useState<CommunityPost[]>(externalPosts ?? []);
+  const [loading, setLoading] = useState(!isControlled);
   const [activeFilter, setActiveFilter] = useState(filter || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
   const [sortBy, setSortBy] = useState<"latest" | "popular">("latest");
   const [expandedComments, setExpandedComments] = useState<Set<number>>(new Set());
   const [page, setPage] = useState(1);
-  const [hasMore, setHasMore] = useState(true);
+  const [hasMore, setHasMore] = useState(!isControlled);
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
+  // Keep internal posts in sync when controlled by parent
+  useEffect(() => {
+    if (isControlled) {
+      setPosts(externalPosts ?? []);
+    }
+  }, [isControlled, externalPosts]);
+
   const fetchPosts = useCallback(async (pageNumber = 1, append = false) => {
-    // Skip fetching if external posts are provided
-    if (externalPosts) return;
+    // Skip internal fetching when controlled by parent
+    if (isControlled) return;
 
     try {
       if (!append) {
@@ -146,14 +156,18 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, searchQuery, selectedTag, sortBy, externalPosts]);
+  }, [activeFilter, searchQuery, selectedTag, sortBy, isControlled]);
 
   useEffect(() => {
-    fetchPosts();
-  }, [fetchPosts]);
+    if (!isControlled) {
+      fetchPosts();
+    }
+  }, [fetchPosts, isControlled]);
 
   // Infinite scroll with Intersection Observer
   useEffect(() => {
+    if (isControlled) return; // Parent manages pagination
+
     const observer = new IntersectionObserver(
       (entries) => {
         const [entry] = entries;
@@ -179,7 +193,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
         observer.unobserve(currentRef);
       }
     };
-  }, [hasMore, loading, page, fetchPosts]);
+  }, [hasMore, loading, page, fetchPosts, isControlled]);
 
   const handleLike = async (postId: number) => {
     try {
@@ -619,8 +633,8 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
         </div>
       )}
 
-      {/* Infinite Scroll Trigger */}
-      {hasMore && (
+      {/* Infinite Scroll Trigger (uncontrolled mode only) */}
+      {hasMore && !isControlled && (
         <div
           ref={loadMoreRef}
           className="flex justify-center py-8"
@@ -632,8 +646,8 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
         </div>
       )}
 
-      {/* End of Posts Message */}
-      {!hasMore && posts.length > 0 && (
+      {/* End of Posts Message (uncontrolled mode only) */}
+      {!isControlled && !hasMore && posts.length > 0 && (
         <div className="text-center py-8">
           <div className="text-slate-400 text-sm">모든 게시물을 확인했습니다</div>
         </div>

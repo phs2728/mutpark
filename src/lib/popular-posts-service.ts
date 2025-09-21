@@ -12,6 +12,21 @@ export interface PopularityScore {
   };
 }
 
+type PostType = 'RECIPE' | 'REVIEW' | 'TIP' | 'QUESTION';
+
+export interface PostWithScores {
+  id: number;
+  type: PostType;
+  author: { name: string };
+  createdAt: Date;
+  publishedAt: Date | null;
+  popularityScore: PopularityScore;
+  likesCount: number;
+  commentsCount: number;
+  bookmarksCount: number;
+  personalizedScore?: number;
+}
+
 export interface PopularPostsFilter {
   timeRange?: 'day' | 'week' | 'month' | 'all';
   postType?: 'recipe' | 'review' | 'tip' | 'question' | 'all';
@@ -75,8 +90,8 @@ export class PopularPostsService {
     };
   }
 
-  // 인기 게시물 가져오기
-  static async getPopularPosts(filter: PopularPostsFilter = {}) {
+  // 인기 게시물 가져오기 (단순 리스트)
+  static async getPopularPosts(filter: PopularPostsFilter = {}): Promise<PostWithScores[]> {
     const {
       timeRange = 'week',
       postType = 'all',
@@ -133,7 +148,7 @@ export class PopularPostsService {
     });
 
     // 인기도 점수 계산 및 정렬
-    const postsWithScores = posts.map(post => {
+    const postsWithScores: PostWithScores[] = posts.map(post => {
       const popularityScore = this.calculatePopularityScore({
         id: post.id,
         likesCount: post._count.likes,
@@ -143,7 +158,11 @@ export class PopularPostsService {
       });
 
       return {
-        ...post,
+        id: post.id,
+        type: post.type as PostType,
+        author: { name: post.author.name },
+        createdAt: post.createdAt,
+        publishedAt: post.publishedAt ?? null,
         popularityScore,
         likesCount: post._count.likes,
         commentsCount: post._count.comments,
@@ -155,6 +174,17 @@ export class PopularPostsService {
     .slice(0, limit);
 
     return postsWithScores;
+  }
+
+  // 인기 게시물 페이지네이션 + total
+  static async getPopularPostsPaged(filter: PopularPostsFilter & { page?: number } = {}) {
+    const { page = 1, limit = 20, ...rest } = filter;
+    // 풀 리스트 계산
+  const full = await this.getPopularPosts({ ...rest, limit: 10_000 }); // 충분히 큰 상한
+    const total = full.length;
+    const offset = (page - 1) * limit;
+    const items = full.slice(offset, offset + limit);
+    return { posts: items, total };
   }
 
   // 트렌딩 태그 가져오기
@@ -263,7 +293,7 @@ export class PopularPostsService {
     });
 
     // 최근 활동 대비 높은 점수의 게시물 필터링
-    const trendingPosts = recentPosts
+  const trendingPosts = recentPosts
       .map(post => {
         const popularityScore = this.calculatePopularityScore({
           id: post.id,
@@ -286,6 +316,48 @@ export class PopularPostsService {
       .slice(0, limit);
 
     return trendingPosts;
+  }
+
+  // 트렌딩 게시물 페이지네이션 + total
+  static async getTrendingPostsPaged({ limit = 5, page = 1 }: { limit?: number; page?: number } = {}) {
+    // 최근 6시간 기준 전체 후보 생성
+    const sixHoursAgo = new Date(Date.now() - 6 * 60 * 60 * 1000);
+    const recentPosts = await prisma.communityPost.findMany({
+      where: { OR: [ { publishedAt: { gte: sixHoursAgo } }, { createdAt: { gte: sixHoursAgo } } ] },
+      include: {
+        author: { select: { name: true } },
+        _count: { select: { likes: true, comments: true, bookmarks: true } }
+      }
+    });
+
+    const full: PostWithScores[] = recentPosts
+      .map(post => {
+        const popularityScore = this.calculatePopularityScore({
+          id: post.id,
+          likesCount: post._count.likes,
+          commentsCount: post._count.comments,
+          createdAt: post.createdAt,
+          publishedAt: post.publishedAt
+        });
+        return {
+          id: post.id,
+          type: post.type as PostType,
+          author: { name: post.author.name },
+          createdAt: post.createdAt,
+          publishedAt: post.publishedAt ?? null,
+          popularityScore,
+          likesCount: post._count.likes,
+          commentsCount: post._count.comments,
+          bookmarksCount: post._count.bookmarks
+        };
+      })
+      .filter(post => post.popularityScore.score > 15)
+      .sort((a, b) => b.popularityScore.score - a.popularityScore.score);
+
+    const total = full.length;
+    const offset = (page - 1) * limit;
+    const items = full.slice(offset, offset + limit);
+    return { posts: items, total };
   }
 
   // 베스트 댓글 선별
@@ -373,6 +445,25 @@ export class PopularPostsService {
     return posts
       .sort((a, b) => ((a as unknown) as { personalizedScore: number }).personalizedScore < ((b as unknown) as { personalizedScore: number }).personalizedScore ? 1 : -1)
       .slice(offset, offset + limit);
+  }
+
+  // 개인화 피드 페이지네이션 + total (풀 후보군을 넉넉히 가져와 추정)
+  static async getPersonalizedFeedPaged(userId: number, page: number = 1, limit: number = 20) {
+    const offset = (page - 1) * limit;
+    // 충분히 큰 후보군 확보 (성능 고려 시 조정 가능)
+  const posts = await this.getPopularPosts({ timeRange: 'week', limit: 500, minScore: 0 });
+
+    const prefs = await this.analyzeUserPreferences(userId);
+    const adjusted: (PostWithScores & { personalizedScore: number })[] = posts.map((post) => {
+      let adjustedScore = post.popularityScore.score;
+      if (prefs.preferredTypes.includes(post.type)) adjustedScore *= 1.5;
+      return { ...post, personalizedScore: adjustedScore };
+    })
+    .sort((a, b) => b.personalizedScore - a.personalizedScore);
+
+    const total = adjusted.length;
+    const items = adjusted.slice(offset, offset + limit);
+    return { posts: items, total };
   }
 
   // 사용자 선호도 분석

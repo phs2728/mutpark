@@ -5,9 +5,10 @@ export async function GET(request: NextRequest) {
   try {
     const { searchParams } = new URL(request.url);
     const limit = parseInt(searchParams.get('limit') || '5');
+    const page = parseInt(searchParams.get('page') || '1');
 
-    const [trendingPosts, trendingTags] = await Promise.all([
-      PopularPostsService.getTrendingPosts(limit),
+    const [{ posts: trendingPosts, total }, trendingTags] = await Promise.all([
+      PopularPostsService.getTrendingPostsPaged({ limit, page }),
       PopularPostsService.getTrendingTags('day')
     ]);
 
@@ -15,10 +16,10 @@ export async function GET(request: NextRequest) {
       posts: trendingPosts,
       tags: trendingTags,
       pagination: {
-        page: 1,
+        page,
         limit,
-        total: trendingPosts.length,
-        pages: Math.ceil(trendingPosts.length / limit)
+        total,
+        pages: Math.ceil(total / limit)
       },
       meta: {
         postsCount: trendingPosts.length,

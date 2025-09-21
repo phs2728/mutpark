@@ -56,6 +56,7 @@ interface InteractiveFeedProps {
 }
 
 export default function InteractiveFeed({ userId, showPersonalized = false }: InteractiveFeedProps) {
+  const LIMIT = 20;
   const [posts, setPosts] = useState<CommunityPost[]>([]);
   const [loading, setLoading] = useState(false);
   const [hasMore, setHasMore] = useState(true);
@@ -72,6 +73,15 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
   const loadMoreRef = useRef<HTMLDivElement>(null);
   const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  const dedupeById = (arr: CommunityPost[]) => {
+    const seen = new Set<number>();
+    return arr.filter((p) => {
+      if (seen.has(p.id)) return false;
+      seen.add(p.id);
+      return true;
+    });
+  };
+
   // 게시물 로드
   const loadPosts = useCallback(async (reset = false) => {
     if (loading) return;
@@ -83,21 +93,26 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
       let url = '';
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '20',
+        limit: String(LIMIT),
         ...(searchQuery && { search: searchQuery }),
         ...(filters.type !== 'all' && { postType: filters.type }),
         ...(filters.timeRange !== 'all' && { timeRange: filters.timeRange })
       });
 
       // API 엔드포인트 선택
+      let mode: 'latest' | 'popular' | 'trending' | 'personalized' = 'latest';
       if (showPersonalized && userId) {
         url = `/api/community/personalized-feed?userId=${userId}&${params.toString()}`;
+        mode = 'personalized';
       } else if (filters.sortBy === 'popular') {
         url = `/api/community/popular?${params.toString()}`;
+        mode = 'popular';
       } else if (filters.sortBy === 'trending') {
         url = `/api/community/trending?${params.toString()}`;
+        mode = 'trending';
       } else {
         url = `/api/community/posts?${params.toString()}`;
+        mode = 'latest';
       }
 
       const response = await fetch(url);
@@ -107,13 +122,19 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
         setPosts(data.posts || []);
         setPage(2);
       } else {
-        setPosts(prev => [...prev, ...(data.posts || [])]);
+        const received: CommunityPost[] = data.posts || [];
+        setPosts(prev => dedupeById([...prev, ...received]));
         setPage(prev => prev + 1);
       }
 
-      // 더 정확한 hasMore 로직
+      // hasMore 로직 통일: 서버 페이징이 확실한 latest에서만 사용
       const receivedPosts = data.posts || [];
-      setHasMore(receivedPosts.length === 20 && currentPage < (data.pagination?.pages || 1));
+      const supportsPagination = mode === 'latest';
+      const pages = data.pagination?.pages as number | undefined;
+      const nextHasMore = supportsPagination
+        ? (receivedPosts.length === LIMIT && (pages ? currentPage < pages : true))
+        : false; // popular/trending/personalized은 서버 페이징 미지원으로 간주
+      setHasMore(nextHasMore);
     } catch (error) {
       console.error('Error loading posts:', error);
       setHasMore(false); // 에러 시 더 이상 로드하지 않음
@@ -150,21 +171,26 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
       let url = '';
       const params = new URLSearchParams({
         page: currentPage.toString(),
-        limit: '20',
+        limit: String(LIMIT),
         ...(searchQuery && { search: searchQuery }),
         ...(filters.type !== 'all' && { postType: filters.type }),
         ...(filters.timeRange !== 'all' && { timeRange: filters.timeRange })
       });
 
       // API 엔드포인트 선택
+      let mode: 'latest' | 'popular' | 'trending' | 'personalized' = 'latest';
       if (showPersonalized && userId) {
         url = `/api/community/personalized-feed?userId=${userId}&${params.toString()}`;
+        mode = 'personalized';
       } else if (filters.sortBy === 'popular') {
         url = `/api/community/popular?${params.toString()}`;
+        mode = 'popular';
       } else if (filters.sortBy === 'trending') {
         url = `/api/community/trending?${params.toString()}`;
+        mode = 'trending';
       } else {
         url = `/api/community/posts?${params.toString()}`;
+        mode = 'latest';
       }
 
       const response = await fetch(url);
@@ -172,12 +198,17 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
 
       const receivedPosts = data.posts || [];
       if (receivedPosts.length > 0) {
-        setPosts(prev => [...prev, ...receivedPosts]);
+        setPosts(prev => dedupeById([...prev, ...receivedPosts]));
         setPage(prev => prev + 1);
       }
 
-      // 더 정확한 hasMore 로직
-      setHasMore(receivedPosts.length === 20 && currentPage < (data.pagination?.pages || 1));
+      // hasMore 로직 통일: latest만 계속 로드, 나머지는 한 번만
+      const supportsPagination = mode === 'latest';
+      const pages = data.pagination?.pages as number | undefined;
+      const nextHasMore = supportsPagination
+        ? (receivedPosts.length === LIMIT && (pages ? currentPage < pages : true))
+        : false;
+      setHasMore(nextHasMore);
     } catch (error) {
       console.error('Error loading more posts:', error);
       setHasMore(false);
