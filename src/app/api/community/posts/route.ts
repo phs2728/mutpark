@@ -97,7 +97,7 @@ export async function GET(request: NextRequest) {
         name: post.author.name,
       },
       product: post.product,
-      likesCount: post._count.likes,
+      likesCount: post.likesCount, // 포스트 테이블에 저장된 카운트 사용
       commentsCount: post._count.comments,
       bookmarksCount: post._count.bookmarks || 0,
       viewsCount: post.viewsCount,
