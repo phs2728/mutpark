@@ -2,7 +2,7 @@
 
 import { useState, useEffect, useCallback, useRef } from 'react';
 import { Filter, Search, TrendingUp, Clock, Heart, MessageCircle, ChevronDown } from 'lucide-react';
-import CommunityFeed from './CommunityFeed';
+import { CommunityFeed } from './CommunityFeed';
 
 interface FilterOptions {
   type: 'all' | 'recipe' | 'review' | 'tip' | 'question';
@@ -30,7 +30,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
   });
 
   const loadMoreRef = useRef<HTMLDivElement>(null);
-  const searchTimeoutRef = useRef<NodeJS.Timeout>();
+  const searchTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
   // 게시물 로드
   const loadPosts = useCallback(async (reset = false) => {

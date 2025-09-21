@@ -99,6 +99,10 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
         throw new Error('Failed to post comment');
       }
 
@@ -116,6 +120,7 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
       }
     } catch (error) {
       console.error('Error posting comment:', error);
+      alert('댓글 작성 중 오류가 발생했습니다.');
     } finally {
       setSubmitting(false);
     }
@@ -131,6 +136,10 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          alert('로그인이 필요합니다.');
+          return;
+        }
         throw new Error('Failed to like comment');
       }
 
@@ -138,6 +147,7 @@ export default function CommentSection({ postId, isOpen, onClose }: CommentSecti
       await fetchComments();
     } catch (error) {
       console.error('Error liking comment:', error);
+      alert('좋아요 처리 중 오류가 발생했습니다.');
     }
   };
 

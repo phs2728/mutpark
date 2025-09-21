@@ -52,6 +52,8 @@ interface CommunityPost {
 
 interface CommunityFeedProps {
   filter?: string;
+  posts?: CommunityPost[];
+  userId?: number;
 }
 
 const postTypeColors = {
@@ -75,9 +77,9 @@ const difficultyColors = {
 
 
 
-export function CommunityFeed({ filter }: CommunityFeedProps) {
-  const [posts, setPosts] = useState<CommunityPost[]>([]);
-  const [loading, setLoading] = useState(true);
+export function CommunityFeed({ filter, posts: externalPosts, userId }: CommunityFeedProps) {
+  const [posts, setPosts] = useState<CommunityPost[]>(externalPosts || []);
+  const [loading, setLoading] = useState(!externalPosts);
   const [activeFilter, setActiveFilter] = useState(filter || "all");
   const [searchQuery, setSearchQuery] = useState("");
   const [selectedTag, setSelectedTag] = useState<string | null>(null);
@@ -88,6 +90,9 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
   const loadMoreRef = useRef<HTMLDivElement>(null);
 
   const fetchPosts = useCallback(async (pageNumber = 1, append = false) => {
+    // Skip fetching if external posts are provided
+    if (externalPosts) return;
+
     try {
       if (!append) {
         setLoading(true);
@@ -138,7 +143,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
     } finally {
       setLoading(false);
     }
-  }, [activeFilter, searchQuery, selectedTag, sortBy]);
+  }, [activeFilter, searchQuery, selectedTag, sortBy, externalPosts]);
 
   useEffect(() => {
     fetchPosts();
@@ -180,7 +185,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: 1 }), // TODO: Get actual user ID from auth context
+        body: JSON.stringify({ userId: userId || 1 }), // Use provided userId or default to 1
       });
 
       if (!response.ok) {
@@ -205,6 +210,12 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
 
   const handleBookmark = async (postId: number) => {
     try {
+      // Check if user is authenticated
+      if (!userId) {
+        alert("로그인이 필요합니다.");
+        return;
+      }
+
       const post = posts.find(p => p.id === postId);
       if (!post) return;
 
@@ -218,6 +229,10 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
       });
 
       if (!response.ok) {
+        if (response.status === 401) {
+          alert("로그인이 필요합니다.");
+          return;
+        }
         throw new Error("Failed to toggle bookmark");
       }
 
@@ -232,6 +247,7 @@ export function CommunityFeed({ filter }: CommunityFeedProps) {
       ));
     } catch (error) {
       console.error("Error toggling bookmark:", error);
+      alert("북마크 처리 중 오류가 발생했습니다.");
     }
   };
 
