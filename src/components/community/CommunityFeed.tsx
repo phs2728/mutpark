@@ -122,21 +122,29 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
       }
 
       const data = await response.json();
-      let filteredPosts = data.posts || [];
+      let filteredPosts: CommunityPost[] = (data.posts || []).map((p: unknown) => {
+        const post = p as Record<string, unknown>;
+        return {
+          // normalize from various APIs
+          ...post,
+          type: (post.type || 'question').toString().toLowerCase(),
+          tags: Array.isArray(post.tags) ? post.tags : [],
+        } as CommunityPost;
+      });
 
       // Client-side search filtering
       if (searchQuery) {
         filteredPosts = filteredPosts.filter((post: CommunityPost) =>
           post.title.toLowerCase().includes(searchQuery.toLowerCase()) ||
           post.content.toLowerCase().includes(searchQuery.toLowerCase()) ||
-          post.tags.some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
+          (post.tags ?? []).some((tag: string) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
         );
       }
 
       // Tag filtering
       if (selectedTag) {
         filteredPosts = filteredPosts.filter((post: CommunityPost) =>
-          post.tags.some((tag: string) => tag === selectedTag)
+          (post.tags ?? []).some((tag: string) => tag === selectedTag)
         );
       }
 
@@ -505,7 +513,7 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
 
                 {/* Tags */}
                 <div className="flex flex-wrap gap-2 mb-4">
-                  {post.tags.map((tag, index) => (
+                  {(post.tags ?? []).map((tag, index) => (
                     <button
                       key={index}
                       onClick={() => handleTagClick(tag)}
