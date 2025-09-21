@@ -8,6 +8,7 @@ export async function GET(request: NextRequest) {
     const limit = parseInt(searchParams.get("limit") || "10");
     const type = searchParams.get("type");
     const sortBy = searchParams.get("sortBy") || "latest";
+    const userId = parseInt(searchParams.get("userId") || "0");
     const offset = (page - 1) * limit;
 
     const where = type ? { type: type as "RECIPE" | "REVIEW" | "TIP" | "QUESTION" } : {};
@@ -46,6 +47,14 @@ export async function GET(request: NextRequest) {
             imageUrl: true,
           },
         },
+        likes: userId ? {
+          where: { userId },
+          select: { id: true },
+        } : false,
+        bookmarks: userId ? {
+          where: { userId },
+          select: { id: true },
+        } : false,
         _count: {
           select: {
             likes: true,
@@ -94,6 +103,9 @@ export async function GET(request: NextRequest) {
       viewsCount: post.viewsCount,
       publishedAt: post.publishedAt,
       createdAt: post.createdAt,
+      // 사용자별 상태
+      isLiked: userId ? (post.likes && post.likes.length > 0) : false,
+      isBookmarked: userId ? (post.bookmarks && post.bookmarks.length > 0) : false,
     }));
 
     return NextResponse.json({

@@ -115,6 +115,9 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
       params.append("page", pageNumber.toString());
       params.append("limit", "10");
       params.append("sortBy", sortBy);
+      if (userId) {
+        params.append("userId", userId.toString());
+      }
 
       const response = await fetch(`/api/community/posts?${params.toString()}`);
       if (!response.ok) {
@@ -210,8 +213,8 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
         headers: {
           "Content-Type": "application/json",
         },
-        body: JSON.stringify({ userId: userId || 1 }), // Use provided userId or default to 1
-        credentials: 'include', // Include cookies for authentication
+        body: JSON.stringify({ userId: userId || 1 }),
+        credentials: 'include',
       });
 
       if (!response.ok) {
@@ -231,6 +234,8 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
       ));
     } catch (error) {
       console.error("Error toggling like:", error);
+      const errorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+      alert("좋아요 처리 중 오류가 발생했습니다: " + errorMessage);
     }
   };
 
