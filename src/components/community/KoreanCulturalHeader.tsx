@@ -7,11 +7,17 @@ export default function KoreanCulturalHeader() {
   const [theme, setTheme] = useState(getSeasonalTheme());
   const [welcomeMessage, setWelcomeMessage] = useState('');
   const [culturalIcon, setCulturalIcon] = useState('');
+  const [backgroundElements, setBackgroundElements] = useState<string[]>([]);
+  const [bottomElement, setBottomElement] = useState('');
+  const [isClient, setIsClient] = useState(false);
 
   useEffect(() => {
+    setIsClient(true);
     setTheme(getSeasonalTheme());
     setWelcomeMessage(getRandomFriendlyMessage());
     setCulturalIcon(getRandomKoreanElement('culture'));
+    setBackgroundElements(Array.from({ length: 48 }, () => getRandomKoreanElement('culture')));
+    setBottomElement(getRandomKoreanElement('celebration'));
   }, []);
 
   return (
@@ -21,9 +27,9 @@ export default function KoreanCulturalHeader() {
       {/* 배경 패턴 */}
       <div className="absolute inset-0 opacity-5">
         <div className="grid grid-cols-12 gap-4 h-full">
-          {Array.from({ length: 48 }).map((_, i) => (
+          {isClient && backgroundElements.map((element, i) => (
             <div key={i} className="text-2xl">
-              {getRandomKoreanElement('culture')}
+              {element}
             </div>
           ))}
         </div>
@@ -66,7 +72,7 @@ export default function KoreanCulturalHeader() {
             </div>
             <div className="flex items-center space-x-2">
               <span>함께해요</span>
-              <span>{getRandomKoreanElement('celebration')}</span>
+              <span>{isClient ? bottomElement : ''}</span>
             </div>
           </div>
         </div>
