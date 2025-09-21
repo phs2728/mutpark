@@ -1,77 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect, useCallback } from 'react';
 import { Calendar, Trophy, Clock, Users } from 'lucide-react';
 
 interface SeasonalEvent {
-  id: string;
+  id: number;
   name: string;
   description: string;
   startDate: string;
   endDate: string;
-  type: 'challenge' | 'contest' | 'celebration';
+  type: 'challenge' | 'contest' | 'celebration' | 'promotion';
   icon: string;
   theme: string;
   rewards: string[];
-  participants: number;
+  participantCount: number;
+  maxParticipants?: number;
   status: 'upcoming' | 'active' | 'ended';
+  featured: boolean;
 }
 
-// 한국 전통 명절 및 계절 이벤트
-const SEASONAL_EVENTS: SeasonalEvent[] = [
-  {
-    id: 'chuseok-2024',
-    name: '추석 전통음식 챌린지',
-    description: '집에서 만드는 추석 전통음식 레시피를 공유하고 따뜻한 마음을 나눠요',
-    startDate: '2024-09-15',
-    endDate: '2024-09-18',
-    type: 'challenge',
-    icon: '🥮',
-    theme: 'bg-gradient-to-br from-yellow-100 to-orange-100 border-orange-200',
-    rewards: ['특별 배지: 전통음식 마스터', '한국 전통차 세트', '커뮤니티 명예의 전당'],
-    participants: 127,
-    status: 'ended'
-  },
-  {
-    id: 'winter-kimchi-2024',
-    name: '김장철 대회',
-    description: '터키에서도 맛있는 김치 담그기! 나만의 김치 레시피와 노하우를 공유해주세요',
-    startDate: '2024-11-20',
-    endDate: '2024-12-10',
-    type: 'contest',
-    icon: '🥬',
-    theme: 'bg-gradient-to-br from-green-100 to-red-100 border-green-200',
-    rewards: ['우승자: 한국식품 패키지', '특별 배지: 김치 마스터', '김치냉장고 할인 쿠폰'],
-    participants: 89,
-    status: 'active'
-  },
-  {
-    id: 'lunar-new-year-2025',
-    name: '설날 떡국 축제',
-    description: '새해 첫날, 따뜻한 떡국으로 시작하는 한 해. 여러분만의 떡국 이야기를 들려주세요',
-    startDate: '2025-01-25',
-    endDate: '2025-02-02',
-    type: 'celebration',
-    icon: '🍲',
-    theme: 'bg-gradient-to-br from-red-100 to-pink-100 border-red-200',
-    rewards: ['참가자 전원: 새해 복 배지', '떡국 재료 세트', '한국 전통 선물'],
-    participants: 0,
-    status: 'upcoming'
-  },
-  {
-    id: 'spring-picnic-2025',
-    name: '봄나들이 도시락 대회',
-    description: '터키의 아름다운 봄과 함께하는 한국식 도시락 만들기 챌린지',
-    startDate: '2025-04-01',
-    endDate: '2025-04-15',
-    type: 'contest',
-    icon: '🌸',
-    theme: 'bg-gradient-to-br from-pink-100 to-green-100 border-pink-200',
-    rewards: ['최우수상: 피크닉 세트', '특별 배지: 봄나들이 요리사', '한국 전통 보자기'],
-    participants: 0,
-    status: 'upcoming'
-  }
-];
 
 function EventCard({ event }: { event: SeasonalEvent }) {
   const getStatusColor = (status: string) => {
@@ -141,7 +88,7 @@ function EventCard({ event }: { event: SeasonalEvent }) {
 
         <div className="flex items-center gap-2 text-sm text-gray-600">
           <Users className="w-4 h-4" />
-          <span>참가자 {event.participants}명</span>
+          <span>참가자 {event.participantCount}명</span>
         </div>
       </div>
 
@@ -187,14 +134,67 @@ function EventCard({ event }: { event: SeasonalEvent }) {
 }
 
 export default function SeasonalEvents() {
-  const [events] = useState<SeasonalEvent[]>(SEASONAL_EVENTS);
+  const [events, setEvents] = useState<SeasonalEvent[]>([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const [filter, setFilter] = useState<'all' | 'active' | 'upcoming' | 'ended'>('all');
+
+  const fetchEvents = useCallback(async () => {
+    try {
+      setLoading(true);
+      setError(null);
+      const response = await fetch('/api/events');
+      if (!response.ok) {
+        throw new Error('Failed to fetch events');
+      }
+      const data = await response.json();
+      setEvents(data.events || []);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Failed to load events');
+    } finally {
+      setLoading(false);
+    }
+  }, []);
+
+  useEffect(() => {
+    fetchEvents();
+  }, [fetchEvents]);
 
   const filteredEvents = events.filter(event =>
     filter === 'all' || event.status === filter
   );
 
   const activeEvents = events.filter(event => event.status === 'active');
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">⏰</div>
+          <h3 className="text-xl font-semibold text-gray-900 mb-2">이벤트를 불러오는 중...</h3>
+          <p className="text-gray-600">잠시만 기다려주세요!</p>
+        </div>
+      </div>
+    );
+  }
+
+  if (error) {
+    return (
+      <div className="space-y-6">
+        <div className="text-center py-12">
+          <div className="text-6xl mb-4">⚠️</div>
+          <h3 className="text-xl font-semibold text-red-900 mb-2">이벤트를 불러올 수 없습니다</h3>
+          <p className="text-red-600 mb-4">{error}</p>
+          <button
+            onClick={fetchEvents}
+            className="bg-red-500 text-white px-6 py-2 rounded-lg hover:bg-red-600 transition-colors"
+          >
+            다시 시도
+          </button>
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="space-y-6">

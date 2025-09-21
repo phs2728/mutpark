@@ -66,6 +66,8 @@ model User {
   following             UserFollow[]       @relation("UserFollowing")
   followers             UserFollow[]       @relation("UserFollower")
   badges                UserBadge[]
+  createdEvents         Event[]            @relation("EventCreator")
+  eventParticipations   EventParticipant[]
 }
 
 model SocialAccount {
@@ -596,4 +598,77 @@ enum BadgeType {
   FIRST_POST        // 첫 게시물
   HELPFUL_REVIEWER  // 도움되는 리뷰어
   COMMUNITY_VETERAN // 커뮤니티 베테랑
+}
+
+// 계절 이벤트 시스템
+enum EventType {
+  CHALLENGE  // 챌린지
+  CONTEST    // 대회
+  CELEBRATION // 축제
+  PROMOTION  // 프로모션
+}
+
+enum EventStatus {
+  UPCOMING   // 예정
+  ACTIVE     // 진행 중
+  ENDED      // 종료
+  CANCELLED  // 취소
+}
+
+model Event {
+  id            Int         @id @default(autoincrement())
+  name          String
+  description   String      @db.Text
+  type          EventType
+  status        EventStatus @default(UPCOMING)
+
+  startDate     DateTime
+  endDate       DateTime
+
+  // 디자인 & UI
+  icon          String?     // 이모지 또는 아이콘
+  theme         String?     // CSS 클래스 또는 색상 정보
+  bannerUrl     String?     // 배너 이미지
+
+  // 이벤트 세부사항
+  rules         Json?       // 참여 규칙
+  rewards       Json?       // 보상 정보 배열
+
+  // 통계
+  participantCount Int      @default(0)
+  maxParticipants  Int?     // 최대 참가자 수
+
+  // 관리
+  createdById   Int
+  featured      Boolean     @default(false)
+  metadata      Json?       // 추가 메타데이터
+
+  createdAt     DateTime    @default(now())
+  updatedAt     DateTime    @updatedAt
+
+  // 관계
+  createdBy     User              @relation("EventCreator", fields: [createdById], references: [id])
+  participants  EventParticipant[]
+
+  @@index([status])
+  @@index([startDate])
+  @@index([endDate])
+  @@index([featured])
+}
+
+// 이벤트 참가자
+model EventParticipant {
+  id          Int      @id @default(autoincrement())
+  eventId     Int
+  userId      Int
+  joinedAt    DateTime @default(now())
+  completed   Boolean  @default(false)
+  completedAt DateTime?
+  score       Int?     // 점수 (대회용)
+  submission  Json?    // 제출물 정보
+
+  event Event @relation(fields: [eventId], references: [id], onDelete: Cascade)
+  user  User  @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([eventId, userId])
 }

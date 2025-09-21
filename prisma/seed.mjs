@@ -11,6 +11,10 @@ async function main() {
   const existingCommunityPosts = await prisma.communityPost.count();
   let shouldSeedCommunity = existingCommunityPosts === 0;
 
+  // Check if we need to add events
+  const existingEvents = await prisma.event.count();
+  let shouldSeedEvents = existingEvents === 0;
+
   const baseProducts = [
     {
       sku: "KFOOD-GOCHUJANG-500G",
@@ -448,6 +452,159 @@ async function main() {
   console.log("✅ Community seeding completed successfully");
   } else {
     console.log("Seed skipped: community posts already exist.");
+  }
+
+  // Seed events
+  if (shouldSeedEvents) {
+    console.log("🎉 Seeding events...");
+
+    // Create an admin user for events if not exists
+    let adminUser = await prisma.user.findFirst({
+      where: { role: "ADMIN" }
+    });
+
+    if (!adminUser) {
+      adminUser = await prisma.user.create({
+        data: {
+          email: "admin@mutpark.com",
+          passwordHash: "$2b$10$example_hash_for_admin_user",
+          name: "관리자",
+          role: "ADMIN",
+          locale: "ko",
+          currency: "TRY",
+        }
+      });
+    }
+
+    const events = await Promise.all([
+      prisma.event.create({
+        data: {
+          name: "추석 전통음식 챌린지",
+          description: "집에서 만드는 추석 전통음식 레시피를 공유하고 따뜻한 마음을 나눠요. 전통 요리를 통해 한국 문화를 터키에서도 함께 즐겨보세요.",
+          type: "CHALLENGE",
+          status: "ENDED",
+          startDate: new Date("2024-09-15T00:00:00Z"),
+          endDate: new Date("2024-09-18T23:59:59Z"),
+          icon: "🥮",
+          theme: "bg-gradient-to-br from-yellow-100 to-orange-100 border-orange-200",
+          rewards: [
+            "특별 배지: 전통음식 마스터",
+            "한국 전통차 세트",
+            "커뮤니티 명예의 전당"
+          ],
+          participantCount: 127,
+          createdById: adminUser.id,
+          featured: true,
+          metadata: {
+            hashtags: ["추석", "전통음식", "레시피"],
+            difficulty: "중급"
+          }
+        }
+      }),
+      prisma.event.create({
+        data: {
+          name: "김장철 대회",
+          description: "터키에서도 맛있는 김치 담그기! 나만의 김치 레시피와 노하우를 공유해주세요. 겨울을 준비하는 한국의 전통을 함께 나누어요.",
+          type: "CONTEST",
+          status: "ACTIVE",
+          startDate: new Date("2024-11-20T00:00:00Z"),
+          endDate: new Date("2024-12-10T23:59:59Z"),
+          icon: "🥬",
+          theme: "bg-gradient-to-br from-green-100 to-red-100 border-green-200",
+          rewards: [
+            "우승자: 한국식품 패키지",
+            "특별 배지: 김치 마스터",
+            "김치냉장고 할인 쿠폰"
+          ],
+          participantCount: 89,
+          maxParticipants: 200,
+          createdById: adminUser.id,
+          featured: true,
+          metadata: {
+            hashtags: ["김장", "김치", "겨울준비"],
+            judging: "커뮤니티 투표"
+          }
+        }
+      }),
+      prisma.event.create({
+        data: {
+          name: "설날 떡국 축제",
+          description: "새해를 맞이하여 전통 떡국과 함께하는 축제입니다. 각자의 특별한 떡국 레시피를 공유하고 새해 복을 나누어요.",
+          type: "CELEBRATION",
+          status: "UPCOMING",
+          startDate: new Date("2025-01-28T00:00:00Z"),
+          endDate: new Date("2025-02-02T23:59:59Z"),
+          icon: "🍜",
+          theme: "bg-gradient-to-br from-red-100 to-pink-100 border-red-200",
+          rewards: [
+            "새해 복 배지",
+            "전통 떡 선물세트",
+            "한국 전통 그릇 세트"
+          ],
+          participantCount: 0,
+          createdById: adminUser.id,
+          featured: true,
+          metadata: {
+            hashtags: ["설날", "떡국", "새해"],
+            category: "명절음식"
+          }
+        }
+      }),
+      prisma.event.create({
+        data: {
+          name: "봄맞이 나물반찬 특집",
+          description: "봄철 건강한 나물반찬으로 가족 건강을 챙겨보세요. 제철 재료를 활용한 다양한 나물 요리법을 공유합니다.",
+          type: "CHALLENGE",
+          status: "UPCOMING",
+          startDate: new Date("2025-03-15T00:00:00Z"),
+          endDate: new Date("2025-04-15T23:59:59Z"),
+          icon: "🌱",
+          theme: "bg-gradient-to-br from-green-100 to-yellow-100 border-green-200",
+          rewards: [
+            "건강 요리사 배지",
+            "유기농 재료 할인 쿠폰",
+            "나물 요리 도구 세트"
+          ],
+          participantCount: 0,
+          maxParticipants: 150,
+          createdById: adminUser.id,
+          metadata: {
+            hashtags: ["봄", "나물", "건강"],
+            season: "spring"
+          }
+        }
+      }),
+      prisma.event.create({
+        data: {
+          name: "터키 현지재료 활용 대회",
+          description: "터키에서 구할 수 있는 현지 재료로 한국 요리를 만들어보는 창의적인 대회입니다. 로컬 푸드로 K-푸드를 재해석해보세요!",
+          type: "CONTEST",
+          status: "UPCOMING",
+          startDate: new Date("2025-05-01T00:00:00Z"),
+          endDate: new Date("2025-05-31T23:59:59Z"),
+          icon: "🇹🇷",
+          theme: "bg-gradient-to-br from-blue-100 to-red-100 border-blue-200",
+          rewards: [
+            "크리에이티브 셰프 배지",
+            "터키-한국 요리 도구 세트",
+            "현지 식재료 탐방 투어"
+          ],
+          participantCount: 0,
+          maxParticipants: 100,
+          createdById: adminUser.id,
+          featured: false,
+          metadata: {
+            hashtags: ["터키", "현지재료", "창의"],
+            collaboration: "터키-한국 문화교류"
+          }
+        }
+      })
+    ]);
+
+    console.log(`Created ${events.length} events`);
+    console.log("✅ Events seeding completed successfully");
+  } else {
+    console.log("Seed skipped: events already exist.");
   }
 }
 
