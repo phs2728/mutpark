@@ -111,9 +111,12 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
         setPage(prev => prev + 1);
       }
 
-      setHasMore((data.posts || []).length === 20);
+      // 더 정확한 hasMore 로직
+      const receivedPosts = data.posts || [];
+      setHasMore(receivedPosts.length === 20 && currentPage < (data.pagination?.pages || 1));
     } catch (error) {
       console.error('Error loading posts:', error);
+      setHasMore(false); // 에러 시 더 이상 로드하지 않음
     } finally {
       setLoading(false);
     }
@@ -136,12 +139,59 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
     }, 500);
   };
 
+  // 무한 스크롤을 위한 별도 함수
+  const loadMorePosts = useCallback(async () => {
+    if (loading || !hasMore) return;
+
+    setLoading(true);
+
+    try {
+      const currentPage = page;
+      let url = '';
+      const params = new URLSearchParams({
+        page: currentPage.toString(),
+        limit: '20',
+        ...(searchQuery && { search: searchQuery }),
+        ...(filters.type !== 'all' && { postType: filters.type }),
+        ...(filters.timeRange !== 'all' && { timeRange: filters.timeRange })
+      });
+
+      // API 엔드포인트 선택
+      if (showPersonalized && userId) {
+        url = `/api/community/personalized-feed?userId=${userId}&${params.toString()}`;
+      } else if (filters.sortBy === 'popular') {
+        url = `/api/community/popular?${params.toString()}`;
+      } else if (filters.sortBy === 'trending') {
+        url = `/api/community/trending?${params.toString()}`;
+      } else {
+        url = `/api/community/posts?${params.toString()}`;
+      }
+
+      const response = await fetch(url);
+      const data = await response.json();
+
+      const receivedPosts = data.posts || [];
+      if (receivedPosts.length > 0) {
+        setPosts(prev => [...prev, ...receivedPosts]);
+        setPage(prev => prev + 1);
+      }
+
+      // 더 정확한 hasMore 로직
+      setHasMore(receivedPosts.length === 20 && currentPage < (data.pagination?.pages || 1));
+    } catch (error) {
+      console.error('Error loading more posts:', error);
+      setHasMore(false);
+    } finally {
+      setLoading(false);
+    }
+  }, [page, searchQuery, filters, userId, showPersonalized]); // eslint-disable-line react-hooks/exhaustive-deps
+
   // 무한 스크롤
   useEffect(() => {
     const observer = new IntersectionObserver(
       (entries) => {
         if (entries[0].isIntersecting && hasMore && !loading) {
-          loadPosts();
+          loadMorePosts();
         }
       },
       { threshold: 0.1 }
@@ -157,7 +207,7 @@ export default function InteractiveFeed({ userId, showPersonalized = false }: In
         observer.unobserve(currentRef);
       }
     };
-  }, [loadPosts, hasMore, loading]);
+  }, [loadMorePosts, hasMore, loading]);
 
   const handleFilterChange = (key: keyof FilterOptions, value: string) => {
     setFilters(prev => ({ ...prev, [key]: value }));

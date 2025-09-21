@@ -137,9 +137,12 @@ export function CommunityFeed({ filter, posts: externalPosts, userId }: Communit
         setPage(1);
       }
 
-      setHasMore(data.pagination.page < data.pagination.pages);
+      // 더 정확한 hasMore 로직
+      const hasMoreData = data.pagination && data.pagination.page < data.pagination.pages;
+      setHasMore(hasMoreData && filteredPosts.length > 0);
     } catch (error) {
       console.error("Error fetching posts:", error);
+      setHasMore(false); // 에러 시 더 이상 로드하지 않음
     } finally {
       setLoading(false);
     }
