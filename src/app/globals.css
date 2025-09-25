@@ -5,6 +5,8 @@
 *::before,
 *::after {
   box-sizing: border-box;
+  margin: 0;
+  padding: 0;
 }
 
 :root {
@@ -39,6 +41,7 @@
   --mut-color-accent-beige: #f5e8d3;
 
   --mut-font-sans: "Noto Sans KR", var(--font-geist-sans), -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+  --mut-font-emoji: "Apple Color Emoji", "Segoe UI Emoji", "Noto Color Emoji", "Android Emoji", "EmojiSymbols", "EmojiOne Mozilla", "Twemoji Mozilla", "Segoe UI Symbol", "Noto Emoji";
 
   --mut-font-h1: 2.5rem;
   --mut-font-h2: 2rem;
@@ -95,13 +98,190 @@
   }
 }
 
-body {
+html {
   margin: 0;
+  padding: 0;
+}
+
+body {
+  margin: 0 !important;
+  padding: 0 !important;
   min-height: 100vh;
   background: var(--mut-color-background);
   color: var(--mut-color-text-primary);
   font-family: var(--mut-font-sans);
   line-height: 1.6;
+}
+
+/* Admin layout specific fixes */
+body:has([class*="admin"]) {
+  overflow: hidden;
+  margin: 0;
+  padding: 0;
+}
+
+/* Remove Next.js default margins/padding while preserving layout */
+html, body {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* Admin specific layout fixes */
+.admin-layout {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  margin: 0;
+  padding: 0;
+  display: flex;
+  height: 100vh;
+  overflow: hidden;
+}
+
+.admin-sidebar {
+  width: 15rem;
+  flex-shrink: 0;
+  z-index: 30;
+  background: linear-gradient(180deg, #ffffff 0%, #fafbfc 100%);
+  border-right: 1px solid #e5e7eb;
+  box-shadow: 2px 0 8px rgba(0, 0, 0, 0.04);
+}
+
+.admin-main-content {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.admin-content {
+  padding: 1.5rem;
+  background: #fafbfc;
+}
+
+.admin-header-padding {
+  padding: 1.25rem 1.5rem;
+  background: #ffffff;
+  border-bottom: 1px solid #e5e7eb;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.05);
+}
+
+/* Korean text optimization */
+.korean-text {
+  letter-spacing: 0.015em;
+  line-height: 1.55;
+  word-spacing: 0.05em;
+  font-feature-settings: "kern" 1;
+  text-rendering: optimizeLegibility;
+}
+
+.korean-text-tight {
+  letter-spacing: 0.01em;
+  line-height: 1.5;
+  word-spacing: 0.03em;
+}
+
+.korean-text-loose {
+  letter-spacing: 0.04em;
+  line-height: 2.0;
+  word-spacing: 0.12em;
+}
+
+/* Admin specific typography */
+.admin-nav-text {
+  letter-spacing: 0.03em;
+  line-height: 2.0;
+  word-spacing: 0.08em;
+  font-feature-settings: "kern" 1;
+}
+
+.admin-header-title {
+  letter-spacing: 0.025em;
+  line-height: 2.0;
+  word-spacing: 0.06em;
+}
+
+.admin-user-text {
+  letter-spacing: 0.02em;
+  line-height: 2.0;
+  word-spacing: 0.05em;
+}
+
+/* Enhanced admin sidebar styling */
+.admin-sidebar-logo {
+  background: linear-gradient(135deg, #3b82f6 0%, #1d4ed8 100%);
+  color: white;
+  padding: 2rem 1.5rem;
+  margin: 0 1rem 1rem;
+  border-radius: 0.75rem;
+  box-shadow: 0 4px 12px rgba(59, 130, 246, 0.25);
+}
+
+.admin-nav-item {
+  margin: 0 1rem 0.5rem;
+  border-radius: 0.75rem;
+  transition: all 0.2s ease;
+  overflow: hidden;
+}
+
+.admin-nav-item:hover {
+  transform: translateX(4px);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.08);
+}
+
+.admin-nav-item.active {
+  background: linear-gradient(135deg, #dbeafe 0%, #bfdbfe 100%);
+  border-left: 4px solid #3b82f6;
+}
+
+.admin-user-section {
+  background: rgba(59, 130, 246, 0.05);
+  margin: 1rem;
+  padding: 1rem;
+  border-radius: 0.75rem;
+  border: 1px solid rgba(59, 130, 246, 0.1);
+}
+
+/* Dashboard content styling */
+.admin-dashboard-content h1,
+.admin-dashboard-content h2,
+.admin-dashboard-content h3,
+.admin-dashboard-content h4 {
+  line-height: 2.0;
+  letter-spacing: 0.025em;
+  margin-bottom: 1.5rem;
+}
+
+.admin-dashboard-content p {
+  line-height: 2.2;
+  letter-spacing: 0.015em;
+  margin-bottom: 1.2rem;
+}
+
+.admin-dashboard-content .stats-card {
+  line-height: 2.0;
+  letter-spacing: 0.02em;
+}
+
+.admin-dashboard-content .activity-item {
+  line-height: 2.0;
+  letter-spacing: 0.015em;
+  margin-bottom: 1.5rem;
+  padding: 1.2rem;
+}
+
+.admin-dashboard-content .quick-action-card {
+  line-height: 1.8;
+  letter-spacing: 0.015em;
+  padding: 1.5rem;
+}
+
+.admin-dashboard-content .system-status {
+  line-height: 2.0;
+  letter-spacing: 0.015em;
 }
 
 a {
@@ -324,4 +504,46 @@ textarea:focus {
 .suggestion-chips button:hover {
   background: var(--mut-color-secondary-hover);
   border-color: var(--mut-color-primary);
+}
+
+/* Emoji support */
+.emoji,
+.event-icon,
+.emoji-icon {
+  font-family: var(--mut-font-emoji);
+  font-style: normal;
+  font-weight: normal;
+  line-height: 1;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* Event icon specific styling */
+.event-icon-selector {
+  font-family: var(--mut-font-emoji);
+  font-size: 1.5rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+.event-icon-display {
+  font-family: var(--mut-font-emoji);
+  font-size: 2rem;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 48px;
+  min-width: 48px;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }

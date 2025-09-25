@@ -46,3 +46,61 @@ export function verifyAccessToken(token: string) {
 export function verifyRefreshToken(token: string) {
   return jwt.verify(token, getJwtSecret()) as RefreshTokenPayload;
 }
+
+export async function verifyAdminToken(request: any) {
+  try {
+    const authHeader = request.headers.get("authorization");
+    const token = authHeader?.replace("Bearer ", "");
+
+    if (!token) {
+      // Try to get token from cookies (check both admin-token and auth-token)
+      const adminToken = request.cookies.get("admin-token")?.value;
+      const authToken = request.cookies.get("auth-token")?.value;
+      const cookieToken = adminToken || authToken;
+
+      if (!cookieToken) {
+        return { success: false, error: "No token provided" };
+      }
+
+      let payload;
+      try {
+        payload = verifyAccessToken(cookieToken);
+      } catch (error) {
+        // Try to verify as JWT directly (for admin tokens)
+        try {
+          payload = jwt.verify(cookieToken, getJwtSecret()) as any;
+        } catch (jwtError) {
+          return { success: false, error: "Invalid token" };
+        }
+      }
+
+      // Check if user has admin privileges
+      if (!["ADMIN", "SUPER_ADMIN", "MODERATOR", "OPERATOR"].includes(payload.role)) {
+        return { success: false, error: "Insufficient privileges" };
+      }
+
+      return { success: true, user: payload };
+    }
+
+    let payload;
+    try {
+      payload = verifyAccessToken(token);
+    } catch (error) {
+      // Try to verify as JWT directly (for admin tokens)
+      try {
+        payload = jwt.verify(token, getJwtSecret()) as any;
+      } catch (jwtError) {
+        return { success: false, error: "Invalid token" };
+      }
+    }
+
+    // Check if user has admin privileges
+    if (!["ADMIN", "SUPER_ADMIN", "MODERATOR", "OPERATOR"].includes(payload.role)) {
+      return { success: false, error: "Insufficient privileges" };
+    }
+
+    return { success: true, user: payload };
+  } catch (error) {
+    return { success: false, error: "Invalid token" };
+  }
+}

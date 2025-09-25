@@ -5,6 +5,8 @@ import { issueSession } from "@/services/auth-service";
 import { hashPassword } from "@/lib/auth";
 import { SocialProvider } from "@prisma/client";
 import { randomBytes } from "node:crypto";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 interface SocialLoginPayload {
   token: string;
@@ -28,39 +30,7 @@ async function verifyGoogleToken(idToken: string) {
   };
 }
 
-async function verifyKakaoToken(accessToken: string) {
-  const response = await fetch("https://kapi.kakao.com/v2/user/me", {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-  });
-  if (!response.ok) {
-    throw new Error("Invalid Kakao token");
-  }
-  const data = (await response.json()) as {
-    id: number;
-    kakao_account?: {
-      email?: string;
-      profile?: {
-        nickname?: string;
-      };
-      profile_needs_agreement?: boolean;
-      has_email?: boolean;
-      email_needs_agreement?: boolean;
-      locale?: string;
-    };
-  };
-  const email = data.kakao_account?.email;
-  if (!email) {
-    throw new Error("Kakao token missing email consent");
-  }
-  return {
-    email,
-    name: data.kakao_account?.profile?.nickname ?? email.split("@")[0],
-    providerUserId: data.id.toString(),
-    locale: data.kakao_account?.locale ?? "ko",
-  };
-}
+// Kakao login removed - not needed for Turkey market
 
 async function findOrCreateUser({
   provider,
@@ -152,37 +122,86 @@ export async function POST(request: NextRequest, context: { params: Promise<{ pr
       name = profile.name;
       providerUserId = profile.email;
       localePref = undefined;
-    } else if (providerParam === "kakao") {
-      provider = SocialProvider.KAKAO;
-      const profile = await verifyKakaoToken(token);
-      email = profile.email;
-      name = profile.name;
-      providerUserId = profile.providerUserId ?? profile.email;
-      localePref = profile.locale;
     } else {
-      return errorResponse("Unsupported provider", 400);
+      return errorResponse("Only Google login is supported", 400);
     }
 
     const user = await findOrCreateUser({ provider, providerUserId, email, name, locale: localePref });
 
-    const response = successResponse({
-      user: {
+    // 관리자 권한 확인
+    const isAdmin = ["ADMIN", "SUPER_ADMIN", "MODERATOR", "OPERATOR"].includes(user.role);
+
+    if (isAdmin) {
+      // 관리자용 JWT 토큰 생성
+      const adminToken = jwt.sign(
+        {
+          userId: user.id,
+          email: user.email,
+          role: user.role,
+          name: user.name,
+        },
+        process.env.JWT_SECRET!,
+        { expiresIn: "8h" }
+      );
+
+      // 관리자용 쿠키 설정
+      const cookieStore = await cookies();
+      cookieStore.set("admin-token", adminToken, {
+        httpOnly: true,
+        secure: process.env.NODE_ENV === "production",
+        sameSite: "strict",
+        maxAge: 8 * 60 * 60, // 8시간
+        path: "/",
+      });
+
+      // 감사 로그 기록
+      await prisma.auditLog.create({
+        data: {
+          userId: user.id,
+          action: "LOGIN",
+          entityType: "AdminSession",
+          entityId: user.id.toString(),
+          description: `Admin Google login: ${user.email}`,
+          ipAddress: request.headers.get("x-forwarded-for") || request.headers.get("x-real-ip") || "unknown",
+          userAgent: request.headers.get("user-agent") || "unknown",
+        },
+      });
+
+      return successResponse({
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          locale: user.locale,
+          role: user.role,
+        },
+        provider,
+        isAdmin: true,
+        redirectTo: "/admin/dashboard"
+      });
+    } else {
+      // 일반 사용자용 세션 처리
+      const response = successResponse({
+        user: {
+          id: user.id,
+          email: user.email,
+          name: user.name,
+          locale: user.locale,
+          role: user.role,
+        },
+        provider,
+        isAdmin: false,
+        redirectTo: `/${user.locale || 'ko'}`
+      });
+
+      await issueSession(response, {
         id: user.id,
         email: user.email,
-        name: user.name,
-        locale: user.locale,
         role: user.role,
-      },
-      provider,
-    });
+      });
 
-    await issueSession(response, {
-      id: user.id,
-      email: user.email,
-      role: user.role,
-    });
-
-    return response;
+      return response;
+    }
   } catch (error) {
     console.error(error);
     return errorResponse((error as Error).message ?? "Unable to authenticate", 400);

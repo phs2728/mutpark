@@ -115,6 +115,7 @@ export async function validateUserCredentials(email: string, password: string) {
   }
 
   const isValid = await verifyPassword(password, user.passwordHash);
+
   if (!isValid) {
     return null;
   }

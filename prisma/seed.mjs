@@ -15,6 +15,14 @@ async function main() {
   const existingEvents = await prisma.event.count();
   let shouldSeedEvents = existingEvents === 0;
 
+  // Check if we need to add banners
+  const existingBanners = await prisma.banner.count();
+  let shouldSeedBanners = existingBanners === 0;
+
+  // Check if we need to add orders
+  const existingOrders = await prisma.order.count();
+  let shouldSeedOrders = existingOrders === 0;
+
   const baseProducts = [
     {
       sku: "KFOOD-GOCHUJANG-500G",
@@ -224,7 +232,7 @@ async function main() {
       create: {
         email: "kimturkey@example.com",
         name: "김터키",
-        hashedPassword: "$2a$10$example_hash_1", // placeholder hash
+        passwordHash: "$2a$10$5gBW8TRawJ1psCtej4.Q..OaGFOdtwRLOiMVHXa7Psb7p2KwlvRJm", // password123
         role: "USER",
         isEmailVerified: true,
       },
@@ -235,7 +243,7 @@ async function main() {
       create: {
         email: "istanbulkim@example.com",
         name: "이스탄불김씨",
-        hashedPassword: "$2a$10$example_hash_2", // placeholder hash
+        passwordHash: "$2a$10$5gBW8TRawJ1psCtej4.Q..OaGFOdtwRLOiMVHXa7Psb7p2KwlvRJm", // password123
         role: "USER",
         isEmailVerified: true,
       },
@@ -246,7 +254,7 @@ async function main() {
       create: {
         email: "ankarakorean@example.com",
         name: "앙카라한국인",
-        hashedPassword: "$2a$10$example_hash_3", // placeholder hash
+        passwordHash: "$2a$10$5gBW8TRawJ1psCtej4.Q..OaGFOdtwRLOiMVHXa7Psb7p2KwlvRJm", // password123
         role: "USER",
         isEmailVerified: true,
       },
@@ -458,7 +466,7 @@ async function main() {
   if (shouldSeedEvents) {
     console.log("🎉 Seeding events...");
 
-    // Create an admin user for events if not exists
+    // Create admin users for events if not exists
     let adminUser = await prisma.user.findFirst({
       where: { role: "ADMIN" }
     });
@@ -467,7 +475,7 @@ async function main() {
       adminUser = await prisma.user.create({
         data: {
           email: "admin@mutpark.com",
-          passwordHash: "$2b$10$example_hash_for_admin_user",
+          passwordHash: "$2a$10$TEfQOqP/kBxT8ydFdtjAoOuUEAuB095e415bQ0J23yjiviqQJxId.",
           name: "관리자",
           role: "ADMIN",
           locale: "ko",
@@ -475,6 +483,24 @@ async function main() {
         }
       });
     }
+
+    // Create super admin user for development
+    await prisma.user.upsert({
+      where: { email: "mutpark01@gmail.com" },
+      update: {
+        passwordHash: "$2a$10$5anv9MUVleY5AIYUApPGouP.zcMDlM1fhzxewuqVyw5yNSVBG.CnG", // Hannah@0309
+      },
+      create: {
+        email: "mutpark01@gmail.com",
+        passwordHash: "$2a$10$5anv9MUVleY5AIYUApPGouP.zcMDlM1fhzxewuqVyw5yNSVBG.CnG", // Hannah@0309
+        name: "Super Admin",
+        role: "SUPER_ADMIN",
+        locale: "ko",
+        currency: "TRY",
+      }
+    });
+
+    console.log("✅ Super admin user created/updated: mutpark01@gmail.com");
 
     const events = await Promise.all([
       prisma.event.create({
@@ -605,6 +631,416 @@ async function main() {
     console.log("✅ Events seeding completed successfully");
   } else {
     console.log("Seed skipped: events already exist.");
+  }
+
+  // Seed banners
+  if (shouldSeedBanners) {
+    console.log("🏷️ Seeding banners...");
+
+    // Get admin user for banner creation
+    let adminUser = await prisma.user.findFirst({
+      where: { role: { in: ["ADMIN", "SUPER_ADMIN"] } }
+    });
+
+    if (!adminUser) {
+      adminUser = await prisma.user.create({
+        data: {
+          email: "banner-admin@mutpark.com",
+          passwordHash: "$2a$10$TEfQOqP/kBxT8ydFdtjAoOuUEAuB095e415bQ0J23yjiviqQJxId.",
+          name: "배너 관리자",
+          role: "ADMIN",
+          locale: "ko",
+          currency: "TRY",
+        }
+      });
+    }
+
+    const banners = await Promise.all([
+      // HERO position banner - Main promotional banner
+      prisma.banner.create({
+        data: {
+          title: "겨울 신상품 할인 이벤트",
+          description: "따뜻한 한국 음식으로 겨울을 맞이하세요! 최대 30% 할인",
+          imageUrl: "https://images.unsplash.com/photo-1547592180-85f173990554?auto=format&fit=crop&w=1200&q=80",
+          linkUrl: "/products?category=winter-special",
+          position: "HERO",
+          status: "ACTIVE",
+          startDate: new Date("2025-01-20T00:00:00Z"),
+          endDate: new Date("2025-02-28T23:59:59Z"),
+          priority: 1,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 2840,
+          clickCount: 156,
+        },
+      }),
+
+      // HEADER position banner - Announcement
+      prisma.banner.create({
+        data: {
+          title: "무료 배송 이벤트",
+          description: "150 TL 이상 주문시 터키 전역 무료 배송!",
+          imageUrl: "https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=800&q=80",
+          linkUrl: "/shipping-info",
+          position: "HEADER",
+          status: "ACTIVE",
+          startDate: new Date("2025-01-15T00:00:00Z"),
+          endDate: new Date("2025-03-15T23:59:59Z"),
+          priority: 2,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 1920,
+          clickCount: 89,
+        },
+      }),
+
+      // SIDEBAR position banner - Product promotion
+      prisma.banner.create({
+        data: {
+          title: "신라면 특가",
+          description: "한국인이 사랑하는 신라면 시리즈 특가 판매",
+          imageUrl: "https://images.unsplash.com/photo-1569718212165-3a8278d5f624?auto=format&fit=crop&w=600&q=80",
+          linkUrl: "/products/shinramyun-black",
+          position: "SIDEBAR",
+          status: "ACTIVE",
+          startDate: new Date("2025-01-10T00:00:00Z"),
+          endDate: new Date("2025-02-10T23:59:59Z"),
+          priority: 3,
+          deviceType: "desktop",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 980,
+          clickCount: 67,
+        },
+      }),
+
+      // FOOTER position banner - Newsletter signup
+      prisma.banner.create({
+        data: {
+          title: "뉴스레터 구독하고 할인받기",
+          description: "최신 한국 식품 소식과 특가 정보를 받아보세요",
+          imageUrl: "https://images.unsplash.com/photo-1596526131083-e8c633c948d2?auto=format&fit=crop&w=800&q=80",
+          linkUrl: "/newsletter",
+          position: "FOOTER",
+          status: "ACTIVE",
+          startDate: new Date("2025-01-01T00:00:00Z"),
+          endDate: new Date("2025-12-31T23:59:59Z"),
+          priority: 4,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 1560,
+          clickCount: 234,
+        },
+      }),
+
+      // MODAL position banner - App download
+      prisma.banner.create({
+        data: {
+          title: "MutPark 모바일 앱 출시!",
+          description: "언제 어디서나 간편하게 한국 음식을 주문하세요",
+          imageUrl: "https://images.unsplash.com/photo-1512941937669-90a1b58e7e9c?auto=format&fit=crop&w=800&q=80",
+          linkUrl: "/app-download",
+          position: "MODAL",
+          status: "SCHEDULED",
+          startDate: new Date("2025-02-01T00:00:00Z"),
+          endDate: new Date("2025-02-15T23:59:59Z"),
+          priority: 5,
+          deviceType: "mobile",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 0,
+          clickCount: 0,
+        },
+      }),
+
+      // FLOATING position banner - Limited time offer
+      prisma.banner.create({
+        data: {
+          title: "⚡ 번개세일 ⚡",
+          description: "김치 1+1 이벤트! 오늘만 특가",
+          imageUrl: "https://images.unsplash.com/photo-1604908176940-3d61aacd3b02?auto=format&fit=crop&w=600&q=80",
+          linkUrl: "/products?category=kimchi",
+          position: "FLOATING",
+          status: "ACTIVE",
+          startDate: new Date(),
+          endDate: new Date(Date.now() + 24 * 60 * 60 * 1000), // 24 hours from now
+          priority: 1,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 3420,
+          clickCount: 412,
+        },
+      }),
+
+      // Another HERO banner for rotation
+      prisma.banner.create({
+        data: {
+          title: "한국 전통차 컬렉션",
+          description: "건강한 한국 전통차로 몸과 마음을 따뜻하게",
+          imageUrl: "https://images.unsplash.com/photo-1563822249366-6ad7bda4c7d2?auto=format&fit=crop&w=1200&q=80",
+          linkUrl: "/products?category=tea",
+          position: "HERO",
+          status: "ACTIVE",
+          startDate: new Date("2025-01-25T00:00:00Z"),
+          endDate: new Date("2025-03-25T23:59:59Z"),
+          priority: 2,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 1870,
+          clickCount: 123,
+        },
+      }),
+
+      // Inactive banner for testing
+      prisma.banner.create({
+        data: {
+          title: "추석 명절 선물세트",
+          description: "소중한 사람에게 전하는 마음, 한국 전통 선물세트",
+          imageUrl: "https://images.unsplash.com/photo-1578662996442-48f60103fc96?auto=format&fit=crop&w=800&q=80",
+          linkUrl: "/products?category=gift-sets",
+          position: "HERO",
+          status: "INACTIVE",
+          startDate: new Date("2024-09-15T00:00:00Z"),
+          endDate: new Date("2024-09-20T23:59:59Z"),
+          priority: 1,
+          deviceType: "all",
+          locale: "tr",
+          createdBy: adminUser.id,
+          viewCount: 5680,
+          clickCount: 892,
+        },
+      }),
+    ]);
+
+    console.log(`Created ${banners.length} banners`);
+    console.log("✅ Banner seeding completed successfully");
+  } else {
+    console.log("Seed skipped: banners already exist.");
+  }
+
+  // Seed orders
+  if (shouldSeedOrders) {
+    console.log("🛒 Seeding orders...");
+
+    // Get some users and products for orders
+    const users = await prisma.user.findMany({
+      where: { role: "CUSTOMER" }
+    });
+
+    const products = await prisma.product.findMany();
+
+    if (users.length > 0 && products.length > 0) {
+      const orders = await Promise.all([
+        // Create address first, then order
+        prisma.order.create({
+          data: {
+            user: {
+              connect: { id: users[0].id }
+            },
+            status: "AWAITING_PAYMENT",
+            subtotalAmount: 349.8,
+            shippingFee: 0,
+            totalAmount: 349.8,
+            currency: "TRY",
+            address: {
+              create: {
+                userId: users[0].id,
+                recipientName: "김터키",
+                phone: "+90 555 123 4567",
+                district: "Beşiktaş",
+                street: "İnönü Cad. No:45",
+                city: "İstanbul",
+                postalCode: "34357",
+                country: "TR",
+                isDefault: false
+              }
+            },
+            items: {
+              create: [
+                {
+                  productId: products[0].id,
+                  quantity: 2,
+                  unitPrice: 189.9,
+                  productName: products[0].baseName,
+                  productImage: products[0].imageUrl
+                }
+              ]
+            }
+          }
+        }),
+
+        // Pending order 2
+        prisma.order.create({
+          data: {
+            user: {
+              connect: { id: users[1] ? users[1].id : users[0].id }
+            },
+            status: "AWAITING_PAYMENT",
+            subtotalAmount: 249.5,
+            shippingFee: 0,
+            totalAmount: 249.5,
+            currency: "TRY",
+            address: {
+              create: {
+                userId: users[1] ? users[1].id : users[0].id,
+                recipientName: "이스탄불김씨",
+                phone: "+90 555 987 6543",
+                district: "Kadıköy",
+                street: "Bağdat Cad. No:123",
+                city: "İstanbul",
+                postalCode: "34710",
+                country: "TR",
+                isDefault: false
+              }
+            },
+            items: {
+              create: [
+                {
+                  productId: products[1] ? products[1].id : products[0].id,
+                  quantity: 1,
+                  unitPrice: 249.5,
+                  productName: products[1] ? products[1].baseName : products[0].baseName,
+                  productImage: products[1] ? products[1].imageUrl : products[0].imageUrl
+                }
+              ]
+            }
+          }
+        }),
+
+        // Pending order 3
+        prisma.order.create({
+          data: {
+            user: {
+              connect: { id: users[2] ? users[2].id : users[0].id }
+            },
+            status: "AWAITING_PAYMENT",
+            subtotalAmount: 159.9,
+            shippingFee: 0,
+            totalAmount: 159.9,
+            currency: "TRY",
+            address: {
+              create: {
+                userId: users[2] ? users[2].id : users[0].id,
+                recipientName: "앙카라한국인",
+                phone: "+90 555 111 2222",
+                district: "Çankaya",
+                street: "Atatürk Bulvarı No:67",
+                city: "Ankara",
+                postalCode: "06420",
+                country: "TR",
+                isDefault: false
+              }
+            },
+            items: {
+              create: [
+                {
+                  productId: products[2] ? products[2].id : products[0].id,
+                  quantity: 1,
+                  unitPrice: 159.9,
+                  productName: products[2] ? products[2].baseName : products[0].baseName,
+                  productImage: products[2] ? products[2].imageUrl : products[0].imageUrl
+                }
+              ]
+            }
+          }
+        }),
+
+        // Completed order for reference
+        prisma.order.create({
+          data: {
+            user: {
+              connect: { id: users[0].id }
+            },
+            status: "DELIVERED",
+            subtotalAmount: 319.8,
+            shippingFee: 0,
+            totalAmount: 319.8,
+            currency: "TRY",
+            address: {
+              create: {
+                userId: users[0].id,
+                recipientName: "김터키",
+                phone: "+90 555 123 4567",
+                district: "Beşiktaş",
+                street: "İnönü Cad. No:45 (배송완료)",
+                city: "İstanbul",
+                postalCode: "34357",
+                country: "TR",
+                isDefault: false
+              }
+            },
+            items: {
+              create: [
+                {
+                  productId: products[0].id,
+                  quantity: 1,
+                  unitPrice: 189.9,
+                  productName: products[0].baseName,
+                  productImage: products[0].imageUrl
+                },
+                {
+                  productId: products[3] ? products[3].id : products[0].id,
+                  quantity: 1,
+                  unitPrice: 129.9,
+                  productName: products[3] ? products[3].baseName : products[0].baseName,
+                  productImage: products[3] ? products[3].imageUrl : products[0].imageUrl
+                }
+              ]
+            }
+          }
+        }),
+
+        // Processing order
+        prisma.order.create({
+          data: {
+            user: {
+              connect: { id: users[1] ? users[1].id : users[0].id }
+            },
+            status: "PROCESSING",
+            subtotalAmount: 289.9,
+            shippingFee: 0,
+            totalAmount: 289.9,
+            currency: "TRY",
+            address: {
+              create: {
+                userId: users[1] ? users[1].id : users[0].id,
+                recipientName: "이스탄불김씨",
+                phone: "+90 555 987 6543",
+                district: "Kadıköy",
+                street: "Bağdat Cad. No:123 (처리중)",
+                city: "İstanbul",
+                postalCode: "34710",
+                country: "TR",
+                isDefault: false
+              }
+            },
+            items: {
+              create: [
+                {
+                  productId: products[4] ? products[4].id : products[0].id,
+                  quantity: 1,
+                  unitPrice: 289.9,
+                  productName: products[4] ? products[4].baseName : products[0].baseName,
+                  productImage: products[4] ? products[4].imageUrl : products[0].imageUrl
+                }
+              ]
+            }
+          }
+        })
+      ]);
+
+      console.log(`Created ${orders.length} orders (3 pending, 2 completed/processing)`);
+      console.log("✅ Order seeding completed successfully");
+    } else {
+      console.log("❌ Cannot create orders: No users or products found");
+    }
+  } else {
+    console.log("Seed skipped: orders already exist.");
   }
 }
 

@@ -1,11 +1,23 @@
 "use client";
 
 import { useI18n } from "@/providers/I18nProvider";
+import { BannerDisplay } from "@/components/banners/BannerDisplay";
+import { usePathname } from "next/navigation";
 
 export function MainFooter() {
   const { t } = useI18n();
+  const pathname = usePathname();
+
+  // Extract locale from pathname
+  const locale = pathname.split('/')[1] || 'tr';
+
   return (
     <footer className="border-t border-slate-200 bg-slate-50 py-10 dark:border-slate-800 dark:bg-slate-900">
+      {/* Footer Banners */}
+      <div className="mx-auto max-w-6xl px-4 mb-6">
+        <BannerDisplay position="FOOTER" locale={locale} maxItems={1} />
+      </div>
+
       <div className="mx-auto flex max-w-6xl flex-col gap-6 px-4 sm:flex-row sm:items-start sm:justify-between">
         <div>
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white">MutPark</h3>

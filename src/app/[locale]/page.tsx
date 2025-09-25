@@ -2,6 +2,7 @@ import type { ReactNode } from "react";
 import { Suspense } from "react";
 import { Prisma } from "@prisma/client";
 import { HeroSection } from "@/components/home/HeroSection";
+import { BannerDisplay } from "@/components/banners/BannerDisplay";
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { RecommendedProducts } from "@/components/products/RecommendedProducts";
@@ -86,7 +87,16 @@ export default async function LocaleHome({
 
   return (
     <div className="flex flex-col gap-10">
-      <HeroSection locale={locale} />
+      {/* Header Banner */}
+      <BannerDisplay position="HEADER" locale={locale} className="w-full" />
+
+      {/* Hero Banners */}
+      <BannerDisplay position="HERO" locale={locale} maxItems={1} />
+
+      {/* Fallback to original HeroSection if no HERO banners */}
+      <div className="hero-fallback">
+        <HeroSection locale={locale} />
+      </div>
 
       {/* Recommended Products Section */}
       <Suspense fallback={
@@ -103,7 +113,11 @@ export default async function LocaleHome({
       </Suspense>
 
       <div className="grid gap-8 lg:grid-cols-[280px_1fr]">
-        <ProductFilters />
+        <div className="space-y-6">
+          <ProductFilters />
+          {/* Sidebar Banners */}
+          <BannerDisplay position="SIDEBAR" locale={locale} maxItems={3} />
+        </div>
         <div className="space-y-6">
           <ProductGrid
             locale={locale}
@@ -124,6 +138,10 @@ export default async function LocaleHome({
           />
         </div>
       </div>
+
+      {/* Floating and Modal Banners (render globally) */}
+      <BannerDisplay position="FLOATING" locale={locale} maxItems={1} />
+      <BannerDisplay position="MODAL" locale={locale} maxItems={1} />
     </div>
   );
 }
