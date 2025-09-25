@@ -121,20 +121,11 @@ function SocialLoginButton({ provider, label }: { provider: "google"; label: str
   const handleGoogleLogin = async () => {
     setLoading(true);
     try {
-      if (typeof window !== 'undefined') {
-        // 실제 Google OAuth URL로 리다이렉트
-        const googleOAuthURL = new URL('https://accounts.google.com/oauth/authorize');
-        googleOAuthURL.searchParams.append('client_id', process.env.NEXT_PUBLIC_GOOGLE_CLIENT_ID || '');
-        googleOAuthURL.searchParams.append('redirect_uri', `${window.location.origin}/api/auth/callback/google`);
-        googleOAuthURL.searchParams.append('response_type', 'code');
-        googleOAuthURL.searchParams.append('scope', 'openid email profile');
-        googleOAuthURL.searchParams.append('state', crypto.randomUUID());
-
-        // Google OAuth로 리다이렉트
-        window.location.href = googleOAuthURL.toString();
-      }
+      // API 라우트로 직접 리다이렉트 (GET 요청)
+      window.location.href = '/api/auth/social/google';
     } catch (error) {
-      alert((error as Error).message);
+      console.error('Google login error:', error);
+      alert('Google 로그인 중 오류가 발생했습니다.');
       setLoading(false);
     }
   };

@@ -1,10 +1,11 @@
-import { NextRequest } from "next/server";
+import { NextRequest, NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api";
 import { issueSession } from "@/services/auth-service";
 import { hashPassword } from "@/lib/auth";
 import { SocialProvider } from "@prisma/client";
 import { randomBytes } from "node:crypto";
+import { webcrypto as crypto } from "node:crypto";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
@@ -97,6 +98,35 @@ async function findOrCreateUser({
       },
     },
   });
+}
+
+// GET handler for OAuth initiation
+export async function GET(request: NextRequest, context: { params: Promise<{ provider: string }> }) {
+  try {
+    const { provider: providerParamValue } = await context.params;
+    const providerParam = providerParamValue.toLowerCase();
+
+    if (providerParam !== "google") {
+      return errorResponse("Only Google login is supported", 400);
+    }
+
+    // Google OAuth URL 생성
+    const url = new URL(request.url);
+    const redirectUri = `${url.origin}/api/auth/callback/google`;
+
+    const googleOAuthURL = new URL('https://accounts.google.com/o/oauth2/v2/auth');
+    googleOAuthURL.searchParams.append('client_id', process.env.GOOGLE_CLIENT_ID || '');
+    googleOAuthURL.searchParams.append('redirect_uri', redirectUri);
+    googleOAuthURL.searchParams.append('response_type', 'code');
+    googleOAuthURL.searchParams.append('scope', 'openid email profile');
+    googleOAuthURL.searchParams.append('state', crypto.randomUUID());
+
+    // 직접 리다이렉트
+    return NextResponse.redirect(googleOAuthURL.toString());
+  } catch (error) {
+    console.error('Google OAuth initiation error:', error);
+    return errorResponse((error as Error).message ?? "Failed to initiate Google OAuth", 500);
+  }
 }
 
 export async function POST(request: NextRequest, context: { params: Promise<{ provider: string }> }) {
