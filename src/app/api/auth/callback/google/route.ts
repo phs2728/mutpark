@@ -132,7 +132,10 @@ export async function GET(request: NextRequest) {
     }
 
     // OAuth 코드를 토큰으로 교환
-    const redirectUri = `${url.origin}/api/auth/callback/google`;
+    // 환경에 따른 리다이렉트 URI 설정 (OAuth 시작시와 동일해야 함)
+    const redirectUri = process.env.NODE_ENV === 'production'
+      ? `${process.env.NEXT_PUBLIC_APP_URL || url.origin}/api/auth/callback/google`
+      : 'http://localhost:3000/api/auth/callback/google';
     const tokenData = await exchangeCodeForToken(code, redirectUri);
 
     // 사용자 정보 가져오기

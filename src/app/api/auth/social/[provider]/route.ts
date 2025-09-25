@@ -112,7 +112,10 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pro
 
     // Google OAuth URL 생성
     const url = new URL(request.url);
-    const redirectUri = `${url.origin}/api/auth/callback/google`;
+    // 환경에 따른 리다이렉트 URI 설정
+    const redirectUri = process.env.NODE_ENV === 'production'
+      ? `${process.env.NEXT_PUBLIC_APP_URL || url.origin}/api/auth/callback/google`
+      : 'http://localhost:3000/api/auth/callback/google';
 
     const googleOAuthURL = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     googleOAuthURL.searchParams.append('client_id', process.env.GOOGLE_CLIENT_ID || '');
