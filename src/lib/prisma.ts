@@ -8,7 +8,7 @@ export const prisma =
     log: process.env.NODE_ENV === "development" ? ["error", "warn"] : ["error"],
     datasources: {
       db: {
-        url: process.env.DATABASE_URL
+        url: process.env.DATABASE_URL || "mysql://build:build@localhost:3306/build_temp"
       }
     }
   });

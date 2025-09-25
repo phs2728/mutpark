@@ -11,6 +11,11 @@ WORKDIR /app
 COPY --from=deps /app/node_modules ./node_modules
 COPY . .
 RUN npx prisma generate
+# Set temporary DATABASE_URL for build process only
+ENV DATABASE_URL="mysql://build:build@localhost:3306/build_temp"
+ENV JWT_SECRET="temp_jwt_secret_for_build_only_not_production"
+ENV ADMIN_SETUP_TOKEN="temp_setup_token"
+ENV ADMIN_DEFAULT_PASSWORD="temp_password"
 RUN npm run build
 
 FROM node:20-alpine AS runner

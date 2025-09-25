@@ -49,6 +49,11 @@ const nextConfig: NextConfig & { turbopack?: { root?: string } } = {
     ignoreDuringBuilds: true,
   },
 
+  // Skip static page generation for API routes during build
+  generateBuildId: async () => {
+    return 'mutpark-' + Date.now().toString();
+  },
+
   // PWA and caching headers
   async headers() {
     return [
