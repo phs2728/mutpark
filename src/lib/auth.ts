@@ -1,5 +1,6 @@
 import bcrypt from "bcryptjs";
 import jwt from "jsonwebtoken";
+import { NextRequest } from "next/server";
 
 const ACCESS_TOKEN_TTL = "1h";
 const REFRESH_TOKEN_TTL = "30d";
@@ -47,7 +48,7 @@ export function verifyRefreshToken(token: string) {
   return jwt.verify(token, getJwtSecret()) as RefreshTokenPayload;
 }
 
-export async function verifyAdminToken(request: any) {
+export async function verifyAdminToken(request: NextRequest | Request) {
   try {
     const authHeader = request.headers.get("authorization");
     const token = authHeader?.replace("Bearer ", "");
@@ -68,7 +69,7 @@ export async function verifyAdminToken(request: any) {
       } catch (error) {
         // Try to verify as JWT directly (for admin tokens)
         try {
-          payload = jwt.verify(cookieToken, getJwtSecret()) as any;
+          payload = jwt.verify(cookieToken, getJwtSecret()) as AccessTokenPayload;
         } catch (jwtError) {
           return { success: false, error: "Invalid token" };
         }
@@ -88,7 +89,7 @@ export async function verifyAdminToken(request: any) {
     } catch (error) {
       // Try to verify as JWT directly (for admin tokens)
       try {
-        payload = jwt.verify(token, getJwtSecret()) as any;
+        payload = jwt.verify(token, getJwtSecret()) as AccessTokenPayload;
       } catch (jwtError) {
         return { success: false, error: "Invalid token" };
       }

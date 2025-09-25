@@ -2,7 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { writeFile, mkdir } from "fs/promises";
 import path from "path";
 import { existsSync } from "fs";
-import { verifyToken } from "@/lib/auth";
+import { verifyAdminToken } from "@/lib/auth";
 import { rateLimiters, getClientIdentifier } from "@/utils/security";
 
 const UPLOAD_DIR = path.join(process.cwd(), "public/uploads");
@@ -37,8 +37,8 @@ export async function POST(request: NextRequest) {
     }
 
     // Authenticate user before allowing upload
-    const authResult = await verifyToken(request);
-    if (!authResult.isValid) {
+    const authResult = await verifyAdminToken(request);
+    if (!authResult.success) {
       return NextResponse.json(
         { error: "Authentication required for file upload" },
         { status: 401 }
