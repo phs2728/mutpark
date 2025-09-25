@@ -53,7 +53,7 @@ interface Order {
       baseName: string;
       imageUrl?: string;
       sku: string;
-      translations?: any[];
+      translations?: Array<{id: number; locale: string; name: string}>;
     };
   }>;
   payment?: {

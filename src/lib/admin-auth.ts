@@ -10,7 +10,7 @@ export interface AdminUser {
 /**
  * 관리자 토큰 생성
  */
-export function generateAdminToken(user: any): string {
+export function generateAdminToken(user: { id: number; email: string; name: string; role: string }): string {
   return jwt.sign(
     {
       userId: user.id,

@@ -13,7 +13,7 @@ interface Notification {
   time: string;
   priority: string;
   link: string;
-  data: any;
+  data: Record<string, unknown>;
 }
 
 interface NotificationSummary {

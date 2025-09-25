@@ -110,7 +110,7 @@ export function TouchButton({
         touch.clientY <= rect.bottom + touchExpansion;
 
       if (isWithinBounds && onClick) {
-        onClick(e as any);
+        onClick(e as unknown as React.MouseEvent<HTMLButtonElement>);
       }
     }
 

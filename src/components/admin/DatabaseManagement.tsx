@@ -124,7 +124,7 @@ export default function DatabaseManagement() {
   const seedDatabase = async (action: 'reset' | 'populate') => {
     setLoading(true);
     try {
-      const payload: any = { action };
+      const payload: { action: string; confirmation?: string } = { action };
 
       if (action === 'reset') {
         const confirmation = prompt('시드 데이터를 초기화하시겠습니까? "RESET_SEED_DATA_CONFIRM"을 입력하세요:');

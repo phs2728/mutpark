@@ -7,7 +7,7 @@ interface InvoiceModalProps {
   isOpen: boolean;
   onClose: () => void;
   onSave: (invoiceData: InvoiceFormData) => void;
-  invoice?: any | null;
+  invoice?: InvoiceFormData | null;
 }
 
 interface InvoiceFormData {

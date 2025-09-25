@@ -7,7 +7,7 @@ export interface BookmarkItem {
   description?: string;
   imageUrl?: string;
   url: string;
-  data: any; // Full data object for offline access
+  data: Record<string, unknown>; // Full data object for offline access
   bookmarkedAt: number;
   tags?: string[];
 }
@@ -274,16 +274,16 @@ export function useOfflineRecipes() {
 
   const recipes = bookmarks.filter(bookmark => bookmark.type === 'recipe');
 
-  const saveRecipeForOffline = useCallback(async (recipeId: string, recipeData: any) => {
+  const saveRecipeForOffline = useCallback(async (recipeId: string, recipeData: Record<string, unknown>) => {
     const bookmark: Omit<BookmarkItem, 'bookmarkedAt'> = {
       id: recipeId,
       type: 'recipe',
-      title: recipeData.title,
-      description: recipeData.description,
-      imageUrl: recipeData.image,
+      title: (recipeData.title as string) || '',
+      description: recipeData.description as string,
+      imageUrl: recipeData.image as string,
       url: `/recipes/${recipeId}`,
       data: recipeData,
-      tags: recipeData.tags || [],
+      tags: (recipeData.tags as string[]) || [],
     };
 
     return addBookmark(bookmark);
@@ -317,16 +317,16 @@ export function useOfflineProducts() {
 
   const products = bookmarks.filter(bookmark => bookmark.type === 'product');
 
-  const saveProductForOffline = useCallback(async (productId: string, productData: any) => {
+  const saveProductForOffline = useCallback(async (productId: string, productData: Record<string, unknown>) => {
     const bookmark: Omit<BookmarkItem, 'bookmarkedAt'> = {
       id: productId,
       type: 'product',
-      title: productData.name,
-      description: productData.description,
-      imageUrl: productData.images?.[0],
+      title: (productData.name as string) || '',
+      description: productData.description as string,
+      imageUrl: (productData.images as string[])?.[0],
       url: `/products/${productId}`,
       data: productData,
-      tags: productData.tags || [],
+      tags: (productData.tags as string[]) || [],
     };
 
     return addBookmark(bookmark);

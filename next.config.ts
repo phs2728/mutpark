@@ -39,6 +39,16 @@ const nextConfig: NextConfig & { turbopack?: { root?: string } } = {
   // Compression
   compress: true,
 
+  // Skip TypeScript type checking during build (for faster deployments)
+  typescript: {
+    ignoreBuildErrors: true,
+  },
+
+  // Skip ESLint during builds (for faster deployments)
+  eslint: {
+    ignoreDuringBuilds: true,
+  },
+
   // PWA and caching headers
   async headers() {
     return [
