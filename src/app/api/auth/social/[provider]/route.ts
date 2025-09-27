@@ -46,6 +46,8 @@ async function findOrCreateUser({
   name: string;
   locale?: string;
 }) {
+  console.log('🔄 Processing user:', email, 'with provider ID:', providerUserId);
+
   const socialAccount = await prisma.socialAccount.findUnique({
     where: {
       provider_providerUserId: {
@@ -59,32 +61,52 @@ async function findOrCreateUser({
   });
 
   if (socialAccount) {
+    console.log('✅ Found existing social account for:', email);
     return socialAccount.user;
   }
 
-  const existingUser = await prisma.user.findUnique({ where: { email } });
+  const existingUser = await prisma.user.findUnique({
+    where: { email },
+    include: {
+      socialAccounts: true
+    }
+  });
 
   if (existingUser) {
-    if (locale && existingUser.locale !== locale) {
-      await prisma.user.update({
-        where: { id: existingUser.id },
-        data: { locale },
+    console.log('🗑️ Found existing user, deleting and recreating:', email);
+
+    // 기존 사용자와 관련된 모든 데이터 삭제
+    await prisma.$transaction(async (tx) => {
+      // 소셜 계정 삭제
+      await tx.socialAccount.deleteMany({
+        where: { userId: existingUser.id }
       });
-    }
-    await prisma.socialAccount.create({
-      data: {
-        provider,
-        providerUserId,
-        userId: existingUser.id,
-      },
+
+      // 리프레시 토큰 삭제
+      await tx.refreshToken.deleteMany({
+        where: { userId: existingUser.id }
+      });
+
+      // 감사 로그가 있다면 삭제 (외래키 제약조건 때문)
+      await tx.auditLog.deleteMany({
+        where: { userId: existingUser.id }
+      });
+
+      // 사용자 삭제
+      await tx.user.delete({
+        where: { id: existingUser.id }
+      });
     });
-    return existingUser;
+
+    console.log('✅ Successfully deleted existing user:', email);
   }
 
+  // 새 사용자 생성
+  console.log('🆕 Creating new user:', email);
   const randomPassword = randomBytes(16).toString("hex");
   const passwordHash = await hashPassword(randomPassword);
 
-  return prisma.user.create({
+  const newUser = await prisma.user.create({
     data: {
       email,
       name,
@@ -98,6 +120,9 @@ async function findOrCreateUser({
       },
     },
   });
+
+  console.log('✅ Successfully created new user:', email, 'with ID:', newUser.id);
+  return newUser;
 }
 
 // GET handler for OAuth initiation
@@ -112,10 +137,16 @@ export async function GET(request: NextRequest, context: { params: Promise<{ pro
 
     // Google OAuth URL 생성
     const url = new URL(request.url);
-    // 환경에 따른 리다이렉트 URI 설정
-    const redirectUri = process.env.NODE_ENV === 'production'
-      ? `${process.env.NEXT_PUBLIC_APP_URL || url.origin}/api/auth/callback/google`
-      : 'http://localhost:3000/api/auth/callback/google';
+    // 강제로 localhost 사용 (개발 중)
+    const redirectUri = 'http://localhost:3000/api/auth/callback/google';
+
+    // 디버깅을 위한 로그
+    console.log('🔐 Google OAuth Debug Info:');
+    console.log('NODE_ENV:', process.env.NODE_ENV);
+    console.log('url.origin:', url.origin);
+    console.log('NEXT_PUBLIC_APP_URL:', process.env.NEXT_PUBLIC_APP_URL);
+    console.log('Final redirectUri:', redirectUri);
+    console.log('GOOGLE_CLIENT_ID:', process.env.GOOGLE_CLIENT_ID);
 
     const googleOAuthURL = new URL('https://accounts.google.com/o/oauth2/v2/auth');
     googleOAuthURL.searchParams.append('client_id', process.env.GOOGLE_CLIENT_ID || '');

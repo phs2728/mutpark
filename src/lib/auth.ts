@@ -33,7 +33,7 @@ export function createAccessToken(payload: AccessTokenPayload) {
 }
 
 export interface RefreshTokenPayload extends AccessTokenPayload {
-  tokenId: number;
+  tokenId: string | number;
 }
 
 export function createRefreshToken(payload: RefreshTokenPayload) {

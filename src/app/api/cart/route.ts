@@ -1,5 +1,5 @@
 import { NextRequest } from "next/server";
-import { prisma } from "@/lib/prisma";
+import { prisma, withDatabaseRetry } from "@/lib/prisma";
 import { errorResponse, successResponse } from "@/lib/api";
 import { requireAuth } from "@/lib/auth-guard";
 import { upsertCartSchema } from "@/lib/validators";
@@ -8,15 +8,17 @@ export async function GET(request: NextRequest) {
   try {
     const user = requireAuth(request);
 
-    const items = await prisma.cartItem.findMany({
-      where: { userId: user.userId },
-      include: {
-        product: {
-          include: {
-            translations: true,
+    const items = await withDatabaseRetry(async () => {
+      return prisma.cartItem.findMany({
+        where: { userId: user.userId },
+        include: {
+          product: {
+            include: {
+              translations: true,
+            },
           },
         },
-      },
+      });
     });
 
     return successResponse({ items });

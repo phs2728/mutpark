@@ -119,8 +119,10 @@ function SocialLoginButton({ provider, label }: { provider: "google"; label: str
   const router = useRouter();
 
   const handleGoogleLogin = async () => {
+    console.log('🔥 Google login button clicked!');
     setLoading(true);
     try {
+      console.log('🔥 Redirecting to:', '/api/auth/social/google');
       // API 라우트로 직접 리다이렉트 (GET 요청)
       window.location.href = '/api/auth/social/google';
     } catch (error) {

@@ -19,10 +19,18 @@
     "ctaRecipes": "View Recipes"
   },
   "common": {
-    "loading": "Loading..."
+    "loading": "Loading...",
+    "clearAll": "Clear All",
+    "apply": "Apply",
+    "cancel": "Cancel",
+    "save": "Save",
+    "close": "Close"
   },
   "products": {
     "featured": "Featured Products",
+    "popular": "Popular Products",
+    "trending": "Trending",
+    "popularCategories": "Popular Categories",
     "filters": {
       "search": "Search products",
       "category": "Category",
@@ -30,6 +38,13 @@
       "halal": "Halal certified",
       "spicy": "Spicy",
       "all": "All",
+      "allBrands": "All Brands",
+      "allSpiceLevels": "All Spice Levels",
+      "inStock": "In stock only",
+      "discountOnly": "On sale only",
+      "options": "Options",
+      "title": "Filters",
+      "activeFilters": "{count} filters active",
       "sort": "Sort",
       "sortLabel": "Sort",
       "sortNewest": "Newest",
@@ -51,7 +66,33 @@
     "resultsCount": "Showing {count} items",
     "addToCart": "Add to Cart",
     "viewDetails": "View Details",
-    "empty": "No products have been added yet."
+    "empty": "No products have been added yet.",
+    "recentlyViewed": "Recently Viewed",
+    "priceRange": "Price Range",
+    "minPrice": "Min Price",
+    "maxPrice": "Max Price",
+    "stockNotification": "Notify When Available",
+    "stockNotificationSuccess": "We'll notify you when this product is back in stock",
+    "stockNotificationEmail": "Email Address"
+  },
+  "search": {
+    "noResults": "No results found",
+    "noResultsFor": "No products found for {query}",
+    "resultsFor": "Results for {query}",
+    "foundProducts": "Found {count} products",
+    "startSearching": "Start searching for products",
+    "startSearchingDescription": "Search for your favorite Korean foods",
+    "tipsTitle": "Search tips",
+    "tips": {
+      "spelling": "Check the spelling of your search terms",
+      "shorter": "Try shorter search terms",
+      "synonyms": "Try similar words or different expressions",
+      "categories": "Select different categories"
+    },
+    "popularSearches": "Popular searches",
+    "browseCategories": "Browse categories",
+    "backToHome": "Back to home",
+    "allProducts": "View all products"
   },
   "community": {
     "placeholder": "Community features are coming soon. Stay tuned for recipe sharing and reviews!"
@@ -94,7 +135,29 @@
     "viewImage": "View image",
     "prev": "Previous",
     "next": "Next",
-    "pageIndicator": "Page"
+    "pageIndicator": "Page",
+    "helpful": "Was this helpful?",
+    "helpfulMarked": "Helpful",
+    "helpfulCount": "{count} people found this helpful",
+    "uploadImages": "Review images (optional)",
+    "uploadImagesHelper": "PNG, JPG (max 5MB, up to 6 images)",
+    "uploadImagesButton": "Click to upload",
+    "uploading": "Uploading...",
+    "sortBy": "Sort by",
+    "sortNewest": "Newest first",
+    "sortOldest": "Oldest first",
+    "sortRatingHigh": "Highest rating",
+    "sortRatingLow": "Lowest rating",
+    "sortMostHelpful": "Most helpful",
+    "filterBy": "Filter by rating",
+    "allRatings": "All ratings",
+    "star5": "5 stars",
+    "star4": "4 stars",
+    "star3": "3 stars",
+    "star2": "2 stars",
+    "star1": "1 star",
+    "verifiedOnly": "Verified purchases only",
+    "withImagesOnly": "Reviews with images only"
   },
   "auth": {
     "login": {
@@ -123,7 +186,11 @@
     "checkout": "Checkout",
     "continue": "Continue Shopping",
     "quantity": "Quantity",
-    "remove": "Remove"
+    "remove": "Remove",
+    "each": "each",
+    "updating": "Updating",
+    "items": "Items",
+    "total": "total"
   },
   "checkout": {
     "title": "Checkout",
@@ -201,6 +268,30 @@
       "SHIPPED": "Shipped",
       "DELIVERED": "Delivered",
       "CANCELLED": "Cancelled"
+    },
+    "orderDetails": {
+      "orderNumber": "Order #{orderNumber}",
+      "orderDate": "Order Date",
+      "status": "Status",
+      "total": "Total",
+      "items": "Items",
+      "shippingAddress": "Shipping Address",
+      "trackingInfo": "Tracking Information",
+      "trackingNumber": "Tracking Number",
+      "carrier": "Carrier",
+      "estimatedDelivery": "Estimated Delivery",
+      "actualDelivery": "Delivered On",
+      "noTracking": "No tracking information available",
+      "viewDetails": "View Details",
+      "trackShipment": "Track Shipment",
+      "orderSummary": "Order Summary",
+      "subtotal": "Subtotal",
+      "shipping": "Shipping",
+      "paymentMethod": "Payment Method",
+      "contactSupport": "Contact Support",
+      "reorder": "Reorder",
+      "cancel": "Cancel Order",
+      "return": "Return Items"
     }
   },
   "notifications": {
@@ -208,6 +299,27 @@
     "cartUpdated": "Cart updated.",
     "loginRequired": "Please sign in.",
     "error": "Something went wrong. Please try again."
+  },
+  "wishlist": {
+    "title": "Wishlist",
+    "addToWishlist": "Add to Wishlist",
+    "removeFromWishlist": "Remove from Wishlist",
+    "empty": "Your wishlist is empty.",
+    "loginRequired": "Please sign in to use wishlist."
+  },
+  "compare": {
+    "title": "Product Comparison",
+    "subtitle": "Compare up to {max} products",
+    "addToComparison": "Add to Comparison",
+    "removeFromComparison": "Remove from Comparison",
+    "maxItemsReached": "You can compare up to 3 products",
+    "empty": "No products to compare",
+    "emptyDescription": "Add products to comparison to see them here.",
+    "browseProducts": "Browse Products",
+    "features": "Features",
+    "clearAll": "Clear All",
+    "remove": "Remove",
+    "viewProduct": "View {name}"
   },
   "footer": {
     "tagline": "MutPark – Korean flavors in Türkiye",
@@ -217,5 +329,31 @@
     "hours": "Hours",
     "policy": "Terms of Use",
     "privacy": "Privacy Policy"
+  },
+  "coupons": {
+    "couponCode": "Coupon Code",
+    "enterCode": "Enter coupon code",
+    "apply": "Apply",
+    "applied": "Coupon Applied",
+    "remove": "Remove coupon",
+    "freeShipping": "Free shipping",
+    "discount": "Discount",
+    "off": "off",
+    "availableCoupons": "Available Coupons",
+    "noCouponsAvailable": "No coupons available at the moment",
+    "minimumOrder": "Minimum order",
+    "maxDiscount": "Maximum discount",
+    "firstTimeOnly": "First-time customers only",
+    "usesLeft": "Uses left",
+    "expired": "Expired",
+    "expiresIn1Day": "Expires in 1 day",
+    "expiresInDays": "Expires in {days} days",
+    "expiresOn": "Expires on {date}",
+    "use": "Use",
+    "errors": {
+      "codeRequired": "Please enter a coupon code",
+      "validationFailed": "Failed to validate coupon",
+      "loadFailed": "Failed to load coupons"
+    }
   }
 }

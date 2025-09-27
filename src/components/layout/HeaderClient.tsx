@@ -5,6 +5,8 @@ import { useEffect } from "react";
 import { useI18n } from "@/providers/I18nProvider";
 import { LanguageSwitcher } from "@/components/common/LanguageSwitcher";
 import { useCartStore } from "@/hooks/useCartStore";
+import { useWishlist } from "@/hooks/useWishlist";
+import SearchBar from "@/components/search/SearchBar";
 
 interface HeaderClientProps {
   locale: string;
@@ -18,6 +20,7 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
   const { t } = useI18n();
   const items = useCartStore((state) => state.items);
   const fetchCart = useCartStore((state) => state.fetchCart);
+  const { wishlistCount } = useWishlist();
 
   useEffect(() => {
     if (user) {
@@ -32,14 +35,14 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
       <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8">
         <div className="flex h-16 items-center justify-between">
           {/* Logo and Navigation */}
-          <div className="flex items-center gap-12">
+          <div className="flex items-center gap-8">
             <Link
               href={`/${locale}`}
               className="text-2xl font-bold text-emerald-600 transition-colors hover:text-emerald-700"
             >
               MutPark
             </Link>
-            <nav className="hidden md:flex items-center gap-8">
+            <nav className="hidden lg:flex items-center gap-6">
               <Link
                 href={`/${locale}`}
                 className="text-sm font-medium text-slate-700 transition-colors hover:text-emerald-600 dark:text-slate-200 dark:hover:text-emerald-400"
@@ -67,9 +70,37 @@ export function HeaderClient({ locale, user }: HeaderClientProps) {
             </nav>
           </div>
 
+          {/* Search Bar */}
+          <div className="flex-1 max-w-md mx-4 hidden md:block">
+            <SearchBar
+              placeholder="한국 음식을 검색해보세요..."
+              className="w-full"
+            />
+          </div>
+
           {/* Right side actions */}
           <div className="flex items-center gap-4">
             <LanguageSwitcher canSync={Boolean(user)} />
+
+            {/* Wishlist */}
+            {user && (
+              <Link
+                href={`/${locale}/wishlist`}
+                className="relative rounded-lg border border-slate-200 bg-white px-3 py-2 text-sm font-medium text-slate-700 transition-colors hover:bg-slate-50 dark:border-slate-700 dark:bg-slate-800 dark:text-slate-200 dark:hover:bg-slate-700"
+              >
+                <div className="flex items-center gap-2">
+                  <svg className="h-5 w-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4.318 6.318a4.5 4.5 0 000 6.364L12 20.364l7.682-7.682a4.5 4.5 0 00-6.364-6.364L12 7.636l-1.318-1.318a4.5 4.5 0 00-6.364 0z" />
+                  </svg>
+                  <span className="hidden sm:inline">위시리스트</span>
+                </div>
+                {wishlistCount > 0 && (
+                  <span className="absolute -right-2 -top-2 flex h-5 w-5 items-center justify-center rounded-full bg-red-600 text-xs font-bold text-white">
+                    {wishlistCount}
+                  </span>
+                )}
+              </Link>
+            )}
 
             {/* Cart */}
             <Link

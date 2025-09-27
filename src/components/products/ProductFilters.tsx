@@ -27,6 +27,9 @@ export function ProductFilters() {
   const [brand, setBrand] = useState(searchParams.get("brand") ?? "");
   const [halal, setHalal] = useState(searchParams.get("halal") === "true");
   const [spicy, setSpicy] = useState(searchParams.get("spicy") === "true");
+  const [minPrice, setMinPrice] = useState(searchParams.get("minPrice") ?? "");
+  const [maxPrice, setMaxPrice] = useState(searchParams.get("maxPrice") ?? "");
+  const [inStock, setInStock] = useState(searchParams.get("inStock") === "true");
   const [sort, setSort] = useState(searchParams.get("sort") ?? "newest");
   const [options, setOptions] = useState<FilterOptions>({ categories: [], brands: [] });
   const [loading, setLoading] = useState(true);
@@ -118,6 +121,9 @@ export function ProductFilters() {
     brand?: string;
     halal?: boolean;
     spicy?: boolean;
+    minPrice?: string;
+    maxPrice?: string;
+    inStock?: boolean;
     sort?: string;
   }) => {
     const nextSearch = (overrides?.search ?? search).trim();
@@ -125,6 +131,9 @@ export function ProductFilters() {
     const nextBrand = overrides?.brand ?? brand;
     const nextHalal = overrides?.halal ?? halal;
     const nextSpicy = overrides?.spicy ?? spicy;
+    const nextMinPrice = overrides?.minPrice ?? minPrice;
+    const nextMaxPrice = overrides?.maxPrice ?? maxPrice;
+    const nextInStock = overrides?.inStock ?? inStock;
     const nextSort = overrides?.sort ?? sort;
 
     const params = new URLSearchParams();
@@ -133,6 +142,9 @@ export function ProductFilters() {
     if (nextBrand) params.set("brand", nextBrand);
     if (nextHalal) params.set("halal", "true");
     if (nextSpicy) params.set("spicy", "true");
+    if (nextMinPrice) params.set("minPrice", nextMinPrice);
+    if (nextMaxPrice) params.set("maxPrice", nextMaxPrice);
+    if (nextInStock) params.set("inStock", "true");
     if (nextSort && nextSort !== "newest") params.set("sort", nextSort);
 
     const queryString = params.toString();
@@ -150,6 +162,9 @@ export function ProductFilters() {
     setBrand("");
     setHalal(false);
     setSpicy(false);
+    setMinPrice("");
+    setMaxPrice("");
+    setInStock(false);
     setSort("newest");
     setSuggestions([]);
     router.replace(pathname);
@@ -252,9 +267,34 @@ export function ProductFilters() {
           <option value="price-desc">{t("products.filters.sortPriceDesc")}</option>
         </select>
       </div>
+      <div>
+        <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
+          {t("products.priceRange", "Price Range")}
+        </label>
+        <div className="flex gap-2 mt-2">
+          <input
+            type="number"
+            value={minPrice}
+            onChange={(event) => setMinPrice(event.target.value)}
+            className="input-field flex-1"
+            placeholder={t("products.minPrice", "Min Price")}
+            min="0"
+            step="0.01"
+          />
+          <input
+            type="number"
+            value={maxPrice}
+            onChange={(event) => setMaxPrice(event.target.value)}
+            className="input-field flex-1"
+            placeholder={t("products.maxPrice", "Max Price")}
+            min="0"
+            step="0.01"
+          />
+        </div>
+      </div>
       <div className="flex flex-col gap-2">
         <label className="text-sm font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
-          {t("products.filters.halal")}
+          {t("products.filters.options", "Options")}
         </label>
         <label className="flex items-center gap-2 text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
           <input
@@ -273,6 +313,15 @@ export function ProductFilters() {
             className="h-4 w-4"
           />
           {t("products.filters.spicy")}
+        </label>
+        <label className="flex items-center gap-2 text-sm" style={{ color: "var(--mut-color-text-secondary)" }}>
+          <input
+            type="checkbox"
+            checked={inStock}
+            onChange={(event) => setInStock(event.target.checked)}
+            className="h-4 w-4"
+          />
+          {t("products.filters.inStock", "In stock only")}
         </label>
       </div>
       <div className="mt-2 flex gap-2">

@@ -6,6 +6,7 @@ import { BannerDisplay } from "@/components/banners/BannerDisplay";
 import { ProductFilters } from "@/components/products/ProductFilters";
 import { ProductGrid } from "@/components/products/ProductGrid";
 import { RecommendedProducts } from "@/components/products/RecommendedProducts";
+import { PopularProducts } from "@/components/products/PopularProducts";
 import { prisma } from "@/lib/prisma";
 import { getLocalizedProduct } from "@/lib/i18n-utils";
 import { productFilterSchema } from "@/lib/validators";
@@ -97,6 +98,20 @@ export default async function LocaleHome({
       <div className="hero-fallback">
         <HeroSection locale={locale} />
       </div>
+
+      {/* Popular Products Section */}
+      <Suspense fallback={
+        <div className="animate-pulse space-y-4">
+          <div className="h-8 bg-slate-200 rounded w-48 dark:bg-slate-700"></div>
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-6">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div key={i} className="bg-slate-200 rounded-xl h-48 dark:bg-slate-700"></div>
+            ))}
+          </div>
+        </div>
+      }>
+        <PopularProducts locale={locale} maxItems={8} />
+      </Suspense>
 
       {/* Recommended Products Section */}
       <Suspense fallback={

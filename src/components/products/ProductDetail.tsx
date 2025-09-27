@@ -5,6 +5,11 @@ import Link from "next/link";
 import { useI18n } from "@/providers/I18nProvider";
 import { AddToCartButton } from "@/components/products/AddToCartButton";
 import { ProductReviews } from "@/components/products/ProductReviews";
+import { ProductImageGallery } from "@/components/products/ProductImageGallery";
+import { ProductNutritionInfo } from "@/components/products/ProductNutritionInfo";
+import { ProductStockStatus } from "@/components/products/ProductStockStatus";
+import { RelatedProducts } from "@/components/products/RelatedProducts";
+import { WishlistButton } from "@/components/products/WishlistButton";
 import { useMemo, useState, type ReactNode } from "react";
 import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { resolveImageUrl } from "@/lib/imagekit";
@@ -152,35 +157,35 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
     [t],
   );
 
-  const mainImage = resolveImageUrl(product.imageUrl, { width: 800, quality: 85 });
+  // 이미지 갤러리용 이미지 배열 생성
+  const galleryImages = product.imageUrl
+    ? [{ url: product.imageUrl, altText: product.name }]
+    : [];
 
   return (
     <div className="space-y-12">
       <div className="grid gap-8 lg:grid-cols-[1.2fr_1fr]">
-        <div className="card overflow-hidden">
-          <div className="relative h-96 w-full" style={{ background: "var(--mut-color-background-subtle)" }}>
-            {mainImage ? (
-              <Image
-                src={mainImage}
-                alt={product.name}
-                fill
-                sizes="(min-width: 1024px) 50vw, 100vw"
-                className="object-cover"
-              />
-            ) : (
-              <div className="flex h-full items-center justify-center text-slate-400">
-                {product.name}
-              </div>
-            )}
-            <div className="absolute left-4 top-4 flex flex-col gap-2">
-              {product.halalCertified ? <span className="badge badge-success">{t("products.halal")}</span> : null}
-              {product.isExpired ? (
-                <span className="badge badge-error">{t("products.expired")}</span>
-              ) : product.freshnessStatus === "EXPIRING" ? (
-                <span className="badge badge-warning">{t("products.expiresSoon")}</span>
-              ) : null}
-            </div>
+        <div className="space-y-6">
+          {/* 개선된 이미지 갤러리 */}
+          <div className="card overflow-hidden">
+            <ProductImageGallery
+              images={galleryImages}
+              productName={product.name}
+            />
           </div>
+
+          {/* 영양 정보 및 인증 정보 */}
+          <div className="card p-6">
+            <ProductNutritionInfo
+              nutrition={metadata.nutrition as any}
+              halalCertified={product.halalCertified}
+              metadata={metadata}
+            />
+          </div>
+        </div>
+
+        <div className="space-y-6">
+          {/* 상품 기본 정보 */}
           <div className="space-y-4 p-6">
             <h1 className="text-3xl font-semibold" style={{ color: "var(--mut-color-text-primary)" }}>
               {product.name}
@@ -204,33 +209,10 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
                   {t("products.spiceLevel")}: {"🌶️".repeat(product.spiceLevel)}
                 </span>
               ) : null}
-              <span className="chip" style={{ background: "var(--mut-color-secondary)", border: "none" }}>
-                {t("products.stock")}: {product.stock}
-              </span>
-              {product.isLowStock && !product.isExpired ? (
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-300">
-                  {t("products.lowStock")}
-                </span>
-              ) : null}
-              {product.isExpired ? (
-                <span className="rounded-full bg-red-100 px-3 py-1 text-sm font-semibold text-red-600 dark:bg-red-500/20 dark:text-red-300">
-                  {t("products.expired")}
-                </span>
-              ) : null}
-              {!product.isExpired && product.freshnessStatus === "EXPIRING" ? (
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-sm font-semibold text-amber-700 dark:bg-amber-500/20 dark:text-amber-200">
-                  {t("products.expiresSoon")}
-                </span>
-              ) : null}
             </div>
             {product.discountPercentage && product.discountPercentage > 0 && !product.isExpired ? (
               <p className="text-sm font-medium text-emerald-600">
-                {t("products.expiresSoon")} (-{product.discountPercentage}%)
-              </p>
-            ) : null}
-            {product.expiryDate ? (
-              <p className="text-sm text-slate-500 dark:text-slate-300">
-                {t("products.expiryDate", "Expiry date")}: {new Date(product.expiryDate).toLocaleDateString(locale)}
+                {t("products.discount")} (-{product.discountPercentage}%)
               </p>
             ) : null}
             <div className="flex flex-wrap gap-3">
@@ -247,6 +229,11 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
               >
                 {t("productDetail.actions.checkout")}
               </Link>
+              <WishlistButton
+                productId={product.id}
+                variant="button"
+                className="px-8 py-3 text-base"
+              />
             </div>
             {product.isExpired ? (
               <p className="text-sm font-semibold text-red-600 dark:text-red-400">
@@ -254,23 +241,22 @@ export function ProductDetail({ locale, product, related, currentUserId }: Produ
               </p>
             ) : null}
           </div>
-        </div>
-        <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("products.featured")}</h2>
-          <div className="space-y-3">
-            {related.map((item) => (
-              <Link
-                key={item.id}
-                href={`/${locale}/products/${item.slug}`}
-                className="flex items-center justify-between rounded-2xl border border-transparent px-4 py-3 hover:border-emerald-200 dark:hover:border-emerald-500"
-              >
-                <span className="text-sm font-medium text-slate-700 dark:text-slate-200">{item.name}</span>
-                <span className="text-sm font-semibold text-emerald-500">
-                  {formatCurrency(item.price, DEFAULT_CURRENCY, activeLocale)}
-                </span>
-              </Link>
-            ))}
+          {/* 실시간 재고 상태 */}
+          <div className="card p-6">
+            <ProductStockStatus
+              stock={product.stock}
+              isLowStock={product.isLowStock}
+              isExpired={product.isExpired}
+              expiryDate={product.expiryDate}
+              freshnessStatus={product.freshnessStatus}
+              productId={product.id}
+              productName={product.name}
+            />
           </div>
+        </div>
+
+        <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
+          <RelatedProducts productId={product.id} locale={locale} />
         </aside>
       </div>
       <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">

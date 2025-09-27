@@ -25,11 +25,13 @@ interface CartState {
   loading: boolean;
   error?: string;
   subtotal: number;
+  optimisticUpdating: Set<number>; // Track items being updated optimistically
   fetchCart: () => Promise<void>;
   addItem: (productId: number, quantity?: number) => Promise<void>;
   updateItem: (productId: number, quantity: number) => Promise<void>;
   removeItem: (productId: number) => Promise<void>;
   clear: () => void;
+  clearError: () => void;
 }
 
 interface RawCartItemTranslation {
@@ -91,6 +93,7 @@ export const useCartStore = create<CartState>((set, get) => ({
   items: [],
   loading: false,
   subtotal: 0,
+  optimisticUpdating: new Set(),
   async fetchCart() {
     set({ loading: true, error: undefined });
     try {
@@ -131,7 +134,23 @@ export const useCartStore = create<CartState>((set, get) => ({
     }
   },
   async updateItem(productId, quantity) {
-    set({ loading: true, error: undefined });
+    const currentState = get();
+    const optimisticUpdating = new Set(currentState.optimisticUpdating);
+    optimisticUpdating.add(productId);
+
+    // Optimistic update
+    const optimisticItems = currentState.items.map(item =>
+      item.productId === productId ? { ...item, quantity } : item
+    );
+    const optimisticSubtotal = optimisticItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+
+    set({
+      items: optimisticItems,
+      subtotal: optimisticSubtotal,
+      optimisticUpdating,
+      error: undefined
+    });
+
     try {
       const response = await fetch("/api/cart", {
         method: "PUT",
@@ -141,18 +160,56 @@ export const useCartStore = create<CartState>((set, get) => ({
         },
         body: JSON.stringify({ productId, quantity }),
       });
+
       if (response.status === 401) {
-        set({ loading: false });
+        // Revert optimistic update on auth failure
+        const revertedUpdating = new Set(get().optimisticUpdating);
+        revertedUpdating.delete(productId);
+        set({
+          items: currentState.items,
+          subtotal: currentState.subtotal,
+          optimisticUpdating: revertedUpdating
+        });
         return;
       }
+
       await handleResponse(response);
+
+      // Success: remove from optimistic updating set
+      const successUpdating = new Set(get().optimisticUpdating);
+      successUpdating.delete(productId);
+      set({ optimisticUpdating: successUpdating });
+
+      // Fetch latest data to ensure consistency
       await get().fetchCart();
     } catch (error) {
-      set({ error: (error as Error).message, loading: false });
+      // Revert optimistic update on error
+      const errorUpdating = new Set(get().optimisticUpdating);
+      errorUpdating.delete(productId);
+      set({
+        items: currentState.items,
+        subtotal: currentState.subtotal,
+        optimisticUpdating: errorUpdating,
+        error: (error as Error).message
+      });
     }
   },
   async removeItem(productId) {
-    set({ loading: true, error: undefined });
+    const currentState = get();
+    const optimisticUpdating = new Set(currentState.optimisticUpdating);
+    optimisticUpdating.add(productId);
+
+    // Optimistic removal
+    const optimisticItems = currentState.items.filter(item => item.productId !== productId);
+    const optimisticSubtotal = optimisticItems.reduce((acc, item) => acc + item.product.price * item.quantity, 0);
+
+    set({
+      items: optimisticItems,
+      subtotal: optimisticSubtotal,
+      optimisticUpdating,
+      error: undefined
+    });
+
     try {
       const response = await fetch("/api/cart", {
         method: "DELETE",
@@ -162,17 +219,44 @@ export const useCartStore = create<CartState>((set, get) => ({
         },
         body: JSON.stringify({ productId }),
       });
+
       if (response.status === 401) {
-        set({ loading: false });
+        // Revert optimistic removal on auth failure
+        const revertedUpdating = new Set(get().optimisticUpdating);
+        revertedUpdating.delete(productId);
+        set({
+          items: currentState.items,
+          subtotal: currentState.subtotal,
+          optimisticUpdating: revertedUpdating
+        });
         return;
       }
+
       await handleResponse(response);
+
+      // Success: remove from optimistic updating set
+      const successUpdating = new Set(get().optimisticUpdating);
+      successUpdating.delete(productId);
+      set({ optimisticUpdating: successUpdating });
+
+      // Fetch latest data to ensure consistency
       await get().fetchCart();
     } catch (error) {
-      set({ error: (error as Error).message, loading: false });
+      // Revert optimistic removal on error
+      const errorUpdating = new Set(get().optimisticUpdating);
+      errorUpdating.delete(productId);
+      set({
+        items: currentState.items,
+        subtotal: currentState.subtotal,
+        optimisticUpdating: errorUpdating,
+        error: (error as Error).message
+      });
     }
   },
   clear() {
-    set({ items: [], subtotal: 0 });
+    set({ items: [], subtotal: 0, optimisticUpdating: new Set() });
+  },
+  clearError() {
+    set({ error: undefined });
   },
 }));

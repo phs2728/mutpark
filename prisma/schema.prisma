@@ -47,6 +47,23 @@ model User {
   followers                UserFollow[]            @relation("UserFollower")
   following                UserFollow[]            @relation("UserFollowing")
   preferences              UserPreference?
+  wishlistItems            WishlistItem[]
+  stockNotifications       StockNotification[]
+  createdCoupons           Coupon[]              @relation("CouponCreator")
+  couponUsages             CouponUsage[]
+}
+
+model WishlistItem {
+  id        Int      @id @default(autoincrement())
+  userId    Int
+  productId Int
+  createdAt DateTime @default(now())
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  product   Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@unique([userId, productId])
+  @@index([userId], map: "WishlistItem_userId_fkey")
+  @@index([productId], map: "WishlistItem_productId_fkey")
 }
 
 model SocialAccount {
@@ -88,6 +105,9 @@ model Product {
   translations      ProductTranslation[]
   recipeIngredients RecipeIngredient[]
   recipeProducts    RecipeProduct[]
+  images            ProductImage[]
+  wishlistItems     WishlistItem[]
+  stockNotifications StockNotification[]
 }
 
 model ProductTranslation {
@@ -99,6 +119,21 @@ model ProductTranslation {
   product     Product @relation(fields: [productId], references: [id], onDelete: Cascade)
 
   @@unique([productId, language])
+}
+
+model ProductImage {
+  id        Int     @id @default(autoincrement())
+  productId Int
+  url       String
+  altText   String?
+  order     Int     @default(0)
+  isMain    Boolean @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  product   Product @relation(fields: [productId], references: [id], onDelete: Cascade)
+
+  @@index([productId], map: "ProductImage_productId_fkey")
+  @@index([productId, order])
 }
 
 model CartItem {
@@ -146,6 +181,8 @@ model Order {
   shippingFee       Decimal           @default(0.00) @db.Decimal(10, 2)
   totalAmount       Decimal           @db.Decimal(10, 2)
   currency          String            @default("TRY")
+  couponCode        String?
+  couponDiscountAmount Decimal?       @db.Decimal(10, 2)
   notes             String?
   createdAt         DateTime          @default(now())
   updatedAt         DateTime          @updatedAt
@@ -160,6 +197,7 @@ model Order {
   payment           Payment?
   shippingTracking  ShippingTracking?
   taxInvoice        TaxInvoice?
+  couponUsages      CouponUsage[]
 
   @@index([addressId], map: "Order_addressId_fkey")
   @@index([userId], map: "Order_userId_fkey")
@@ -199,7 +237,7 @@ model Payment {
 model RefreshToken {
   id        Int      @id @default(autoincrement())
   userId    Int
-  token     String   @unique
+  token     String   @db.Text
   expiresAt DateTime
   createdAt DateTime @default(now())
   user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
@@ -905,4 +943,91 @@ enum ShippingStatus {
   DELIVERED
   FAILED
   RETURNED
+}
+
+enum CouponType {
+  PERCENTAGE
+  FIXED_AMOUNT
+  FREE_SHIPPING
+}
+
+model StockNotification {
+  id          Int      @id @default(autoincrement())
+  productId   Int
+  userId      Int?
+  email       String
+  productName String
+  isActive    Boolean  @default(true)
+  notifiedAt  DateTime?
+  createdAt   DateTime @default(now())
+  updatedAt   DateTime @updatedAt
+  product     Product  @relation(fields: [productId], references: [id], onDelete: Cascade)
+  user        User?    @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@index([productId])
+  @@index([email])
+  @@index([isActive])
+  @@index([userId], map: "StockNotification_userId_fkey")
+}
+
+model Coupon {
+  id               Int               @id @default(autoincrement())
+  code             String            @unique
+  name             String
+  description      String?
+  type             CouponType
+  value            Decimal           @db.Decimal(10, 2)
+  minimumOrderAmount Decimal?        @db.Decimal(10, 2)
+  maxDiscountAmount  Decimal?        @db.Decimal(10, 2)
+  currency         String            @default("TRY")
+  usageLimit       Int?
+  usageCount       Int               @default(0)
+  userUsageLimit   Int?              @default(1)
+  isActive         Boolean           @default(true)
+  isPublic         Boolean           @default(false)
+  validFrom        DateTime
+  validUntil       DateTime
+  applicableToProducts Json?
+  applicableToCategories Json?
+  applicableToBrands   Json?
+  excludedProducts     Json?
+  excludedCategories   Json?
+  excludedBrands       Json?
+  firstTimeCustomerOnly Boolean      @default(false)
+  metadata         Json?
+  createdBy        Int?
+  createdAt        DateTime          @default(now())
+  updatedAt        DateTime          @updatedAt
+  creator          User?             @relation("CouponCreator", fields: [createdBy], references: [id])
+  usages           CouponUsage[]
+
+  @@index([code])
+  @@index([type])
+  @@index([isActive])
+  @@index([validFrom])
+  @@index([validUntil])
+  @@index([isPublic])
+  @@index([createdBy], map: "Coupon_createdBy_fkey")
+}
+
+model CouponUsage {
+  id        Int      @id @default(autoincrement())
+  couponId  Int
+  userId    Int?
+  orderId   Int?
+  email     String?
+  discountAmount Decimal @db.Decimal(10, 2)
+  orderAmount    Decimal @db.Decimal(10, 2)
+  createdAt DateTime @default(now())
+  coupon    Coupon   @relation(fields: [couponId], references: [id], onDelete: Cascade)
+  user      User?    @relation(fields: [userId], references: [id])
+  order     Order?   @relation(fields: [orderId], references: [id])
+
+  @@index([couponId])
+  @@index([userId])
+  @@index([orderId])
+  @@index([email])
+  @@index([createdAt])
+  @@index([userId], map: "CouponUsage_userId_fkey")
+  @@index([orderId], map: "CouponUsage_orderId_fkey")
 }

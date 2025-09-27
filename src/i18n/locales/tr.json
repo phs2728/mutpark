@@ -19,7 +19,12 @@
     "ctaRecipes": "Tarifleri Gör"
   },
   "common": {
-    "loading": "Yükleniyor..."
+    "loading": "Yükleniyor...",
+    "clearAll": "Tümünü Temizle",
+    "apply": "Uygula",
+    "cancel": "İptal",
+    "save": "Kaydet",
+    "close": "Kapat"
   },
   "products": {
     "featured": "Öne Çıkan Ürünler",
@@ -51,7 +56,33 @@
     "resultsCount": "Toplam {count} ürün",
     "addToCart": "Sepete Ekle",
     "viewDetails": "Detayları Gör",
-    "empty": "Henüz ürün eklenmedi."
+    "empty": "Henüz ürün eklenmedi.",
+    "recentlyViewed": "Son Görüntülenen",
+    "priceRange": "Fiyat Aralığı",
+    "minPrice": "En Düşük Fiyat",
+    "maxPrice": "En Yüksek Fiyat",
+    "stockNotification": "Stokta Olunca Haber Ver",
+    "stockNotificationSuccess": "Bu ürün stoklara geldiğinde sizi bilgilendireceğiz",
+    "stockNotificationEmail": "E-posta Adresi"
+  },
+  "search": {
+    "noResults": "Arama sonucu bulunamadı",
+    "noResultsFor": "{query} için ürün bulunamadı",
+    "resultsFor": "{query} arama sonuçları",
+    "foundProducts": "Toplam {count} ürün bulundu",
+    "startSearching": "Ürün aramaya başlayın",
+    "startSearchingDescription": "İstediğiniz Kore yemeğini arayarak bulun",
+    "tipsTitle": "Arama ipuçları",
+    "tips": {
+      "spelling": "Arama teriminin yazımını kontrol edin",
+      "shorter": "Daha kısa arama terimleri kullanın",
+      "synonyms": "Benzer kelimeler veya farklı ifadeler deneyin",
+      "categories": "Farklı kategoriler seçin"
+    },
+    "popularSearches": "Popüler aramalar",
+    "browseCategories": "Kategorilere göz atın",
+    "backToHome": "Ana sayfaya dön",
+    "allProducts": "Tüm ürünler"
   },
   "community": {
     "title": "Topluluk",
@@ -165,7 +196,29 @@
     "viewImage": "Görseli aç",
     "prev": "Önceki",
     "next": "Sonraki",
-    "pageIndicator": "Sayfa"
+    "pageIndicator": "Sayfa",
+    "helpful": "Yardımcı oldu mu?",
+    "helpfulMarked": "Yardımcı oldu",
+    "helpfulCount": "{count} kişi bunun yardımcı olduğunu söyledi",
+    "uploadImages": "Yorum fotoğrafları (isteğe bağlı)",
+    "uploadImagesHelper": "PNG, JPG (maksimum 5MB, 6 adede kadar)",
+    "uploadImagesButton": "Yüklemek için tıklayın",
+    "uploading": "Yükleniyor...",
+    "sortBy": "Sırala",
+    "sortNewest": "En yeni",
+    "sortOldest": "En eski",
+    "sortRatingHigh": "En yüksek puan",
+    "sortRatingLow": "En düşük puan",
+    "sortMostHelpful": "En faydalı",
+    "filterBy": "Puana göre filtrele",
+    "allRatings": "Tüm puanlar",
+    "star5": "5 yıldız",
+    "star4": "4 yıldız",
+    "star3": "3 yıldız",
+    "star2": "2 yıldız",
+    "star1": "1 yıldız",
+    "verifiedOnly": "Sadece doğrulanmış alımlar",
+    "withImagesOnly": "Sadece fotoğraflı yorumlar"
   },
   "auth": {
     "login": {
@@ -194,7 +247,11 @@
     "checkout": "Ödeme Yap",
     "continue": "Alışverişe Devam",
     "quantity": "Adet",
-    "remove": "Kaldır"
+    "remove": "Kaldır",
+    "each": "adet",
+    "updating": "Güncelleniyor",
+    "items": "Ürün",
+    "total": "adet"
   },
   "checkout": {
     "title": "Sipariş ve Ödeme",
@@ -272,6 +329,30 @@
       "SHIPPED": "Kargoya verildi",
       "DELIVERED": "Teslim edildi",
       "CANCELLED": "İptal edildi"
+    },
+    "orderDetails": {
+      "orderNumber": "Sipariş #{orderNumber}",
+      "orderDate": "Sipariş Tarihi",
+      "status": "Durum",
+      "total": "Toplam",
+      "items": "Ürünler",
+      "shippingAddress": "Teslimat Adresi",
+      "trackingInfo": "Kargo Takip",
+      "trackingNumber": "Takip Numarası",
+      "carrier": "Kargo Firması",
+      "estimatedDelivery": "Tahmini Teslimat",
+      "actualDelivery": "Teslim Tarihi",
+      "noTracking": "Takip bilgisi bulunmuyor",
+      "viewDetails": "Detayları Gör",
+      "trackShipment": "Kargoyu Takip Et",
+      "orderSummary": "Sipariş Özeti",
+      "subtotal": "Ara Toplam",
+      "shipping": "Kargo",
+      "paymentMethod": "Ödeme Yöntemi",
+      "contactSupport": "Destek",
+      "reorder": "Tekrar Sipariş Ver",
+      "cancel": "Siparişi İptal Et",
+      "return": "İade Et"
     }
   },
   "notifications": {

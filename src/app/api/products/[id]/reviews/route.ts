@@ -36,15 +36,55 @@ export async function GET(request: NextRequest, context: RouteContext) {
     const filters = productReviewListSchema.parse(queryParams);
     const skip = (filters.page - 1) * filters.pageSize;
 
-    const whereClause = {
+    // Get current user if authenticated
+    let currentUserId: number | null = null;
+    try {
+      const user = requireAuth(request);
+      currentUserId = user.userId;
+    } catch {
+      // User not authenticated, continue without user ID
+    }
+
+    const whereClause: any = {
       productId,
       status: "PUBLISHED" as const,
     };
 
+    // Apply rating filter
+    if (filters.rating) {
+      whereClause.rating = filters.rating;
+    }
+
+    // Apply verified purchase filter
+    if (filters.verifiedOnly) {
+      whereClause.verifiedPurchase = true;
+    }
+
+    // Apply images filter
+    if (filters.withImagesOnly) {
+      whereClause.imageUrls = {
+        not: Prisma.JsonNull,
+      };
+    }
+
     const [reviews, totalCount, aggregates, distribution] = await prisma.$transaction([
       prisma.productReview.findMany({
         where: whereClause,
-        orderBy: { createdAt: "desc" },
+        orderBy: (() => {
+          switch (filters.sortBy) {
+            case 'oldest':
+              return { createdAt: 'asc' };
+            case 'rating_high':
+              return { rating: 'desc' };
+            case 'rating_low':
+              return { rating: 'asc' };
+            case 'helpful':
+              return { helpfulCount: 'desc' };
+            case 'newest':
+            default:
+              return { createdAt: 'desc' };
+          }
+        })(),
         skip,
         take: filters.pageSize,
         include: {
@@ -54,6 +94,14 @@ export async function GET(request: NextRequest, context: RouteContext) {
               name: true,
             },
           },
+          helpful: currentUserId ? {
+            where: {
+              userId: currentUserId,
+            },
+            select: {
+              id: true,
+            },
+          } : false,
         },
       }),
       prisma.productReview.count({ where: whereClause }),
@@ -88,6 +136,7 @@ export async function GET(request: NextRequest, context: RouteContext) {
         id: review.user.id,
         name: review.user.name,
       },
+      isHelpfulByUser: currentUserId ? (review.helpful && review.helpful.length > 0) : false,
     }));
 
     return successResponse({

@@ -102,6 +102,10 @@ export const updateProductSchema = createProductSchema.partial().extend({
 export const productReviewListSchema = z.object({
   page: z.coerce.number().min(1).default(1),
   pageSize: z.coerce.number().min(1).max(50).default(10),
+  sortBy: z.enum(['newest', 'oldest', 'rating_high', 'rating_low', 'helpful']).default('newest'),
+  rating: z.coerce.number().int().min(1).max(5).optional(),
+  verifiedOnly: z.coerce.boolean().default(false),
+  withImagesOnly: z.coerce.boolean().default(false),
 });
 
 export const createProductReviewSchema = z.object({

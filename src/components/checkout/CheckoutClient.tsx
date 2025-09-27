@@ -1,12 +1,23 @@
 "use client";
 
-import { FormEvent, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useI18n } from "@/providers/I18nProvider";
-import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
-import { SHIPPING_THRESHOLD_TRY, getShippingFee } from "@/lib/shipping";
+import { EnhancedTurkishAddressForm } from "./EnhancedTurkishAddressForm";
+import { PaymentMethodSelector, type PaymentMethod } from "./PaymentMethodSelector";
+import { OrderSummary } from "./OrderSummary";
+import { ShippingOptions, type ShippingOption } from "./ShippingOptions";
+import { OrderTracking } from "./OrderTracking";
 
-interface CheckoutAddress {
+interface CheckoutItem {
+  id: number;
+  name: string;
+  price: number;
+  quantity: number;
+  currency: string;
+}
+
+interface Address {
   id: number;
   recipientName: string;
   phone: string;
@@ -16,348 +27,268 @@ interface CheckoutAddress {
   isDefault: boolean;
 }
 
-interface CheckoutItem {
-  id: number;
-  name: string;
-  quantity: number;
-  price: number;
-  currency: string;
+interface CheckoutClientProps {
+  locale: string;
+  items: CheckoutItem[];
+  addresses: Address[];
 }
 
-export function CheckoutClient({
-  locale,
-  addresses,
-  items,
-}: {
-  locale: string;
-  addresses: CheckoutAddress[];
-  items: CheckoutItem[];
-}) {
-  const { t, locale: activeLocale } = useI18n();
+export function CheckoutClient({ locale, items, addresses }: CheckoutClientProps) {
   const router = useRouter();
-  const [selectedAddress, setSelectedAddress] = useState(() =>
-    addresses.find((address) => address.isDefault)?.id ?? addresses[0]?.id ?? 0,
-  );
-  const [notes, setNotes] = useState("");
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState<string | undefined>();
-  const [paymentMethod, setPaymentMethod] = useState<"iyzico" | "papara" | "installment">("iyzico");
-  const [installmentPlan, setInstallmentPlan] = useState(3);
-  const [shippingMethod, setShippingMethod] = useState<"standard" | "express">("standard");
+  const { t } = useI18n();
 
-  const subtotalRaw = items.reduce((acc, item) => acc + item.price * item.quantity, 0);
-  const subtotalDisplay = subtotalRaw;
-  const shippingFeeValue = getShippingFee(shippingMethod, subtotalRaw);
-  const shippingFeeDisplay = shippingFeeValue;
-  const totalDisplay = subtotalDisplay + shippingFeeDisplay;
-  const thresholdLabel = formatCurrency(SHIPPING_THRESHOLD_TRY, DEFAULT_CURRENCY, activeLocale);
+  // Form state
+  const [deliveryAddress, setDeliveryAddress] = useState<{
+    recipientName: string;
+    phone: string;
+    city: string;
+    district: string;
+    street: string;
+    postalCode: string;
+    addressLine2?: string;
+  } | null>(null);
 
-  const paymentOptions: Array<{
-    id: "iyzico" | "papara" | "installment";
-    title: string;
-    description: string;
-    badge?: string;
-  }> = [
-    {
-      id: "iyzico",
-      title: t("checkout.paymentOptions.iyzico.title"),
-      description: t("checkout.paymentOptions.iyzico.description"),
-      badge: t("checkout.paymentOptions.iyzico.badge"),
-    },
-    {
-      id: "papara",
-      title: t("checkout.paymentOptions.papara.title"),
-      description: t("checkout.paymentOptions.papara.description"),
-    },
-    {
-      id: "installment",
-      title: t("checkout.paymentOptions.installment.title"),
-      description: t("checkout.paymentOptions.installment.description"),
-    },
-  ];
+  const [paymentMethod, setPaymentMethod] = useState<PaymentMethod | null>(null);
+  const [installmentMonths, setInstallmentMonths] = useState<number | undefined>();
+  const [shippingOption, setShippingOption] = useState<ShippingOption | null>(null);
+  const [shippingCost, setShippingCost] = useState(29.99);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [agreedToTerms, setAgreedToTerms] = useState(false);
 
-  const shippingOptions: Array<{
-    id: "standard" | "express";
-    title: string;
-    description: string;
-    estimate: string;
-  }> = [
-    {
-      id: "standard",
-      title: t("checkout.shipping.options.standard.title"),
-      description: t("checkout.shipping.options.standard.description"),
-      estimate: t("checkout.shipping.options.standard.estimate"),
-    },
-    {
-      id: "express",
-      title: t("checkout.shipping.options.express.title"),
-      description: t("checkout.shipping.options.express.description"),
-      estimate: t("checkout.shipping.options.express.estimate"),
-    },
-  ];
+  // Calculate order total
+  const orderTotal = items.reduce((sum, item) => sum + (item.price * item.quantity), 0);
 
-  const handleSubmit = async (event: FormEvent) => {
-    event.preventDefault();
-    if (!selectedAddress) {
-      setError(t("checkout.selectAddress"));
+  const handleAddressChange = (address: typeof deliveryAddress) => {
+    setDeliveryAddress(address);
+  };
+
+  const handlePaymentMethodChange = (method: PaymentMethod, installmentOption?: number) => {
+    setPaymentMethod(method);
+    setInstallmentMonths(installmentOption);
+  };
+
+  const handleShippingChange = (option: ShippingOption, price: number) => {
+    setShippingOption(option);
+    setShippingCost(price);
+  };
+
+  const isFormValid = () => {
+    return (
+      deliveryAddress &&
+      deliveryAddress.recipientName &&
+      deliveryAddress.phone &&
+      deliveryAddress.city &&
+      deliveryAddress.district &&
+      deliveryAddress.street &&
+      paymentMethod &&
+      shippingOption &&
+      agreedToTerms
+    );
+  };
+
+  const handleSubmitOrder = async () => {
+    if (!isFormValid()) {
+      alert(t("checkout.form.incomplete", "Lütfen tüm alanları doldurun"));
       return;
     }
-    setLoading(true);
-    setError(undefined);
+
+    setIsProcessing(true);
 
     try {
-      const response = await fetch("/api/orders", {
+      const orderData = {
+        items: items.map(item => ({
+          productId: item.id,
+          quantity: item.quantity,
+          price: item.price
+        })),
+        deliveryAddress,
+        paymentMethod,
+        installmentMonths,
+        shippingOption,
+        shippingCost,
+        total: orderTotal + shippingCost
+      };
+
+      // Submit order to API
+      const response = await fetch(`/api/orders`, {
         method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          addressId: selectedAddress,
-          notes,
-          paymentMethod,
-          installmentPlan: paymentMethod === "installment" ? installmentPlan : undefined,
-          shippingMethod,
-        }),
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify(orderData)
       });
-      const json = await response.json();
-      if (!response.ok) {
-        throw new Error(json.message ?? "Order failed");
+
+      if (response.ok) {
+        const order = await response.json();
+        router.push(`/${locale}/orders/${order.id}/success`);
+      } else {
+        throw new Error("Order submission failed");
       }
-      const orderId = json.data?.id ?? json.data?.order?.id ?? json.data?.orderId;
-      if (orderId) {
-        if (paymentMethod === "iyzico") {
-          const checkoutResponse = await fetch("/api/payment/iyzico/checkout", {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ orderId }),
-          });
-          const checkoutJson = await checkoutResponse.json();
-          if (checkoutResponse.ok && checkoutJson.data?.redirectUrl) {
-            window.location.href = checkoutJson.data.redirectUrl;
-            return;
-          }
-        } else if (paymentMethod === "papara") {
-          router.push(`/${locale}/account/orders?payment=papara&order=${orderId}`);
-          return;
-        } else if (paymentMethod === "installment") {
-          router.push(
-            `/${locale}/account/orders?payment=installment&plan=${installmentPlan}&order=${orderId}`,
-          );
-          return;
-        }
-      }
-      router.push(`/${locale}/account/orders`);
-    } catch (err) {
-      setError((err as Error).message);
+    } catch (error) {
+      console.error("Order submission error:", error);
+      alert(t("checkout.error.submission", "Sipariş oluşturulurken bir hata oluştu"));
     } finally {
-      setLoading(false);
+      setIsProcessing(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="grid gap-6 lg:grid-cols-[1fr_320px]">
-      <div className="space-y-6">
-        <section className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <header className="flex items-center justify-between">
-            <h2 className="text-lg font-semibold text-slate-900 dark:text-white">
-              {t("checkout.address")}
-            </h2>
-            <button
-              type="button"
-              onClick={() => router.push(`/${locale}/account/addresses`)}
-              className="text-sm font-semibold text-emerald-600"
-            >
-              + {t("checkout.addAddress")}
-            </button>
-          </header>
-          <div className="flex flex-col gap-3">
-            {addresses.length === 0 ? (
-              <p className="text-sm text-slate-500 dark:text-slate-300">
-                {t("checkout.selectAddress")}
-              </p>
-            ) : (
-              addresses.map((address) => (
-                <label
-                  key={address.id}
-                  className={`flex cursor-pointer flex-col gap-1 rounded-2xl border px-4 py-3 text-sm transition ${
-                    selectedAddress === address.id
-                      ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20"
-                      : "border-slate-200 hover:border-emerald-300 dark:border-slate-700"
-                  }`}
-                >
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="shipping-address"
-                      checked={selectedAddress === address.id}
-                      onChange={() => setSelectedAddress(address.id)}
-                    />
-                    <span className="font-semibold text-slate-900 dark:text-white">
-                      {address.recipientName}
-                    </span>
-                    {address.isDefault ? (
-                      <span className="rounded-full bg-emerald-500 px-2 py-0.5 text-xs font-semibold text-white">
-                        Default
-                      </span>
-                    ) : null}
-                  </div>
-                  <p className="text-slate-500 dark:text-slate-300">
-                    {address.city} {address.district} {address.street}
-                  </p>
-                  <p className="text-slate-400 dark:text-slate-500">{address.phone}</p>
-                </label>
-              ))
-            )}
-          </div>
-        </section>
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.notes")}</h2>
-          <textarea
-            value={notes}
-            onChange={(event) => setNotes(event.target.value)}
-            rows={4}
-            className="mt-3 w-full rounded-lg border border-slate-200 px-3 py-2 text-sm focus:border-emerald-500 focus:outline-none dark:border-slate-700 dark:bg-slate-800"
-          />
-        </section>
-        <section className="space-y-3 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-          <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.shipping.title")}</h2>
-          <p className="text-xs text-slate-500 dark:text-slate-300">
-            {t("checkout.shipping.freeThreshold").replace("{amount}", thresholdLabel)}
-          </p>
-          <div className="flex flex-col gap-3">
-            {shippingOptions.map((option) => (
-              <label
-                key={option.id}
-                className={`flex cursor-pointer flex-col gap-1 rounded-2xl border px-4 py-3 text-sm transition ${
-                  shippingMethod === option.id
-                    ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20"
-                    : "border-slate-200 hover:border-emerald-300 dark:border-slate-700"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="shipping-method"
-                      checked={shippingMethod === option.id}
-                      onChange={() => setShippingMethod(option.id)}
-                    />
-                    <span className="font-semibold text-slate-900 dark:text-white">{option.title}</span>
-                  </div>
-                  <span className="text-xs text-slate-500 dark:text-slate-300">{option.estimate}</span>
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-300">{option.description}</p>
-                {(() => {
-                  const optionFeeValue = getShippingFee(option.id, subtotalRaw);
-                  if (optionFeeValue === 0) {
-                    return <p className="text-xs font-semibold text-emerald-600">{t("checkout.shipping.free")}</p>;
-                  }
-                  return (
-                    <p className="text-xs font-semibold text-emerald-600">
-                      {formatCurrency(optionFeeValue, DEFAULT_CURRENCY, activeLocale)}
-                    </p>
-                  );
-                })()}
-              </label>
-            ))}
-          </div>
-        </section>
+    <div className="max-w-6xl mx-auto">
+      {/* Header */}
+      <div className="mb-8">
+        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+          🛒 {t("checkout.title", "Sipariş Tamamla")}
+        </h1>
+        <p className="text-gray-600 dark:text-gray-400 mt-2">
+          {t("checkout.subtitle", "Sipariş bilgilerinizi gözden geçirin ve ödemeyi tamamlayın")}
+        </p>
       </div>
-      <aside className="space-y-4 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm dark:border-slate-800 dark:bg-slate-900">
-        <h2 className="text-lg font-semibold text-slate-900 dark:text-white">{t("checkout.payment")}</h2>
-        <div className="space-y-3">
-          {items.map((item) => (
-            <div key={item.id} className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-              <span>
-                {item.name} × {item.quantity}
-              </span>
-              <span className="font-semibold">
-                {formatCurrency(item.price * item.quantity, DEFAULT_CURRENCY, activeLocale)}
-              </span>
-            </div>
-          ))}
-        </div>
-        <div className="space-y-3 border-t border-slate-200 pt-4 dark:border-slate-700">
-          <p className="text-sm font-semibold text-slate-900 dark:text-white">
-            {t("checkout.paymentOptions.title")}
-          </p>
-          <div className="flex flex-col gap-3">
-            {paymentOptions.map((option) => (
-              <label
-                key={option.id}
-                className={`flex cursor-pointer flex-col gap-1 rounded-2xl border px-4 py-3 text-sm transition ${
-                  paymentMethod === option.id
-                    ? "border-emerald-500 bg-emerald-50 dark:border-emerald-400 dark:bg-emerald-900/20"
-                    : "border-slate-200 hover:border-emerald-300 dark:border-slate-700"
-                }`}
-              >
-                <div className="flex items-center justify-between gap-2">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="radio"
-                      name="payment-method"
-                      checked={paymentMethod === option.id}
-                      onChange={() => setPaymentMethod(option.id)}
-                    />
-                    <span className="font-semibold text-slate-900 dark:text-white">{option.title}</span>
-                  </div>
-                  {option.badge ? (
-                    <span className="rounded-full bg-slate-900 px-2 py-0.5 text-xs font-semibold text-white dark:bg-slate-100 dark:text-slate-900">
-                      {option.badge}
-                    </span>
-                  ) : null}
-                </div>
-                <p className="text-xs text-slate-500 dark:text-slate-300">{option.description}</p>
-                {option.id === "installment" && paymentMethod === "installment" ? (
-                  <div className="flex flex-wrap gap-2 pt-2">
-                    {[3, 6, 9, 12].map((plan) => (
-                      <button
-                        key={plan}
-                        type="button"
-                        onClick={() => setInstallmentPlan(plan)}
-                        className={`rounded-full border px-3 py-1 text-xs font-semibold transition ${
-                          installmentPlan === plan
-                            ? "border-emerald-500 bg-emerald-50 text-emerald-600 dark:border-emerald-400 dark:bg-emerald-900/30"
-                            : "border-slate-200 text-slate-500 hover:border-emerald-300 dark:border-slate-700 dark:text-slate-300"
-                        }`}
-                      >
-                        {plan} {t("checkout.paymentOptions.installment.months")}
-                      </button>
-                    ))}
-                  </div>
-                ) : null}
-                {option.id === "papara" && paymentMethod === "papara" ? (
-                  <p className="text-xs italic text-slate-500 dark:text-slate-400">
-                    {t("checkout.paymentOptions.papara.note")}
-                  </p>
-                ) : null}
+
+      <div className="grid gap-8 lg:grid-cols-[2fr_1fr]">
+        {/* Main Content */}
+        <div className="space-y-8">
+          {/* Delivery Address */}
+          <div className="card p-6">
+            <EnhancedTurkishAddressForm
+              onAddressChange={handleAddressChange}
+              initialData={addresses[0] ? {
+                recipientName: addresses[0].recipientName,
+                phone: addresses[0].phone,
+                city: addresses[0].city,
+                district: addresses[0].district,
+                street: addresses[0].street,
+                postalCode: (addresses[0] as any).postalCode || "",
+                addressLine2: (addresses[0] as any).addressLine2
+              } : undefined}
+              addressType="shipping"
+            />
+          </div>
+
+          {/* Shipping Options */}
+          <div className="card p-6">
+            <ShippingOptions
+              onShippingChange={handleShippingChange}
+              selectedOption={shippingOption}
+              orderTotal={orderTotal}
+              locale={locale}
+            />
+          </div>
+
+          {/* Payment Method */}
+          <div className="card p-6">
+            <PaymentMethodSelector
+              onPaymentMethodChange={handlePaymentMethodChange}
+              selectedMethod={paymentMethod}
+              orderTotal={orderTotal + shippingCost}
+            />
+          </div>
+
+          {/* Terms and Conditions */}
+          <div className="card p-6">
+            <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
+              📋 {t("checkout.terms.title", "Koşullar ve Sözleşmeler")}
+            </h3>
+            <div className="space-y-3">
+              <label className="flex items-start gap-3 cursor-pointer">
+                <input
+                  type="checkbox"
+                  checked={agreedToTerms}
+                  onChange={(e) => setAgreedToTerms(e.target.checked)}
+                  className="mt-1 w-4 h-4 text-emerald-600 rounded focus:ring-emerald-500"
+                />
+                <span className="text-sm text-gray-700 dark:text-gray-300">
+                  {t("checkout.terms.agreement", "Ön Bilgilendirme Koşulları, Mesafeli Satış Sözleşmesi ve Gizlilik Politikası'nı okudum, onaylıyorum.")}
+                </span>
               </label>
-            ))}
+
+              <div className="flex flex-wrap gap-2 ml-7">
+                <a
+                  href={`/${locale}/legal/terms`}
+                  target="_blank"
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  {t("checkout.terms.termsOfService", "Kullanım Koşulları")}
+                </a>
+                <span className="text-xs text-gray-400">•</span>
+                <a
+                  href={`/${locale}/legal/privacy`}
+                  target="_blank"
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  {t("checkout.terms.privacyPolicy", "Gizlilik Politikası")}
+                </a>
+                <span className="text-xs text-gray-400">•</span>
+                <a
+                  href={`/${locale}/legal/distance-sales`}
+                  target="_blank"
+                  className="text-xs text-blue-600 hover:text-blue-800 underline"
+                >
+                  {t("checkout.terms.distanceSales", "Mesafeli Satış Sözleşmesi")}
+                </a>
+              </div>
+            </div>
           </div>
         </div>
-        <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
-          <span>{t("cart.subtotal")}</span>
-          <span>{formatCurrency(subtotalDisplay, DEFAULT_CURRENCY, activeLocale)}</span>
+
+        {/* Sidebar - Order Summary */}
+        <div className="lg:sticky lg:top-8">
+          <div className="card p-6">
+            <OrderSummary
+              items={items.map(item => ({
+                productId: item.id,
+                name: item.name,
+                price: item.price,
+                quantity: item.quantity
+              }))}
+              locale={locale}
+              paymentMethod={paymentMethod}
+              installmentMonths={installmentMonths}
+              shippingCost={shippingCost}
+            />
+
+            <div className="mt-6 space-y-3">
+              <button
+                type="button"
+                onClick={handleSubmitOrder}
+                disabled={!isFormValid() || isProcessing}
+                className="btn-primary w-full disabled:opacity-50 disabled:cursor-not-allowed"
+              >
+                {isProcessing ? (
+                  <span className="flex items-center justify-center gap-2">
+                    <div className="w-5 h-5 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+                    {t("checkout.processing", "İşleniyor...")}
+                  </span>
+                ) : (
+                  t("checkout.completeOrder", "Siparişi Tamamla")
+                )}
+              </button>
+
+              <button
+                type="button"
+                onClick={() => router.push(`/${locale}/cart`)}
+                className="btn-outline w-full"
+              >
+                {t("checkout.backToCart", "Sepete Dön")}
+              </button>
+            </div>
+
+            {/* Security Notice */}
+            <div className="mt-6 bg-gray-50 border border-gray-200 rounded-lg p-3 dark:bg-gray-900/50 dark:border-gray-700">
+              <div className="flex items-center gap-2">
+                <span className="text-emerald-600">🔒</span>
+                <div className="text-xs">
+                  <p className="font-medium text-gray-700 dark:text-gray-300">
+                    {t("checkout.security.title", "Güvenli Alışveriş")}
+                  </p>
+                  <p className="text-gray-600 dark:text-gray-400">
+                    {t("checkout.security.description", "256-bit SSL sertifikası ile korunmaktadır")}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </div>
         </div>
-        <div className="flex items-center justify-between text-sm text-slate-600 dark:text-slate-300">
-          <span>{t("checkout.shipping.label")}</span>
-          <span className="font-semibold text-slate-900 dark:text-white">
-            {shippingFeeValue === 0
-              ? t("checkout.shipping.free")
-              : formatCurrency(shippingFeeDisplay, DEFAULT_CURRENCY, activeLocale)}
-          </span>
-        </div>
-        <div className="flex items-center justify-between border-t border-slate-200 pt-3 text-sm font-semibold text-slate-900 dark:border-slate-700 dark:text-white">
-          <span>{t("checkout.total")}</span>
-          <span>{formatCurrency(totalDisplay, DEFAULT_CURRENCY, activeLocale)}</span>
-        </div>
-        {error ? <p className="text-sm text-red-500">{error}</p> : null}
-        <button
-          type="submit"
-          disabled={loading || !selectedAddress}
-          className="w-full rounded-full bg-emerald-500 px-6 py-3 text-sm font-semibold text-white hover:bg-emerald-600 disabled:cursor-not-allowed disabled:bg-emerald-300"
-        >
-          {loading ? "..." : t("checkout.placeOrder")}
-        </button>
-      </aside>
-    </form>
+      </div>
+    </div>
   );
 }

@@ -1,11 +1,14 @@
 "use client";
 
-import Image from "next/image";
 import Link from "next/link";
+import { LazyImage } from "@/components/ui/LazyImage";
 import { useI18n } from "@/providers/I18nProvider";
 import { useCartStore } from "@/hooks/useCartStore";
 import { DEFAULT_CURRENCY, formatCurrency } from "@/lib/currency";
 import { resolveImageUrl } from "@/lib/imagekit";
+import { WishlistButton } from "@/components/products/WishlistButton";
+import { ProductCompareButton } from "@/components/products/ProductCompareButton";
+import { SearchHighlight } from "@/components/search/SearchHighlight";
 
 interface ProductCardProps {
   locale: string;
@@ -29,9 +32,15 @@ interface ProductCardProps {
     discountReason?: string | null;
     freshnessStatus?: string | null;
   };
+  searchHighlight?: {
+    searchTerm: string;
+    highlightName?: boolean;
+    highlightCategory?: boolean;
+    highlightDescription?: boolean;
+  };
 }
 
-export function ProductCard({ locale, product }: ProductCardProps) {
+export function ProductCard({ locale, product, searchHighlight }: ProductCardProps) {
   const { t, locale: activeLocale } = useI18n();
   const { addItem } = useCartStore();
 
@@ -48,12 +57,14 @@ export function ProductCard({ locale, product }: ProductCardProps) {
       {/* Product Image */}
       <div className="relative aspect-square overflow-hidden">
         {imageSrc ? (
-          <Image
+          <LazyImage
             src={imageSrc}
             alt={product.name}
             fill
             sizes="(min-width: 768px) 33vw, 100vw"
             className="object-cover transition-transform duration-300 group-hover:scale-105"
+            placeholder="blur"
+            quality={80}
           />
         ) : (
           <div className="flex h-full items-center justify-center bg-slate-100 text-slate-400 dark:bg-slate-800">
@@ -97,17 +108,49 @@ export function ProductCard({ locale, product }: ProductCardProps) {
             )}
           </div>
         )}
+
+        {/* Action Buttons */}
+        <div className="absolute bottom-3 right-3 flex gap-2 opacity-0 group-hover:opacity-100 transition-opacity duration-200">
+          <ProductCompareButton
+            productId={product.id}
+            variant="icon"
+            className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white"
+          />
+          <WishlistButton
+            productId={product.id}
+            variant="icon"
+            className="bg-white/90 backdrop-blur-sm shadow-lg hover:bg-white"
+          />
+        </div>
       </div>
 
       {/* Content */}
       <div className="p-4">
         <div className="mb-3">
           <h3 className="text-lg font-semibold text-slate-900 dark:text-white line-clamp-1">
-            {product.name}
+            {searchHighlight?.highlightName ? (
+              <SearchHighlight
+                text={product.name}
+                searchTerm={searchHighlight.searchTerm}
+                highlightClassName="bg-yellow-200 dark:bg-yellow-800 font-bold px-1 rounded"
+              />
+            ) : (
+              product.name
+            )}
           </h3>
-          <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
-            {product.description}
-          </p>
+          {product.description && (
+            <p className="mt-1 text-sm text-slate-600 dark:text-slate-400 line-clamp-2">
+              {searchHighlight?.highlightDescription ? (
+                <SearchHighlight
+                  text={product.description}
+                  searchTerm={searchHighlight.searchTerm}
+                  highlightClassName="bg-yellow-200 dark:bg-yellow-800 font-medium px-1 rounded"
+                />
+              ) : (
+                product.description
+              )}
+            </p>
+          )}
         </div>
 
         {/* Price and metadata */}
